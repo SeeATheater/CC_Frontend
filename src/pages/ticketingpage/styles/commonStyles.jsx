@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 // 앱 전체 컨테이너
 export const AppContainer = styled.div`
-  font-family: NanumSquareNeo-Variable;
   width: 402px;
   height: 830px;
   margin: 0 auto;

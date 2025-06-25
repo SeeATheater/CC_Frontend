@@ -2,36 +2,54 @@
 import { useState, useEffect } from 'react';
 
 const useTicketing = () => {
-  const dateOptions = [
-    { date: '2025.05.14 (수)', times: ['15:00', '17:00', '19:00'] },
-    { date: '2025.05.15 (목)', times: ['16:00', '20:00'] },
-    { date: '2025.05.16 (금)', times: ['13:00', '16:00', '19:00'] },
-    { date: '2025.05.17 (토)', times: ['16:00', '19:00'] },
-    { date: '2025.05.18 (일)', times: ['11:00', '13:00', '15:00', '17:00'] },
+  // 공연의 날짜+시간 MOCK data
+  const dateTimeOptions = [
+    { value: '2025.05.14 (수) 15:00', display: '2025.05.14 (수) 15:00' },
+    { value: '2025.05.14 (수) 17:00', display: '2025.05.14 (수) 17:00' },
+    { value: '2025.05.14 (수) 19:00', display: '2025.05.14 (수) 19:00' },
+    { value: '2025.05.15 (목) 16:00', display: '2025.05.15 (목) 16:00' },
+    { value: '2025.05.15 (목) 20:00', display: '2025.05.15 (목) 20:00' },
+    { value: '2025.05.16 (금) 13:00', display: '2025.05.16 (금) 13:00' },
+    { value: '2025.05.16 (금) 16:00', display: '2025.05.16 (금) 16:00' },
+    { value: '2025.05.16 (금) 19:00', display: '2025.05.16 (금) 19:00' },
+    { value: '2025.05.17 (토) 16:00', display: '2025.05.17 (토) 16:00' },
+    { value: '2025.05.17 (토) 19:00', display: '2025.05.17 (토) 19:00' },
+    { value: '2025.05.18 (일) 11:00', display: '2025.05.18 (일) 11:00' },
+    { value: '2025.05.18 (일) 13:00', display: '2025.05.18 (일) 13:00' },
+    { value: '2025.05.18 (일) 15:00', display: '2025.05.18 (일) 15:00' },
+    { value: '2025.05.18 (일) 17:00', display: '2025.05.18 (일) 17:00' },
   ];
   const [step, setStep] = useState(1);
-  const [date, setDate] = useState(dateOptions[0].date);
-  const [availableTimes, setAvailableTimes] = useState(dateOptions[0].times);
-  const [time, setTime] = useState(null);
+  const [dateTime, setDateTime] = useState(null);
   const [people, setPeople] = useState(null);
   const [discountType, setDiscountType] = useState(null);
   const [paymentType, setPaymentType] = useState(null);
   const [deliveryType, setDeliveryType] = useState(null);
   const [nextActive, setNextActive] = useState(false);
-
-  useEffect(() => {
-    const selected = dateOptions.find((d) => d.date === date);
-    if (selected) setAvailableTimes(selected.times);
-  }, [date]);
+  const [studentId, setStudentId] = useState(''); // 학번 입력
+  const [depositorName, setDepositorName] = useState(''); // 입금자명 입력
+  const [termsAgreed, setTermsAgreed] = useState(false); // 약관 동의 체크
 
   // 다음 버튼 활성화 여부 확인
   useEffect(() => {
     if (step === 1) {
-      setNextActive(date && time && people);
+      setNextActive(dateTime && people);
     } else if (step === 2) {
-      setNextActive(discountType !== null && paymentType !== null && deliveryType !== null);
+      let isValid = discountType !== null && paymentType !== null && deliveryType !== null;
+      
+      if (discountType === 'standard') {
+        isValid = isValid && studentId.trim() !== '';   // 홍대생 할인 선택 시 학번 입력
+      }
+      if (paymentType === 'bank') {
+        isValid = isValid && depositorName.trim() !== '';   // 입금 선택 시 입금자명 입력
+      }
+      if (paymentType === 'pay') {
+        isValid = isValid && termsAgreed;   // 카카오페이 선택 시 약관 동의 
+      }
+      
+      setNextActive(isValid);
     }
-  }, [step, date, time, people, discountType, paymentType, deliveryType]);
+  }, [step, dateTime, people, discountType, paymentType, deliveryType, studentId, depositorName, termsAgreed]);
 
   // 다음 단계로 이동
   const goToNextStep = () => {
@@ -75,22 +93,21 @@ const useTicketing = () => {
 
   return {
     // 상태
-    dateOptions,
+    dateTimeOptions,
     step,
-    date,
-    availableTimes,
-    time,
+    dateTime,
     people,
     discountType,
     paymentType,
     deliveryType,
     nextActive,
     eventInfo,
+    studentId,
+    depositorName,
+    termsAgreed,
     
     // 액션
-    setDate,
-    setAvailableTimes,
-    setTime,
+    setDateTime,
     setPeople,
     setDiscountType,
     setPaymentType,
@@ -98,6 +115,9 @@ const useTicketing = () => {
     goToNextStep,
     goToPreviousStep,
     viewReservation,
+    setStudentId,
+    setDepositorName,
+    setTermsAgreed,
     
     // 계산된 값
     calculatePayment

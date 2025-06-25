@@ -11,8 +11,6 @@ import {
   ArrowIcon,
   DropdownList,
   DropdownItem,
-  TimeSelectionContainer,
-  TimeButton,
   PersonSelectionContainer,
   PersonInput,
 } from '../styles/formStyles';
@@ -20,22 +18,20 @@ import SelectorIcon from '../components/icons/SelectorIcon.svg';
 
 const Step1 = ({ 
   ticketing: { 
-    dateOptions,
-    date,
-    availableTimes, 
-    time, 
+    dateTimeOptions,
+    dateTime,
     people, 
     eventInfo, 
     nextActive, 
-    setDate, 
-    setTime, 
+    setDateTime,
     setPeople, 
     goToNextStep 
   } 
 }) => {
-  const [showDateDropdown, setShowDateDropdown] = useState(false);
+  const [showDateTimeDropdown, setShowDateTimeDropdown] = useState(false);
   const [showPersonDropdown, setShowPersonDropdown] = useState(false);
-  const toggleDateDropdown = () => setShowDateDropdown((prev) => !prev);
+  
+  const toggleDateTimeDropdown = () => setShowDateTimeDropdown((prev) => !prev);
   const togglePersonDropdown = () => setShowPersonDropdown((prev) => !prev);
   const peopleOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -46,45 +42,30 @@ const Step1 = ({
       <FormSection>
         <SectionTitle>관람일/ 회차 선택</SectionTitle>
         
+        {/* 공연 날짜/시간 통합 선택 */}
         <Input>
           <Label>공연 날짜</Label>
           <DatePickerContainer>
             <DateInput>
-              {date}
-              <ArrowIcon src={SelectorIcon} alt="▼" onClick={toggleDateDropdown}/>
+              {dateTime || '선택'}
+              <ArrowIcon src={SelectorIcon} alt="▼" onClick={toggleDateTimeDropdown}/>
             </DateInput>
-            {showDateDropdown && (
+            {showDateTimeDropdown && (
               <DropdownList>
-                {dateOptions.map((option) => (
+                {dateTimeOptions.map((option) => (
                   <DropdownItem
-                    key={option.date}
+                    key={option.value}
                     onClick={() => {
-                      setDate(option.date);
-                      setTime(null);
-                      setShowDateDropdown(false);
+                      setDateTime(option.value);
+                      setShowDateTimeDropdown(false);
                     }}
                   >
-                    {option.date}
+                    {option.display}
                   </DropdownItem>
                 ))}
               </DropdownList>
             )}
           </DatePickerContainer>
-        </Input>
-        
-        <Input>
-          <Label>공연 시간</Label>
-          <TimeSelectionContainer>
-            {availableTimes.map((t) => (
-              <TimeButton
-                key={t}
-                className={time === t ? 'selected' : ''}
-                onClick={() => setTime(t)}
-              >
-                {t}
-              </TimeButton>
-            ))}
-          </TimeSelectionContainer>
         </Input>
         
         <Input>
