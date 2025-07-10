@@ -1,7 +1,9 @@
+import styled from 'styled-components';
+import { useParams } from 'react-router-dom';
+import useCustomFetch from '@/utils/hooks/useAxios';
+
 import Hamburger from '@/components/Hamburger';
 import Carousel from '@/components/Carousel';
-
-import styled from 'styled-components';
 
 import ChevronLeft from '@/assets/icons/chevronLeftGrey.svg?react';
 import ChevronRight from '@/assets/icons/chevronRightGrey.svg?react';
@@ -34,6 +36,20 @@ function ProdDetail() {
 		{ src: image2, text: '카포네 트릴로지', theatre: '홍익극연구회' },
 		{ src: image3, text: '실종', theatre: '홍익극연구회' },
 	];
+
+	const { memberId } = useParams();
+	console.log('memberId', memberId)
+
+	const {
+		data: playData,
+		error,
+		loading,
+	} = useCustomFetch(`/photoAlbums/member/${memberId}`);
+	// 아직 사진 전체 조회하는 api X
+
+	console.log('error:', error);
+	console.log('loading:', loading);
+	console.log('data:', playData);
 
 	return (
 		<>

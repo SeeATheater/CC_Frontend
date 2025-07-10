@@ -1,3 +1,8 @@
+import styled from 'styled-components';
+//import { useParams } from 'react-router-dom';
+
+//import useCustomFetch from '@/utils/hooks/useAxios';
+
 import Masonry from '@/components/Masonry';
 import MasonryWeb from '@/components/MasonryWeb';
 import Hamburger from '@/components/Hamburger';
@@ -9,7 +14,6 @@ import image2 from '@/assets/mock/images/image2.png';
 import image3 from '@/assets/mock/images/image3.png';
 import image4 from '@/assets/mock/images/image4.png';
 import image5 from '@/assets/mock/images/image5.png';
-import styled from 'styled-components';
 
 function Gallery() {
 	const imageList = [
@@ -30,6 +34,21 @@ function Gallery() {
 
 	const token = 'producer';
 	localStorage.setItem('token', token);
+
+	{
+		/*	const { memberId } = useParams();
+
+	const {
+		data: playData,
+		error,
+		loading,
+	} = useCustomFetch(`/photoAlbums/member/${memberId}`);
+	// 아직 사진 전체 조회하는 api X
+
+	console.log('error:', error);
+	console.log('loading:', loading);
+	console.log('data:', playData);*/
+	}
 
 	return (
 		<>

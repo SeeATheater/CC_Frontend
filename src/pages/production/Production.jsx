@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import useCustomFetch from '@/utils/hooks/useAxios';
 
 import Hamburger from '@/components/Hamburger';
 import Masonry from '@/components/Masonry';
@@ -68,6 +70,7 @@ function Production() {
 
 	const [activeTab, setActiveTab] = useState('plays');
 	const navigate = useNavigate();
+	
 	const navigateToDetail = () => {
 		navigate('/production/1');
 	};
@@ -75,6 +78,19 @@ function Production() {
 		navigate('/production/upload_photo');
 		window.scrollTo(0, 0);
 	};
+
+	const { memberId } = useParams();
+
+	const {
+		data: playData,
+		error,
+		loading,
+	} = useCustomFetch(`/photoAlbums/member/${memberId}`);
+	// 아직 사진 전체 조회하는 api X
+
+	console.log('error:', error);
+	console.log('loading:', loading);
+	console.log('data:', playData);
 
 	return (
 		<>
@@ -231,7 +247,7 @@ const Theatre = styled.div`
 		.theatreName {
 			display: flex;
 			align-items: center;
-			gap: 15px;
+			gap: 8px;
 		}
 		.production {
 			font-size: ${({ theme }) => theme.font.fontSize.headline24};
