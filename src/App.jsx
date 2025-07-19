@@ -54,6 +54,9 @@ import GalleryDetail from './pages/admin/GalleryDetail.jsx';
 import PlaysDetail from './pages/admin/PlaysDetail.jsx';
 import Inquiry from './pages/admin/Inquiry.jsx';
 import InquiryDetail from './pages/admin/InquiryDetail.jsx';
+import BoardManage from './pages/admin/board/BoardManage.jsx';
+import BoardManageDetail1 from './pages/admin/board/BoardManageDetail1.jsx';
+import BoardManageDetail2 from './pages/admin/board/BoardManageDetail2.jsx';
 
 function App() {
 	return (
@@ -135,6 +138,9 @@ function App() {
 						element={<ReservationManagementDetail />}
 					/>
 					<Route path="refunds" element={<RefundManagement />} />
+					<Route path="board" element={<BoardManage />} />
+					<Route path="board/:id" element={<BoardManageDetail1 />} />
+					<Route path="board/:id/comments" element={<BoardManageDetail2 />} />
 					<Route path="inquiry" element={<Inquiry />} />
 					<Route path="inquiry/:inquiryId" element={<InquiryDetail />} />
 					<Route path="mypage" element={<MyPageManagement />} />
