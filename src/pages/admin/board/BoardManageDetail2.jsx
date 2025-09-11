@@ -4,10 +4,10 @@ import styled from 'styled-components';
 
 import BoardHeader from '@/components/Admin/BoardHeader';
 import { getAdminBoardDetail, deleteComment } from '@/pages/admin/board/BoardManageApi';
-import Modal from '../../../pages/board/components/Modal.jsx';
-import useModal from '../../../pages/board/hooks/useModal.jsx';
-import Tab from '../../../pages/board/components/Icons/Tab.svg';
-import Like from '../../../pages/board/components/Icons/Like.svg';
+import Modal from '@/pages/board/components/Modal.jsx';
+import useModal from '@/pages/board/hooks/useModal.jsx';
+import Tab from '@/pages/board/components/Icons/Tab.svg';
+import Like from '@/pages/board/components/Icons/Like.svg';
 
 function BoardManageDetail2() {
     const { id } = useParams();

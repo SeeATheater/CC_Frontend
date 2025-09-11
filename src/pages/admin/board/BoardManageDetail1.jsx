@@ -4,8 +4,8 @@ import styled from 'styled-components';
 
 import BoardHeader from '@/components/Admin/BoardHeader';
 import { getAdminBoardDetail, deleteBoard } from '@/pages/admin/board/BoardManageApi';
-import Modal from '../../../pages/board/components/Modal.jsx';
-import useModal from '../../../pages/board/hooks/useModal.jsx';
+import Modal from '@/pages/board/components/Modal.jsx';
+import useModal from '@/pages/board/hooks/useModal.jsx';
 
 function BoardManageDetail1() {
     const { id } = useParams();
