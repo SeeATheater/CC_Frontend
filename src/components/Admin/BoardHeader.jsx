@@ -66,4 +66,5 @@ const TaskButton = styled.div`
 	height: 34px;
 	padding: 8px 20px;
 	cursor: pointer;
+	text-align: center;
 `;

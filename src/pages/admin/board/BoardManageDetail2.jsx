@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback  } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import BoardHeader from '@/components/Admin/BoardHeader';
-import { mockPosts, mockComments } from './BoardManage';
+import { getAdminBoardDetail, deleteComment } from '@/pages/admin/board/BoardManageApi';
 import Modal from '../../../pages/board/components/Modal.jsx';
 import useModal from '../../../pages/board/hooks/useModal.jsx';
 import Tab from '../../../pages/board/components/Icons/Tab.svg';
@@ -17,38 +17,31 @@ function BoardManageDetail2() {
     const [comments, setComments] = useState([]);
     const [deletedComments, setDeletedComments] = useState(new Set());
     const [hasChanges, setHasChanges] = useState(false);
+    const [loading, setLoading] = useState(true);
     const { isOpen: isDeleteModalOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
     const [selectedComment, setSelectedComment] = useState(null);
 
-    const sortCommentsAsTree = useCallback((commentList) => {
-        const result = [];
-        const commentMap = new Map();
-        
-        // 모든 댓글을 Map에 저장
-        commentList.forEach(comment => {
-            commentMap.set(comment.id, { ...comment, children: [] });
-        });
-        
-        // 부모-자식 관계 설정 및 루트 댓글 수집
-        commentList.forEach(comment => {
-            if (comment.parentId === null) {
-                // 루트 댓글 (일반 댓글)
-                result.push(commentMap.get(comment.id));
-            } else {
-                // 대댓글인 경우 부모의 children에 추가
-                const parent = commentMap.get(comment.parentId);
-                if (parent) {
-                    parent.children.push(commentMap.get(comment.id));
-                }
-            }
-        });
-        
-        // 트리를 평면 배열로 변환 (깊이 우선 탐색)
+    const flattenCommentsTree = useCallback((commentList) => {
+        // API트리 구조 댓글 평면 배열로 변환
         const flattenTree = (nodes, level = 0) => {
             const flattened = [];
             nodes.forEach(node => {
-                // 현재 노드 추가
-                flattened.push({ ...node, replyLevel: level });
+                // 현재 노드를 변환하여 추가
+                const transformedComment = {
+                    id: node.commentId,
+                    commentId: node.commentId,
+                    author: node.writer || '익명',
+                    content: node.content,
+                    date: new Date().toLocaleDateString('ko-KR').substring(5), // MM.DD 형식
+                    userId: node.memberId,
+                    replyLevel: level,
+                    parentId: node.parentId,
+                    likes: node.likeCount || 0,
+                    deleted: node.deleted || false
+                };
+                
+                flattened.push(transformedComment);
+                
                 // 자식 노드들 재귀적으로 추가
                 if (node.children && node.children.length > 0) {
                     flattened.push(...flattenTree(node.children, level + 1));
@@ -57,40 +50,83 @@ function BoardManageDetail2() {
             return flattened;
         };
         
-        return flattenTree(result);
+        return flattenTree(commentList);
     }, []);
 
     useEffect(() => {
-        const foundPost = mockPosts.find(p => p.id === parseInt(id));
-        const foundComments = mockComments[id] || [];
-        
-        if (foundPost) {
-            setPost(foundPost);
-            const sortedComments = sortCommentsAsTree(foundComments);
-            setComments(sortedComments);
-        } else {
-            navigate('/admin/board');
-        }
-    }, [id, navigate, sortCommentsAsTree]);
+        const fetchBoardDetail = async () => {
+            try {
+                setLoading(true);
+                const response = await getAdminBoardDetail(parseInt(id));
+                
+                // API 응답 구조에 맞게 수정
+                if (response && response.boardDetail) {
+                    const boardData = response.boardDetail;
+                    const commentsData = response.comments || [];
+                    
+                    // 게시글 데이터 변환
+                    const transformedPost = {
+                        id: boardData.boardId,
+                        title: boardData.title,
+                        content: boardData.content,
+                        author: boardData.authorNickname || '익명',
+                        date: new Date(boardData.createdAt).toLocaleDateString('ko-KR'),
+                        likes: boardData.likeCount || 0,
+                        comments: boardData.commentCount || 0,
+                        category: boardData.boardType === 'PROMOTION' ? 'promotion' : 'general',
+                        isHot: false,
+                        image: boardData.imgUrls || [],
+                        userId: boardData.authorId,
+                        isDeleted: boardData.isDeleted
+                    };
+                    
+                    // API에서 이미 트리 구조로 온 댓글을 평면 배열로 변환
+                    const sortedComments = flattenCommentsTree(commentsData);
+                    
+                    setPost(transformedPost);
+                    setComments(sortedComments);
+                } else {
+                    console.error('게시글 조회 실패: 잘못된 응답 구조');
+                    navigate('/admin/board');
+                }
+            } catch (error) {
+                console.error('게시글 조회 중 오류 발생:', error);
+                navigate('/admin/board');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleDeleteComment = (commentId) => {
-        setDeletedComments(prev => new Set(prev).add(commentId));
-        setHasChanges(true);
-        closeDeleteModal();
+        if (id) {
+            fetchBoardDetail();
+        }
+    }, [id, navigate, flattenCommentsTree]);
+
+    const handleDeleteComment = async (commentId) => {
+        try {
+            const response = await deleteComment(commentId);
+            // API가 성공 응답을 반환하면 (빈 응답이어도 200 OK면 성공)
+            if (response.success || response.isSuccess || !response.error) {
+                setDeletedComments(prev => new Set(prev).add(commentId));
+                setHasChanges(true);
+                closeDeleteModal();
+                console.log('댓글 삭제 성공');
+            } else {
+                console.error('댓글 삭제 실패:', response.message);
+                alert('댓글 삭제에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('댓글 삭제 중 오류 발생:', error);
+            alert('댓글 삭제 중 오류가 발생했습니다.');
+        }
     };
 
     const handleSaveChanges = () => {
-        // 변경사항 저장 로직
-        console.log('삭제된 댓글들:', Array.from(deletedComments));
-        
-        // 실제로는 API 호출로 서버에 저장
-        // 여기서는 목 데이터 업데이트
-        mockComments[id] = comments.filter(comment => !deletedComments.has(comment.id));
-        
+        // 변경사항이 이미 서버에 반영되었으므로 상태만 초기화
         setHasChanges(false);
         setDeletedComments(new Set());
         
-        // 저장 완료 후 댓글 없는 페이지로 이동
+        // 댓글 없는 페이지로 이동
         navigate(`/admin/board/${id}`);
     };
 
@@ -99,7 +135,29 @@ function BoardManageDetail2() {
         openDeleteModal();
     };
 
-    if (!post) return null;
+    if (loading) {
+        return (
+            <Container>
+                <Content>
+                    <TableArea>
+                        <LoadingMessage>로딩 중...</LoadingMessage>
+                    </TableArea>
+                </Content>
+            </Container>
+        );
+    }
+
+    if (!post) {
+        return (
+            <Container>
+                <Content>
+                    <TableArea>
+                        <ErrorMessage>게시글을 찾을 수 없습니다.</ErrorMessage>
+                    </TableArea>
+                </Content>
+            </Container>
+        );
+    }
 
     const deleteModalActions = [
         {
@@ -122,7 +180,7 @@ function BoardManageDetail2() {
                         title="게시판 관리"
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
-                        buttonName="저장하기"
+                        buttonName="완료"
                         onButtonClick={handleSaveChanges}
                         buttonDisabled={!hasChanges}
                     />
@@ -144,13 +202,9 @@ function BoardManageDetail2() {
                             <PostContent>{post.content}</PostContent>
                             
                             {/* 게시글 이미지 */}
-                            {post.image.length > 0 && (
+                            {post.image && post.image.length > 0 && (
                                 <PostImageContainer>
-                                    {Array.isArray(post.image) ? (
-                                        <PostImage src={post.image[0]} alt="게시글 이미지" />
-                                    ) : (
-                                        <PostImage src={post.image} alt="게시글 이미지" />
-                                    )}
+                                    <PostImage src={Array.isArray(post.image) ? post.image[0] : post.image} alt="게시글 이미지" />
                                 </PostImageContainer>
                             )}
                         </PostContentBox>
@@ -161,7 +215,7 @@ function BoardManageDetail2() {
                             
                             <CommentsContainer>
                             {comments.map((comment) => {
-                                const isDeleted = deletedComments.has(comment.id);
+                                const isDeleted = deletedComments.has(comment.id) || comment.deleted;
                                 
                                 return (
                                     <CommentItem key={comment.id} replyLevel={comment.replyLevel}>
@@ -255,6 +309,20 @@ const Content = styled.div`
 const TableArea = styled.div`
     padding: 0px 120px 50px 50px;
     width: 100%;
+`;
+
+const LoadingMessage = styled.div`
+    text-align: center;
+    padding: 40px 0;
+    font-size: 16px;
+    color: #666;
+`;
+
+const ErrorMessage = styled.div`
+    text-align: center;
+    padding: 40px 0;
+    font-size: 16px;
+    color: #f67676;
 `;
 
 const PostDetailContainer = styled.div`
@@ -388,9 +456,6 @@ const DeleteButton = styled.button`
     color: #FFBEBB;
     cursor: pointer;
     padding: 2px 4px;
-    
-
-
 
     &:hover {
         color: #F67676;
