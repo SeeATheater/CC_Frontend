@@ -84,7 +84,7 @@ const usePosts = () => {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-      }).replace(/\. /g, '.').replace('.', ''),
+      }).replace(/\. /g, '.').replace('.', '.'),
       likes: apiBoard.likeCount,
       comments: apiBoard.commentCount,
       category: apiBoard.boardType.toLowerCase() === 'normal' ? 'general' : 'promotion',
@@ -111,10 +111,10 @@ const usePosts = () => {
       boardId: boardId,
       author: apiComment.writer,
       content: fixedContent,   
-      date: new Date().toLocaleDateString('ko-KR', { 
+      date: new Date(apiComment.createdAt).toLocaleDateString('ko-KR', { 
         month: '2-digit', 
         day: '2-digit' 
-      }),
+      }).replace(/\. /g, '.').replace('.', '.'),
       userId: apiComment.memberId,
       replyLevel: depth,
       parentId: apiComment.parentId,
