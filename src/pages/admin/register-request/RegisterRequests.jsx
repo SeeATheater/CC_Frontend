@@ -24,6 +24,7 @@ function RegisterRequests() {
 
 	const { data, loading, error } = useCustomFetch(
 		'/admin/approval/showList?page=0&size=20',
+		'GET',
 	);
 
 	const changePageHandler = (page) => {

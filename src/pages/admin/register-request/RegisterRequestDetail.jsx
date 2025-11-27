@@ -21,11 +21,14 @@ const testRequests = [
 
 function RegisterRequestDetail() {
 	const { registerId } = useParams();
+	// 🔥 data(fetch), loading, error 가져오기
 	const {
 		data: fullData,
 		loading,
 		error,
+		doFetch, // PATCH/POST 등을 위해 추가했다고 가정
 	} = useCustomFetch(`/admin/amateurShow/${registerId}`);
+
 	const data = fullData?.result || null;
 
 	const [editMode, setEditMode] = useState(false); // 수정 모드 여부
@@ -36,24 +39,19 @@ function RegisterRequestDetail() {
 		setEditMode(true);
 		setSelectedStatus(data?.showStatus === 'APPROVED_YET' ? 'NO' : 'YES');
 	};
-
-	// 저장하기 버튼 눌렀을 때
 	const handleSave = async () => {
 		if (!registerId) return;
+
+		const accessToken = localStorage.getItem('accessToken');
+
+		const url =
+			selectedStatus === 'YES'
+				? `https://api.seeatheater.site/admin/approval/${registerId}/approve`
+				: `https://api.seeatheater.site/admin/approval/${registerId}/reject`;
+
 		try {
-			const accessToken = localStorage.getItem('accessToken'); // 토큰 꺼내오기
-
-			const url =
-				selectedStatus === 'YES'
-					? `https://api.seeatheater.site/admin/approval/${registerId}/approve`
-					: `https://api.seeatheater.site/admin/approval/${registerId}}/reject`;
-
 			const res = await fetch(url, {
 				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${accessToken}`,
-				},
 			});
 
 			if (!res.ok) {

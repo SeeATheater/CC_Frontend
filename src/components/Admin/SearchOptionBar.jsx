@@ -51,6 +51,7 @@ const SearchOptionArea = styled.div`
 			flex-direction: row;
 			align-items: center;
 			gap: 4px;
+			font-size: 14px;
 
 			input {
 				width: 19px;

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import Poster from '@/assets/images/test-poster2.png';
 
 import TopBarWeb from '@/components/TopBarWeb';
-
+import { Await } from 'react-router-dom';
 import { useState } from 'react';
 import useCustomFetch from '@/utils/hooks/useCustomFetch.js';
 import { useParams } from 'react-router-dom';
@@ -34,7 +34,7 @@ function TicketDetail() {
 	const navigate = useNavigate();
 	const { ticketId } = useParams();
 
-	const { data, loading, error } = useCustomFetch(
+	const { data, loading, error, fetchData } = useCustomFetch(
 		`/myTickets/${ticketId}/getMyTicket`,
 	);
 
@@ -43,13 +43,21 @@ function TicketDetail() {
 	// const [showAlert, setShowAlert] = useState(false);
 
 	const [isChecked, setIsChecked] = useState(false);
-	const handleCancelClick = () => {
+	const handleCancelClick = async () => {
 		if (!isChecked) {
 			alert('취소 수수료 동의에 체크해주세요.');
 			return;
 		}
-		// navigate('cancel');
+
+		const response = await fetchData(`/myTickets/${ticketId}/cancel`, 'PATCH');
+
+		if (response?.status === 200) {
+			alert('티켓이 성공적으로 취소되었습니다.');
+		} else {
+			alert('티켓 취소에 실패했습니다.');
+		}
 	};
+
 	function onPrev() {
 		navigate(-1);
 	}

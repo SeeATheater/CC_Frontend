@@ -33,7 +33,7 @@ function MyPageMenu() {
 				<LeftWrapper>
 					<h1 className="title">마이페이지</h1>
 					<h1 className="color-pink only-web" style={{ marginTop: '62px' }}>
-						{role === 'producer' && 'performer'}
+						{role === 'producer' && 'user'}
 						{role === 'user' && 'user'}
 					</h1>
 					<p></p>
@@ -44,7 +44,7 @@ function MyPageMenu() {
 					<button style={{ marginTop: '22px' }}>로그아웃</button>
 				</LeftWrapper>
 				<RightWrapper>
-					{/*}
+					{/*
 					<button
 						onClick={() => {
 							const current = localStorage.getItem('role');

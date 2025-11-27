@@ -46,7 +46,8 @@ const getSinglePresignedUrl = async (fetchData, file) => {
     `${API_ENDPOINTS.PRESIGNED_URL}?imageExtension=${extension}&filePath=board`,
     'GET'
   );
-  return response.result || response;
+  // axios response(.data) || wrapper(.result) || raw response
+  return response.data || response.result || response;
 };
 
 const getMultiplePresignedUrls = async (fetchData, files) => {
@@ -57,8 +58,11 @@ const getMultiplePresignedUrls = async (fetchData, files) => {
     'POST',
     extensions
   );
-  const urlsData = Array.isArray(response) ? response : response?.result;
+  
+  const urlsData = response.data || response.result || response;
+
   if (!Array.isArray(urlsData)) {
+    console.error('Presigned URL 응답 구조 에러:', response); // 디버깅용 로그
     throw new Error('Presigned URL 응답 형식이 올바르지 않습니다.');
   }
   return urlsData;
@@ -67,13 +71,20 @@ const getMultiplePresignedUrls = async (fetchData, files) => {
 // S3에 파일 업로드
 const uploadFileToS3 = async (uploadUrl, file) => {
   try {
-    const extension = getFileExtension(file);
-
+    let contentType = file.type;
+    
+    if (!contentType) {
+       const extension = getFileExtension(file);
+       // jpg의 경우 표준인 image/jpeg로 변환해주는 안전장치
+       if (extension === 'jpg') {
+         contentType = 'image/jpeg';
+       } else {
+         contentType = `image/${extension}`;
+       }
+    }
     await axios.put(uploadUrl, file, {
       headers: {
-        'Content-Type': `image/${extension}`,
-        'x-amz-meta-content-type': `image/${extension}`,
-        'x-amz-meta-filetype': `image/${extension}`,
+        'Content-Type': contentType,
       },
     });
   } catch (error) {
@@ -82,18 +93,24 @@ const uploadFileToS3 = async (uploadUrl, file) => {
   }
 };
 
-// 단일 이미지 업로드 (presigned URL + S3 업로드만)
+// 3. 단일 이미지 업로드 함수 (필드명 매핑)
 export const uploadSingleImage = async (fetchData, file) => {
   try {
     validateImageFile(file);
     const urlData = await getSinglePresignedUrl(fetchData, file);
 
-    await uploadFileToS3(urlData.uploadUrl, file);
+    // 서버 응답 키(imageUrl)와 코드 변수 매핑
+    const uploadUrl = urlData.uploadUrl || urlData.presignedUrl;
+    const keyName = urlData.keyName;
+    const publicUrl = urlData.imageUrl || urlData.publicUrl; // imageUrl 우선 확인
 
-    // DB 저장 없이 S3 정보만 반환
+    if (!uploadUrl) throw new Error('업로드 URL을 받아오지 못했습니다.');
+
+    await uploadFileToS3(uploadUrl, file);
+
     return {
-      keyName: urlData.keyName,
-      imageUrl: urlData.publicUrl,
+      keyName: keyName,
+      imageUrl: publicUrl,
     };
   } catch (error) {
     console.error('단일 이미지 업로드 실패:', error);
@@ -101,7 +118,7 @@ export const uploadSingleImage = async (fetchData, file) => {
   }
 };
 
-// 다중 이미지 업로드 (presigned URL + S3 업로드만)
+// 4. 다중 이미지 업로드 함수 (필드명 매핑)
 export const uploadMultipleImages = async (fetchData, files) => {
   try {
     if (!files || files.length === 0) return [];
@@ -114,16 +131,23 @@ export const uploadMultipleImages = async (fetchData, files) => {
 
     const uploadPromises = files.map(async (file, index) => {
       const urlData = urlsData[index];
-      if (!urlData?.uploadUrl || !urlData?.keyName || !urlData?.publicUrl) {
+      
+      // 서버 응답 키 매핑 (uploadUrl, keyName, imageUrl)
+      const uploadUrl = urlData.uploadUrl || urlData.presignedUrl;
+      const keyName = urlData.keyName;
+      const publicUrl = urlData.imageUrl || urlData.publicUrl; // imageUrl 추가
+
+      if (!uploadUrl || !keyName) {
         throw new Error(`Presigned URL 정보가 누락되었습니다 (파일 ${index + 1})`);
       }
-      await uploadFileToS3(urlData.uploadUrl, file);
-      return { keyName: urlData.keyName, imageUrl: urlData.publicUrl };
+
+      await uploadFileToS3(uploadUrl, file);
+      
+      // DB 저장용 객체 반환
+      return { keyName: keyName, imageUrl: publicUrl };
     });
 
     const uploadResults = await Promise.all(uploadPromises);
-    
-    // DB 저장 없이 S3 정보만 반환
     return uploadResults;
   } catch (error) {
     console.error('다중 이미지 업로드 실패:', error);
@@ -131,7 +155,7 @@ export const uploadMultipleImages = async (fetchData, files) => {
   }
 };
 
-// 게시글 작성용 - S3 업로드 후 keyName과 imageUrl만 반환
+// 게시글 작성용
 export const processImagesForCreate = async (fetchData, files) => {
   try {
     if (!files || files.length === 0) return [];
@@ -146,31 +170,27 @@ export const processImagesForCreate = async (fetchData, files) => {
   }
 };
 
-// 게시글 수정용 - 기존 이미지와 새 이미지 처리
+// 게시글 수정용
 export const processImagesForUpdate = async (fetchData, existingImages = [], newFiles = []) => {
   try {
     const imageRequestDTOs = [];
-    
-    // 기존 이미지 처리 (이미 S3에 있는 이미지들)
     existingImages.forEach((img) => {
-      if (img.keyName && img.url) {
-        imageRequestDTOs.push({ keyName: img.keyName, imageUrl: img.url });
-      } else if (img.url) {
-        // URL에서 keyName 추출 시도
-        const urlParts = img.url.split('/');
+      const url = img.url || img.imageUrl;
+      if (img.keyName && url) {
+        imageRequestDTOs.push({ keyName: img.keyName, imageUrl: url });
+      } else if (url) {
+        const urlParts = url.split('/');
         const possibleKeyName = urlParts.slice(-2).join('/');
-        imageRequestDTOs.push({ keyName: possibleKeyName, imageUrl: img.url });
+        imageRequestDTOs.push({ keyName: possibleKeyName, imageUrl: url });
       }
     });
 
-    // 새로운 파일들 S3에 업로드
     if (newFiles && newFiles.length > 0) {
       const newUploadResults = await uploadMultipleImages(fetchData, newFiles);
       newUploadResults.forEach((result) => {
         imageRequestDTOs.push({ keyName: result.keyName, imageUrl: result.imageUrl });
       });
     }
-
     return imageRequestDTOs;
   } catch (error) {
     console.error('게시글 수정용 이미지 처리 실패:', error);
@@ -178,7 +198,7 @@ export const processImagesForUpdate = async (fetchData, existingImages = [], new
   }
 };
 
-// S3에서 이미지 삭제 
+// S3 이미지 삭제
 export const deleteImageFromS3 = async (fetchData, keyName) => {
   try {
     await fetchData(API_ENDPOINTS.IMAGE_DELETE(keyName), 'DELETE');
@@ -188,7 +208,7 @@ export const deleteImageFromS3 = async (fetchData, keyName) => {
   }
 };
 
-// S3 객체 존재 확인
+// S3 존재 확인
 export const checkImageExists = async (fetchData, keyName) => {
   try {
     const response = await fetchData(`${API_ENDPOINTS.IMAGE_EXISTS}?keyName=${keyName}`, 'GET');

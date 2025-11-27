@@ -14,12 +14,12 @@ export const API_ENDPOINTS = {
   COMMENT_LIKE: (boardId, commentId) => `/boards/${boardId}/comments/${commentId}/like`,
   
   // 이미지
-  PRESIGNED_URL: '/upload/s3/presignedUrl',
-  PRESIGNED_URLS: '/upload/s3/presignedUrls',
+  PRESIGNED_URL: '/s3/uploadUrl',
+  PRESIGNED_URLS: '/s3/uploadUrls',
   IMAGE_SAVE: '/images',
   IMAGE_SAVE_MULTIPLE: '/images/multipleImages',
-  IMAGE_DELETE: (keyName) => `/upload/s3/${encodeURIComponent(keyName)}`,
-  IMAGE_EXISTS: '/upload/s3',
+  IMAGE_DELETE: (keyName) => `/s3/delete?keyName=${encodeURIComponent(keyName)}`,
+  IMAGE_EXISTS: '/s3/exist',
   
   // 사용자
   MY_PAGE: '/member/myPage',
