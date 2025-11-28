@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 import Masonry from '@/components/Masonry';
 import MasonryWeb from '@/components/MasonryWeb';
@@ -13,16 +14,21 @@ import useCustomFetch from '@/utils/hooks/useCustomFetch';
 function Gallery() {
 	const navigate = useNavigate();
 	const roleToken = sessionStorage.getItem('selectedRole');
+	const [cursorId, setCursorId] = useState(0);
 
 	const navigateToUpload = () => {
 		navigate('/production/upload_photo');
 		window.scrollTo(0, 0);
 	};
 
-	const { data: picData, error, loading } = useCustomFetch(`/photoAlbums`);
+	const {
+		data: picData,
+		error,
+		loading,
+	} = useCustomFetch(`/photoAlbums?cursorId=${cursorId}&size=15`);
 	console.log('picData', picData);
 
-	if (loading || !picData?.result) {
+	if (loading) {
 		return <div>로딩 중...</div>;
 	}
 
