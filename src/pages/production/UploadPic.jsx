@@ -2,11 +2,10 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
-
+import { useNavigate } from 'react-router-dom';
 import useAxios from '@/utils/hooks/useAxios';
 import { getPresignedUrl } from '@/utils/apis/getPresignedUrl';
 import { uploadImageToS3 } from '@/utils/apis/uploadImageToS3';
-//import useCustomFetch from '@/utils/hooks/useAxios';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 import ImageUploadBox from '@/components/ImageUploadBox2';
@@ -17,12 +16,6 @@ import CalendarPeriod from '@/components/CalendarPeriod';
 import ChevronDown from '@/assets/icons/chevronDown.svg?react';
 
 function UploadPic() {
-	const data = [
-		{ title: '실종', date: '25.04.25~25.04.27' },
-		{ title: '카포네 트릴로지', date: '25.05.01~25.05.03' },
-		{ title: '킬링시저', date: '25.06.10~25.06.13' },
-	];
-
 	const [file, setFile] = useState(null);
 	const [selected, setSelected] = useState(null);
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -32,6 +25,7 @@ function UploadPic() {
 	const [inputValue, setInputValue] = useState('');
 	const [textContent, setTextContent] = useState('');
 	const isFormValid = Boolean(selected?.title && selected?.date && file);
+	const navigate = useNavigate();
 
 	const searchInput = encodeURIComponent(inputValue);
 	const {
@@ -131,6 +125,7 @@ function UploadPic() {
 
 	const axiosClient = useAxios();
 	const { fetchData } = useCustomFetch(null, 'POST', null);
+
 	const handleUpload = async () => {
 		if (!isFormValid) {
 			alert('모든 필수 정보를 입력해 주세요.');
@@ -140,33 +135,34 @@ function UploadPic() {
 		try {
 			const extension = file.name.split('.').pop().toLowerCase();
 
-			const { uploadUrl, publicUrl, keyName } = await getPresignedUrl(
+			const { imageUrl, uploadUrl, keyName } = await getPresignedUrl(
 				axiosClient,
 				extension,
 				'photoAlbum',
 			);
 
-			console.log('S3 응답:', uploadUrl); // 디버깅용
-			console.log('keyName:', keyName); // 디버깅용
-			console.log('publicUrl:', publicUrl); // 디버깅용
+			console.log('uploadUrl:', uploadUrl);
+			console.log('keyName:', keyName);
+			console.log('imageUrl:', imageUrl);
 
-			//const url = `https://ccbucket-0528.s3.ap-northeast-2.amazonaws.com/${uploadUrl}`;
-			await uploadImageToS3(axiosClient, extension, uploadUrl);
+			await uploadImageToS3(file, uploadUrl);
 
 			const postBody = {
 				amateurShowId: selected.value,
 				content: textContent,
-				imageRequestDTOs: [{ keyName: keyName, imageUrl: publicUrl }],
+				imageRequestDTOs: [{ keyName }],
 			};
-			console.log(postBody);
 
 			const res = await fetchData('/photoAlbums', 'POST', postBody);
-			//console.log(postBody)
-			if (res.status !== 200 && res.status !== 201) {
-				throw new Error(`서버 응답 오류: ${res.status}`);
+
+			// 서버 응답 구조: res.data.result.photoAlbumId
+			const albumId = res?.data?.result?.photoAlbumId;
+
+			if (!albumId) {
+				throw new Error('서버에서 photoAlbumId를 반환하지 않았습니다.');
 			}
-			console.log('응답 데이터:', res.data);
-			alert('등록 완료!');
+
+			navigate('/production/uploadDone', { state: { albumId } });
 		} catch (err) {
 			console.error(err);
 			alert('업로드 실패: ' + err.message);

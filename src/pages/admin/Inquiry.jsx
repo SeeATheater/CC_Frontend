@@ -80,6 +80,7 @@ function Inquiry() {
 	}, [filteredData, currentPage]);
 
 	const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+	
 	return (
 		<Container>
 			<Content>

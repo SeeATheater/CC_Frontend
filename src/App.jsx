@@ -19,6 +19,7 @@ import Detail from './pages/Detail/Detail';
 import Playlist from './pages/Detail/Playlist';
 import Notification from './pages/notification/Notification';
 import UploadPic from './pages/production/UploadPic';
+import UploadDone from './pages/production/UploadDone';
 import ProdDetail from './pages/production/ProdDetail';
 import Production from './pages/production/Production';
 import MyPageRoutes from './routes/MyPageRoutes.jsx';
@@ -53,8 +54,9 @@ function App() {
 
 			<Route path="/notification" element={<Notification />} />
 			<Route path="/production/:prodId" element={<Production />} />
-			<Route path="/production/:prodId/:AlbumId" element={<ProdDetail />} />
+			<Route path="/production/album/:AlbumId" element={<ProdDetail />} />
 			<Route path="/production/upload_photo" element={<UploadPic />} />
+			<Route path='/production/uploadDone' element={<UploadDone />}/>
 
 			<Route path="/mypage/*" element={<MyPageRoutes />} />
 

@@ -22,8 +22,8 @@ function AdminGallery() {
 	}
 
 	const [searchTerm, setSearchTerm] = useState('');
-	const [currentPage, setCurrentPage] = useState(1);
-	const itemsPerPage = 20;
+	const [currentPage, setCurrentPage] = useState(0);
+	const itemsPerPage = 10;
 
 	const headerRow = {
 		title: '소극장 공연 이름',
@@ -37,35 +37,37 @@ function AdminGallery() {
 		error,
 		loading,
 	} = useCustomFetch(
-		`/admin/photoAlbum?page=${currentPage - 1}&size=${itemsPerPage}`,
+		`/admin/photoAlbum?page=${currentPage}&size=${itemsPerPage}`,
 	);
+	const {
+		data: searchData,
+		error: searchError,
+		loading: searchLoading,
+	} = useCustomFetch(`/admin/photoAlbum/search?keyword=${searchTerm}`);
+	//console.log('searchData', searchData);
 
-	console.log('error:', error);
-	console.log('loading:', loading);
 	console.log('data:', gallData);
+
 	const apiRows = useMemo(() => {
-		if (!gallData || !gallData.result) return [];
-		return gallData?.result.content.map((item) => ({
+		const source = searchTerm && searchData?.result ? searchData : gallData;
+		if (!source || !source.result) return [];
+
+		return source.result.content.map((item) => ({
 			title: item.amateurShowName,
 			date: formatDateTime(item.updatedAt),
 			id: item.id,
-			//id: item.uploaderId? 아이디가 사진 아이디인지, 등록자 아이디인지....
 			manage: `/admin/gallery/${item.id}`,
 		}));
-	}, [gallData]);
+	}, [gallData, searchData, searchTerm]);
 
-	const photo_data = [headerRow, ...apiRows];
+	//const photo_data = [headerRow, ...apiRows];
 	const visibleColumns = ['title', 'date', 'id', 'manage'];
 
-	const totalPages = Math.ceil((photo_data.length - 1) / itemsPerPage);
-
-	const paginatedData = photo_data
-		.slice(0, 1)
-		.concat(
-			photo_data
-				.slice(1)
-				.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
-		);
+	const totalPages = searchTerm ? 1 : gallData?.result.totalPages;
+	const isLast = gallData?.result.last;
+	const isFirst = gallData?.result.first;
+	
+	const paginatedData = [headerRow, ...apiRows];
 
 	return (
 		<Container>
@@ -79,7 +81,7 @@ function AdminGallery() {
 								value={searchTerm}
 								onChange={(e) => {
 									setSearchTerm(e.target.value);
-									setCurrentPage(1);
+									setCurrentPage(0);
 								}}
 								placeholder="검색어를 입력하세요"
 							/>
@@ -92,7 +94,11 @@ function AdminGallery() {
 						currentPage={currentPage}
 						setCurrentPage={setCurrentPage}
 						totalPages={totalPages}
+						isLast={isLast}
+						isFirst={isFirst}
 						visibleColumns={visibleColumns}
+						loading={loading}
+						searchLoading={searchLoading}
 					/>
 				</TableArea>
 			</Content>

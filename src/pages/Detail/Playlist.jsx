@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Hamburger from '@/components/Hamburger';
 import PlayCard from '@/components/Detail/PlayCard';
@@ -17,9 +18,9 @@ import SamplePoster from '@/assets/mock/images/실종.png';
 
 function Playlist() {
 	const [current, setCurrent] = useState(0);
+	const navigate = useNavigate();
 
-	const token = 'producer';
-	localStorage.setItem('token', token);
+	const roleToken = sessionStorage.getItem('selectedRole');
 
 	const {
 		data: todayData,
@@ -41,6 +42,10 @@ function Playlist() {
 		loading: ongoingLoading,
 	} = useCustomFetch(`/amateurs/ongoing`);
 	console.log('ongoing:', ongoingData);
+
+	const toRegist = () => {
+		navigate(`/small-theater/register`);
+	};
 
 	return (
 		<Container>
@@ -136,9 +141,9 @@ function Playlist() {
 						))}
 					</MappingArea>
 				</Now>
-				{token && (
+				{roleToken == 'PERFORMER' && (
 					<FixedProdButton>
-						<ProdButton>
+						<ProdButton onClick={toRegist}>
 							<Ticket height={28} />
 							<p>공연등록</p>
 						</ProdButton>

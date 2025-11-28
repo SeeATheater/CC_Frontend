@@ -15,7 +15,7 @@ function ProdGall({ imageData }) {
 						<Item
 							key={idx}
 							onClick={() => {
-								navigate(`/production/${productionId}/${data.photoAlbumId}`);
+								navigate(`/production/album/${data.photoAlbumId}`);
 							}}
 						>
 							<img src={data?.imageUrl} alt="공연사진" className="pic" />

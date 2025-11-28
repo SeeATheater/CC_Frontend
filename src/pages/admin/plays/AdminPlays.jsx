@@ -8,7 +8,9 @@ import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 function AdminPlays() {
 	const [currentPage, setCurrentPage] = useState(0);
-	const itemsPerPage = 20;
+	const itemsPerPage = 10;
+	const [searchTerm, setSearchTerm] = useState('');
+
 	const headerRow = {
 		showName: '소극장 공연 이름',
 		createdAt: '날짜/시간',
@@ -17,13 +19,15 @@ function AdminPlays() {
 		manage: '관리',
 	};
 
+	const apiUrl = searchTerm
+		? `/admin/amateurShow/showList?page=${currentPage}&size=${itemsPerPage}&keyword=${searchTerm}`
+		: `/admin/amateurShow/showList?page=${currentPage}&size=${itemsPerPage}`;
+
 	const {
 		data: playData,
 		error: playError,
 		loading: playLoading,
-	} = useCustomFetch(
-		`/admin/amateurShow/showList?page=${currentPage}&size=${itemsPerPage}`,
-	);
+	} = useCustomFetch(apiUrl);
 
 	const apiRows = useMemo(() => {
 		if (!playData || !playData.result) return [];
@@ -36,9 +40,6 @@ function AdminPlays() {
 		}));
 	}, [playData]);
 
-	const play_data = [headerRow, ...apiRows];
-
-	const [searchTerm, setSearchTerm] = useState('');
 	const [visibleColumns, setVisibleColumns] = useState([
 		'showName',
 		'createdAt',
@@ -54,23 +55,14 @@ function AdminPlays() {
 		performerName: '등록자명',
 	};
 
-	const filteredData = useMemo(() => {
-		const content = play_data.slice(1);
-		return content.filter((user) =>
-			Object.entries(user).some(
-				([key, val]) =>
-					visibleColumns.includes(key) &&
-					val.toLowerCase().includes(searchTerm.toLowerCase()),
-			),
-		);
-	}, [searchTerm, visibleColumns, play_data]);
+	//소극장 api에는 페이지네이션 정보 없음
+	const totalPages = playData?.result.totalPages;
+	const isLast = playData?.result.last;
+	const isFirst = playData?.result.first;
 
-	const paginatedData = useMemo(() => {
-		const start = currentPage * itemsPerPage;
-		return filteredData.slice(start, start + itemsPerPage);
-	}, [filteredData, currentPage]);
+	const paginatedData = [headerRow, ...apiRows];
 
-	const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+	//const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
 	return (
 		<Container>
@@ -87,10 +79,12 @@ function AdminPlays() {
 					/>
 
 					<UserTable
-						data={[headerRow, ...paginatedData]}
-						currentPage={currentPage}
+						data={paginatedData}
+						currentPage={currentPage + 1}
 						setCurrentPage={setCurrentPage}
 						totalPages={totalPages}
+						isLast={isLast}
+						isFirst={isFirst}
 						visibleColumns={visibleColumns}
 					/>
 				</TableArea>

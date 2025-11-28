@@ -36,6 +36,7 @@ function NotiComponent() {
 						type={noti.noticeType}
 						noticeType={noti.noticeType}
 						content={noti.message}
+						contentId={noti.contentId}
 						when={noti.createdAt}
 						checked={noti.isRead}
 						onClick={() => handleClick(noti.id)}

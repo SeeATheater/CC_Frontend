@@ -9,7 +9,9 @@ import React, { useState, useMemo } from 'react';
 
 function Users() {
 	const [currentPage, setCurrentPage] = useState(0);
-	const itemsPerPage = 20;
+	const itemsPerPage = 10;
+	const [searchTerm, setSearchTerm] = useState('');
+
 	const headerRow = {
 		memberId: '아이디',
 		name: '이름',
@@ -19,11 +21,16 @@ function Users() {
 		manage: '관리',
 	};
 
+	const apiUrl = searchTerm
+		? `/admin/member/list?page=${currentPage}&size=${itemsPerPage}&keyword=${searchTerm}`
+		: `/admin/member/list?page=${currentPage}&size=${itemsPerPage}`;
+
 	const {
 		data: userData,
 		error: userError,
 		loading: userLoading,
-	} = useCustomFetch(`/admin/member/list?page=${currentPage}&size=${itemsPerPage}`);
+	} = useCustomFetch(apiUrl);
+	console.log(userData?.result);
 
 	const apiRows = useMemo(() => {
 		if (!userData || !userData.result) return [];
@@ -37,9 +44,6 @@ function Users() {
 		}));
 	}, [userData]);
 
-	const user_data = [headerRow, ...apiRows];
-
-	const [searchTerm, setSearchTerm] = useState('');
 	const [visibleColumns, setVisibleColumns] = useState([
 		'memberId',
 		'name',
@@ -57,26 +61,13 @@ function Users() {
 		);
 	};
 
-	const filteredData = useMemo(() => {
-		const content = user_data.slice(1); // header 제외
-		return content.filter((user) =>
-			Object.entries(user).some(
-				([key, val]) =>
-					visibleColumns.includes(key) &&
-					String(val).toLowerCase().includes(searchTerm.toLowerCase()),
-			),
-		);
-	}, [searchTerm, visibleColumns, user_data]);
 
-	const paginatedData = useMemo(() => {
-		const start = currentPage * itemsPerPage;
-		return filteredData.slice(start, start + itemsPerPage);
-	}, [filteredData, currentPage]);
+	const paginatedData = [headerRow, ...apiRows];
 
-	const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-	if (userLoading) return <p>로딩 중...</p>;
-	if (userError) return <p>에러 발생: {String(userError)}</p>;
+	const totalPages = userData?.result.totalPages;
+	//사용자 api에는 totalPages 정보 없음
+	const isLast = userData?.result.last;
+	const isFirst = userData?.result.first;
 
 	return (
 		<Container>
@@ -90,7 +81,7 @@ function Users() {
 								value={searchTerm}
 								onChange={(e) => {
 									setSearchTerm(e.target.value);
-									setCurrentPage(1);
+									setCurrentPage(0);
 								}}
 								placeholder="검색어를 입력하세요"
 							/>
@@ -113,10 +104,12 @@ function Users() {
 					</FilterArea>
 
 					<UserTable
-						data={[headerRow, ...paginatedData]}
+						data={paginatedData}
 						currentPage={currentPage}
 						setCurrentPage={setCurrentPage}
 						totalPages={totalPages}
+						isLast={isLast}
+						isFirst={isFirst}
 						visibleColumns={visibleColumns}
 					/>
 				</TableArea>

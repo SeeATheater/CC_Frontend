@@ -71,7 +71,7 @@ function ProdDetail() {
 						{picData?.result.singlePhotoAlbumDTOs.map((data) => (
 							<ImgCard
 								onClick={() => {
-									navigate(`/production/${prodId}/${data.photoAlbumId}`);
+									navigate(`/production/album/${data.photoAlbumId}`);
 								}}
 							>
 								<img src={data.imageUrl} />
