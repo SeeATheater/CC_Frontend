@@ -49,7 +49,7 @@ function Gallery() {
 
 			<Web>
 				<SideMenuWrapper>
-					<HomeIconMenu isWeb={true} selectedMenu="plays" />
+					<HomeIconMenu isWeb={true} selectedMenu="gallery" />
 				</SideMenuWrapper>
 				<Container>
 					<SearchBar />
