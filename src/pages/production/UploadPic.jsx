@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
-
+import { useNavigate } from 'react-router-dom';
 import useAxios from '@/utils/hooks/useAxios';
 import { getPresignedUrl } from '@/utils/apis/getPresignedUrl';
 import { uploadImageToS3 } from '@/utils/apis/uploadImageToS3';
@@ -25,6 +25,7 @@ function UploadPic() {
 	const [inputValue, setInputValue] = useState('');
 	const [textContent, setTextContent] = useState('');
 	const isFormValid = Boolean(selected?.title && selected?.date && file);
+	const navigate = useNavigate();
 
 	const searchInput = encodeURIComponent(inputValue);
 	const {
@@ -124,6 +125,7 @@ function UploadPic() {
 
 	const axiosClient = useAxios();
 	const { fetchData } = useCustomFetch(null, 'POST', null);
+
 	const handleUpload = async () => {
 		if (!isFormValid) {
 			alert('모든 필수 정보를 입력해 주세요.');
@@ -139,28 +141,28 @@ function UploadPic() {
 				'photoAlbum',
 			);
 
-			console.log('uploadUrl:', uploadUrl); // 디버깅용
-			console.log('keyName:', keyName); // 디버깅용
-			console.log('imageUrl:', imageUrl); // 디버깅용
+			console.log('uploadUrl:', uploadUrl);
+			console.log('keyName:', keyName);
+			console.log('imageUrl:', imageUrl);
 
 			await uploadImageToS3(file, uploadUrl);
 
 			const postBody = {
 				amateurShowId: selected.value,
 				content: textContent,
-				imageRequestDTOs: [{ keyName: keyName }],
+				imageRequestDTOs: [{ keyName }],
 			};
-			console.log(postBody);
 
 			const res = await fetchData('/photoAlbums', 'POST', postBody);
-			console.log(postBody)
-			if (res.status !== 200 && res.status !== 201) {
-				throw new Error(`서버 응답 오류: ${res.status}`);
-			}
-			console.log('응답 데이터:', res.data);
-			alert('등록 완료!');
 
-			
+			// 서버 응답 구조: res.data.result.photoAlbumId
+			const albumId = res?.data?.result?.photoAlbumId;
+
+			if (!albumId) {
+				throw new Error('서버에서 photoAlbumId를 반환하지 않았습니다.');
+			}
+
+			navigate('/production/uploadDone', { state: { albumId } });
 		} catch (err) {
 			console.error(err);
 			alert('업로드 실패: ' + err.message);
