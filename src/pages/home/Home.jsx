@@ -13,6 +13,7 @@ import Hamburger from '@/components/Hamburger';
 import Poster from '@/assets/images/test-poster2.png';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch.js';
+import { useNavigate } from 'react-router-dom';
 
 /* 코드 가독성 이슈로 추후 리팩토링 해야할듯 */
 const banners = [
@@ -54,6 +55,9 @@ const banners = [
 ];
 
 function Home() {
+	const navigate = useNavigate();
+	localStorage.setItem('accessToken', 'e');
+
 	const {
 		data: dataClosing,
 		/*
@@ -74,11 +78,12 @@ function Home() {
 		// error: errorHotBoard,
 	} = useCustomFetch('/boards/hot');
 
+	console.log('핫게데이터', dataHotBoard);
 	const {
 		data: dataBoard,
 		// loading: loadingBoard,
 		// error: errorBoard,
-	} = useCustomFetch('/boards/all&page=0&size=5');
+	} = useCustomFetch('/boards/all?page=0&size=5');
 
 	console.log(dataClosing?.result);
 	return (
@@ -122,6 +127,12 @@ function Home() {
 						</button>
 					</div>
 				</Wrapper>
+				<RegisterButton
+					onClick={() => navigate('/small-theater/register/step1')}
+				>
+					<p>공연을 준비하고 있다면?</p>
+					<h1>공연 등록하러가기</h1>
+				</RegisterButton>
 				{/*게시판 섹선*/}
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
@@ -132,10 +143,10 @@ function Home() {
 						<ChevronRight />
 					</Bar>
 					<div className="only-mobile">
-						<BoardPreviewCardList data={dataHotBoard?.content} />
+						<BoardPreviewCardList data={dataHotBoard} />
 					</div>
 					<div className="only-web" style={{ paddingRight: '60px' }}>
-						<BoardPreviewCardWeb data={dataHotBoard?.content} />
+						<BoardPreviewCardWeb data={dataHotBoard} />
 					</div>
 
 					<div style={{ paddingRight: '20px' }}>
@@ -193,10 +204,7 @@ const Wrapper = styled.div`
 		margin-bottom: 24px;
 		@media (min-width: 768px) {
 			font-size: ${({ theme }) => theme.font.fontSize.headline20} !important;
-		}import { Hamburger } from '@/components/Hamburger';
-import { useCustomFetch } from '@/utils/hooks/useAxios';
-import { useCustomFetch } from '@/utils/hooks/useCustomFetch';
-import useCustomFetch from './../../utils/hooks/useCustomFetch';
+		}import { RegisterButton } from './../board/styles/formStyles';
 
 	}
 	button {
@@ -232,5 +240,24 @@ const Bar = styled.div`
 		justify-content: flex-start;
 		gap: 20px;
 		margin-bottom: 20px;
+	}
+`;
+const RegisterButton = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	flex: 1;
+	max-width: 1180px;
+	background: ${({ theme }) => theme.colors.pink200};
+	height: 92px;
+	margin: 30px 60px 0px 60px;
+
+	p {
+		color: ${({ theme }) => theme.colors.pink600};
+	}
+	h1 {
+		color: ${({ theme }) => theme.colors.pink600};
+		font-size: 20px;
 	}
 `;

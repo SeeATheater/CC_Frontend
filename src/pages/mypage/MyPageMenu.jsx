@@ -23,6 +23,44 @@ function MyPageMenu() {
 	if (data) {
 		console.log(data?.result);
 	}
+
+	const { fetchData } = useCustomFetch();
+
+	const handleLogout = async () => {
+		const res = await fetchData('/auth/logout', 'POST', {});
+
+		if (res?.status === 200) {
+			localStorage.removeItem('accessToken');
+			localStorage.removeItem('refreshToken');
+			navigate('/login');
+		} else {
+			console.error('로그아웃 실패:', res);
+		}
+	};
+	const handleDeactivate = async () => {
+		const res = await fetchData('/member/myPage/deActive', 'PATCH', {});
+
+		if (res?.status === 200) {
+			// 토큰 삭제
+			localStorage.removeItem('accessToken');
+			localStorage.removeItem('refreshToken');
+
+			// 로그인 페이지로 이동 (혹은 메인)
+			navigate('/login');
+		} else {
+			console.error('회원 비활성화 실패:', res);
+		}
+	};
+	const confirmDeactivate = async () => {
+		const ok = window.confirm(
+			'씨어씨어터 서비스를 탈퇴하시겠습니까?\n탈퇴 후 계정은 비활성화됩니다.',
+		);
+
+		if (!ok) return;
+
+		await handleDeactivate();
+	};
+
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', flex: '1' }}>
 			<div className="only-mobile">
@@ -41,7 +79,9 @@ function MyPageMenu() {
 						{name}
 						<span className="bold">님</span>
 					</h1>
-					<button style={{ marginTop: '22px' }}>로그아웃</button>
+					<button style={{ marginTop: '22px' }} onClick={handleLogout}>
+						로그아웃
+					</button>
 				</LeftWrapper>
 				<RightWrapper>
 					{/*
@@ -92,7 +132,9 @@ function MyPageMenu() {
 						<ul>
 							<li>1:1 문의</li>
 							<li onClick={() => navigate('/mypage/about-cc')}>CC 정보</li>
-							<li className="color-warning">회원 탈퇴</li>
+							<li className="color-warning" onClick={confirmDeactivate}>
+								회원 탈퇴
+							</li>
 						</ul>
 					</section>
 				</RightWrapper>
