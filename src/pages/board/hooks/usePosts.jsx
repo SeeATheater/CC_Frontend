@@ -84,7 +84,7 @@ const usePosts = () => {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-      }).replace(/\. /g, '.').replace('.', ''),
+      }).replace(/\. /g, '.').replace('.', '.'),
       likes: apiBoard.likeCount,
       comments: apiBoard.commentCount,
       category: apiBoard.boardType.toLowerCase() === 'normal' ? 'general' : 'promotion',
@@ -111,10 +111,10 @@ const usePosts = () => {
       boardId: boardId,
       author: apiComment.writer,
       content: fixedContent,   
-      date: new Date().toLocaleDateString('ko-KR', { 
+      date: new Date(apiComment.createdAt).toLocaleDateString('ko-KR', { 
         month: '2-digit', 
         day: '2-digit' 
-      }),
+      }).replace(/\. /g, '.').replace('.', '.'),
       userId: apiComment.memberId,
       replyLevel: depth,
       parentId: apiComment.parentId,
@@ -286,11 +286,14 @@ const usePosts = () => {
     try {
       console.log('게시글 수정 시작:', { postId, updates });
       
-      const existingImages = updates.images?.filter(img => !img.file && img.url) || [];
+      // 기존 이미지: file이 없고 url과 keyName이 있는 것들
+      const existingImages = updates.images?.filter(img => !img.file && (img.url || img.keyName)) || [];
+      // 새 파일: file이 있는 것들
       const newFiles = updates.images?.filter(img => img.file instanceof File).map(img => img.file) || [];
       
       console.log('기존 이미지:', existingImages.length, '새 파일:', newFiles.length);
       
+      // processImagesForUpdate는 { keyName } 형식만 반환
       const imageRequestDTOs = await imageApi.processImagesForUpdate(fetchDataRef.current, existingImages, newFiles);
       console.log('수정용 이미지 처리 완료:', imageRequestDTOs);
       

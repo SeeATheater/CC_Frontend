@@ -12,6 +12,7 @@ import SmallTheaterRoutes from './routes/SmallTheaterRoutes.jsx';
 
 import Home from './pages/home/Home';
 import TicketingPage from './pages/ticketingpage/TicketingPage.jsx';
+import KakaoPayApprove from './pages/ticketingpage/pages/KakaoPayApprove.jsx';
 import Board from './pages/board/Board';
 import Gallery from './pages/gallery/Gallery';
 import Info from './pages/info/Info';
@@ -19,6 +20,7 @@ import Detail from './pages/Detail/Detail';
 import Playlist from './pages/Detail/Playlist';
 import Notification from './pages/notification/Notification';
 import UploadPic from './pages/production/UploadPic';
+import UploadDone from './pages/production/UploadDone';
 import ProdDetail from './pages/production/ProdDetail';
 import Production from './pages/production/Production';
 import MyPageRoutes from './routes/MyPageRoutes.jsx';
@@ -44,6 +46,7 @@ function App() {
 
 			<Route path="/search" element={<SearchMobile/>} />
 			<Route path="/ticketing/:playId" element={<TicketingPage />} />
+			<Route path="/kakaoPay/approve" element={<KakaoPayApprove />} />
 			<Route path="/board/*" element={<Board />} />
 			<Route path="/gallery" element={<Gallery />} />
 			<Route path="/info" element={<Info />} />
@@ -53,8 +56,9 @@ function App() {
 
 			<Route path="/notification" element={<Notification />} />
 			<Route path="/production/:prodId" element={<Production />} />
-			<Route path="/production/:prodId/:AlbumId" element={<ProdDetail />} />
+			<Route path="/production/album/:AlbumId" element={<ProdDetail />} />
 			<Route path="/production/upload_photo" element={<UploadPic />} />
+			<Route path='/production/uploadDone' element={<UploadDone />}/>
 
 			<Route path="/mypage/*" element={<MyPageRoutes />} />
 

@@ -23,7 +23,7 @@ import Header from '@/pages/board/components/BoardHeader';
 import Modal from '@/pages/board/components/Modal';
 import useModal from '@/pages/board/hooks/useModal';
 import usePosts from '@/pages/board/hooks/usePosts';
-import { validateImageFiles } from '@/pages/board/api/imageApi';
+import { validateImageFiles, extractKeyNameFromUrl } from '@/pages/board/api/imageApi';
 import Camera from '@/pages/board/components/Icons/Camera.svg';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 import useAxios from '@/utils/hooks/useAxios';
@@ -69,21 +69,29 @@ const PostCreatePage = () => {
       
       if (existingPost) {
         // 기존 이미지를 formData.images 형식으로 변환
+        // URL에서 keyName을 추출
         const existingImages = existingPost.image 
           ? (Array.isArray(existingPost.image) 
-              ? existingPost.image.map((url, index) => ({
-                  id: `existing_${index}`,
-                  url: url,
-                  file: null,
-                  // URL에서 keyName 추출 시도 (board/filename.jpg 형식)
-                  keyName: url.split('/').slice(-2).join('/')
-                }))
-              : [{
-                  id: 'existing_0',
-                  url: existingPost.image,
-                  file: null,
-                  keyName: existingPost.image.split('/').slice(-2).join('/')
-                }])
+              ? existingPost.image.map((url, index) => {
+                  const keyName = extractKeyNameFromUrl(url);
+                  console.log(`기존 이미지 ${index} URL:`, url, '-> keyName:', keyName);
+                  return {
+                    id: `existing_${index}`,
+                    url: url,
+                    file: null,
+                    keyName: keyName
+                  };
+                })
+              : (() => {
+                  const keyName = extractKeyNameFromUrl(existingPost.image);
+                  console.log('기존 이미지 URL:', existingPost.image, '-> keyName:', keyName);
+                  return [{
+                    id: 'existing_0',
+                    url: existingPost.image,
+                    file: null,
+                    keyName: keyName
+                  }];
+                })())
           : [];
 
         const initialData = {

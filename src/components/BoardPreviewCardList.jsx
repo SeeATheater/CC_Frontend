@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useRef, useState } from 'react';
-function BoardPreviewCardList() {
+function BoardPreviewCardList({ data }) {
 	const mockData = [
 		{
 			title: '상상도 못한 게시판..ㄴ(°0°)ㄱ',
@@ -43,6 +43,7 @@ function BoardPreviewCardList() {
 		scrollRef.current.scrollLeft = scrollLeft - walk;
 	};
 
+	console.log('핫게', data);
 	return (
 		<Wrapper>
 			<CardList
@@ -52,8 +53,8 @@ function BoardPreviewCardList() {
 				onMouseUp={handleMouseUp}
 				onMouseMove={handleMouseMove}
 			>
-				{mockData &&
-					mockData.map((item) => (
+				{data &&
+					data.map((item) => (
 						<Card key={item.boardId}>
 							<h3>{item.title}</h3>
 							<p>{item.content}</p>

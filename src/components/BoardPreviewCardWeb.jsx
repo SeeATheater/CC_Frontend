@@ -5,15 +5,13 @@ function BoardPreviewCardWeb({ data }) {
 		'우오앙 여기도 이런 게시판이 있구나 신기 방기 많이 많이 게시판 이용해야겟다~ 글은 가로길이 800px 넘어가면 다음단락으로 내려가도록... 세줄 넘어가면 ...으로 대체 padding 값은 20px 입니당!  옆에 네모칸은 사진 있을경우 저렇게 쓰면 될것 같고 아래 게시판도 마찬가지로 해당됩니다!';
 	return (
 		<Wrapper>
-			현재 데이터 없어서 핫게 컴포넌트 출력 x (Web), Carousel로 변경 필요
-			{data &&
-				data.map(() => (
-					<div>
-						<h1>{title}</h1>
-						<p>{text}</p>
-					</div>
-				))}
-			<div>이미지</div>
+			{/*data && (
+				<div>
+					<h1>{data[0]?.title}</h1>
+					<p>{data[0]?.content}</p>
+				</div>
+			)*/}
+			{/*<img src={data[0]?.imgUrl} />*/}
 		</Wrapper>
 	);
 }
