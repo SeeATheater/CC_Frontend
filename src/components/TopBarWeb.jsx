@@ -21,7 +21,6 @@ function TopBarWeb({ children, gap = '92px' }) {
 
 export default TopBarWeb;
 const ChevronLeftGray = styled(ChevronLeft)`
-	fill: ${({ theme }) => theme.colors.gray400};
 	height: 20px;
 `;
 const Container = styled.div`
