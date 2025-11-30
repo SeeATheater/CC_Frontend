@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import useResponsive from '@/pages/ticketingpage/hooks/useResponsive';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 import { ticketingAPI } from '@/pages/ticketingpage/api/ticketApi.js';
@@ -11,6 +12,7 @@ const useTicketing = (amateurShowId) => {
   const [error, setError] = useState(null);
   const [nextActive, setNextActive] = useState(false);
   const isPC = useResponsive();
+  const location = useLocation();
 
   // useCustomFetch 훅 사용
   const { fetchData } = useCustomFetch();
@@ -41,6 +43,15 @@ const useTicketing = (amateurShowId) => {
   const [depositorName, setDepositorName] = useState('');
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [reservationData, setReservationData] = useState(null);  // 예매 완료 상태 (카카오페이 결제 후)
+
+  // 결제 완료 후 돌아왔을 때 Step5로 설정
+  useEffect(() => {
+    if (location.state?.paymentSuccess && location.state?.step === 5) {
+      setStep(5);
+      // state 정리 (뒤로가기 시 다시 Step5로 가는 것 방지)
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // 공연 간략 정보 조회
   const fetchShowInfo = async () => {
@@ -281,6 +292,9 @@ const useTicketing = (amateurShowId) => {
 
       // 3단계: 카카오페이 결제 페이지로 리디렉션
       if (paymentData.next_redirect_pc_url || paymentData.next_redirect_mobile_url) {
+        // 결제 완료 후 돌아올 때 사용할 playId를 sessionStorage에 저장
+        sessionStorage.setItem('ticketing_playId', amateurShowId);
+        
         // PC인지 모바일인지에 따라 적절한 URL 선택
         const redirectUrl = isPC ? 
           paymentData.next_redirect_pc_url : 
@@ -315,7 +329,7 @@ const useTicketing = (amateurShowId) => {
 
   // 예약 정보 확인 화면으로 이동
   const viewReservation = () => {
-    window.alert('예약 정보 확인 화면으로 이동합니다.');  // 실제로는 예약 내역 페이지로 라우팅해야 함 navigate('');
+    window.location.href = '/mypage/tickets';  // 내 티켓 목록 페이지로 이동
   };
 
   // 결제 정보 계산
@@ -349,21 +363,6 @@ const useTicketing = (amateurShowId) => {
       fetchTicketTypes();
     }
   }, [amateurShowId]);
-
-  // URL 파라미터에서 결제 결과 확인 (페이지 로드 시)
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const pgToken = urlParams.get('pg_token');
-    const partnerOrderId = urlParams.get('partner_order_id');
-    
-    if (pgToken && partnerOrderId) {
-      // 결제 성공으로 돌아온 경우
-      handlePaymentSuccess();
-      
-      // URL에서 파라미터 제거 (브라우저 히스토리 정리)
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
 
   return {
     // 상태
