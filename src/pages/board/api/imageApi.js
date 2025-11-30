@@ -39,6 +39,44 @@ const validateImageFiles = (files) => {
   return true;
 };
 
+/**
+ * S3 URL에서 keyName 추출
+ * URL 형식 예시: 
+ * - https://bucket.s3.region.amazonaws.com/board/uuid.png
+ * - https://bucket.s3.amazonaws.com/board/uuid.png
+ * keyName 형식: "board/uuid.png"
+ */
+const extractKeyNameFromUrl = (url) => {
+  if (!url) return null;
+  
+  try {
+    const urlObj = new URL(url);
+    // pathname은 "/board/uuid.png" 형태
+    // 맨 앞의 "/" 제거
+    const keyName = urlObj.pathname.substring(1);
+    
+    // keyName이 유효한지 확인 (최소한 "folder/file.ext" 형태)
+    if (keyName && keyName.includes('/')) {
+      return keyName;
+    }
+    
+    // fallback: URL 마지막 2개 세그먼트 사용
+    const segments = url.split('/');
+    if (segments.length >= 2) {
+      return segments.slice(-2).join('/');
+    }
+    
+    return null;
+  } catch (error) {
+    // URL 파싱 실패 시 기존 방식으로 fallback
+    const segments = url.split('/');
+    if (segments.length >= 2) {
+      return segments.slice(-2).join('/');
+    }
+    return null;
+  }
+};
+
 // Presigned URL 관련 함수들
 const getSinglePresignedUrl = async (fetchData, file) => {
   const extension = getFileExtension(file);
@@ -155,14 +193,14 @@ export const uploadMultipleImages = async (fetchData, files) => {
   }
 };
 
-// 게시글 작성용
+// 게시글 작성용 - PartialImageRequestDTO 형식에 맞춤 (keyName만 필요)
 export const processImagesForCreate = async (fetchData, files) => {
   try {
     if (!files || files.length === 0) return [];
     const uploadResults = await uploadMultipleImages(fetchData, files);
+    // PartialImageRequestDTO는 keyName만 필요
     return uploadResults.map((result) => ({
       keyName: result.keyName,
-      imageUrl: result.imageUrl,
     }));
   } catch (error) {
     console.error('게시글 작성용 이미지 처리 실패:', error);
@@ -170,27 +208,42 @@ export const processImagesForCreate = async (fetchData, files) => {
   }
 };
 
-// 게시글 수정용
+// 게시글 수정용 - PartialImageRequestDTO 형식에 맞춤 (keyName만 필요)
 export const processImagesForUpdate = async (fetchData, existingImages = [], newFiles = []) => {
   try {
     const imageRequestDTOs = [];
+    
+    // 1. 기존 이미지 처리 - URL에서 keyName 추출
     existingImages.forEach((img) => {
       const url = img.url || img.imageUrl;
-      if (img.keyName && url) {
-        imageRequestDTOs.push({ keyName: img.keyName, imageUrl: url });
-      } else if (url) {
-        const urlParts = url.split('/');
-        const possibleKeyName = urlParts.slice(-2).join('/');
-        imageRequestDTOs.push({ keyName: possibleKeyName, imageUrl: url });
+      
+      // 이미 keyName이 있으면 사용, 없으면 URL에서 추출
+      let keyName = img.keyName;
+      
+      if (!keyName && url) {
+        keyName = extractKeyNameFromUrl(url);
+      }
+      
+      if (keyName) {
+        // PartialImageRequestDTO는 keyName만 필요
+        imageRequestDTOs.push({ keyName: keyName });
+        console.log('기존 이미지 keyName 추가:', keyName);
+      } else {
+        console.warn('keyName을 추출할 수 없는 이미지:', img);
       }
     });
 
+    // 2. 새 파일 업로드 및 추가
     if (newFiles && newFiles.length > 0) {
       const newUploadResults = await uploadMultipleImages(fetchData, newFiles);
       newUploadResults.forEach((result) => {
-        imageRequestDTOs.push({ keyName: result.keyName, imageUrl: result.imageUrl });
+        // PartialImageRequestDTO는 keyName만 필요
+        imageRequestDTOs.push({ keyName: result.keyName });
+        console.log('새 이미지 keyName 추가:', result.keyName);
       });
     }
+    
+    console.log('최종 imageRequestDTOs:', imageRequestDTOs);
     return imageRequestDTOs;
   } catch (error) {
     console.error('게시글 수정용 이미지 처리 실패:', error);
@@ -219,4 +272,4 @@ export const checkImageExists = async (fetchData, keyName) => {
   }
 };
 
-export { validateImageFile, validateImageFiles };
+export { validateImageFile, validateImageFiles, extractKeyNameFromUrl };

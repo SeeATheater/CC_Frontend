@@ -42,7 +42,7 @@ const usePosts = () => {
         
         // sessionStorage에서 role 가져오기 (로그인 시 저장된 값)
         const savedRole = sessionStorage.getItem('selectedRole');
-        console.log('Role from sessionStorage:', savedRole);
+        // console.log('Role from sessionStorage:', savedRole);
         
         if (savedRole === 'PERFORMER') {
           setUserType('performer'); // 공연 등록자 (홍보 게시판 작성 가능)
@@ -152,7 +152,7 @@ const usePosts = () => {
 
   // 글작성 권한확인 (sessionStorage 기반)
   const canCreatePost = useCallback((category) => {
-    console.log('Checking post creation permission:', { category, userType });
+    // console.log('Checking post creation permission:', { category, userType });
     
     // 일반 게시판: 로그인한 모든 사용자 작성 가능
     if (category === 'general' || category === 'hot') {
@@ -286,11 +286,14 @@ const usePosts = () => {
     try {
       console.log('게시글 수정 시작:', { postId, updates });
       
-      const existingImages = updates.images?.filter(img => !img.file && img.url) || [];
+      // 기존 이미지: file이 없고 url과 keyName이 있는 것들
+      const existingImages = updates.images?.filter(img => !img.file && (img.url || img.keyName)) || [];
+      // 새 파일: file이 있는 것들
       const newFiles = updates.images?.filter(img => img.file instanceof File).map(img => img.file) || [];
       
       console.log('기존 이미지:', existingImages.length, '새 파일:', newFiles.length);
       
+      // processImagesForUpdate는 { keyName } 형식만 반환
       const imageRequestDTOs = await imageApi.processImagesForUpdate(fetchDataRef.current, existingImages, newFiles);
       console.log('수정용 이미지 처리 완료:', imageRequestDTOs);
       
