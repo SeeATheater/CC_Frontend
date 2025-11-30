@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { searchAPI } from '@/pages/search/api/searchApi';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
@@ -8,6 +9,7 @@ import ClosePinkBig from '@/assets/icons/ClosePinkBig.svg';
 import SearchIcon from '@/assets/icons/searchGrey.svg?react';
 
 const SearchPC = () => {
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [recentSearches, setRecentSearches] = useState(['실종', '홍익극연구회', '카포네 트릴로지']);
   const [searchTerm, setSearchTerm] = useState('');
@@ -224,7 +226,7 @@ const SearchPC = () => {
                 ) : upcomingShows.length > 0 ? (
                   <UpcomingPerformances>
                     {upcomingShows.map((performance) => (
-                      <PerformanceCard key={performance.id}>
+                      <PerformanceCard key={performance.id} onClick={() => navigate(`/plays/detail/${performance.id}`)}>
                         <PerformanceImage>
                           <img 
                             src={performance.posterImageUrl} 
@@ -256,7 +258,7 @@ const SearchPC = () => {
               ) : displayResults.length > 0 ? (
                 <SearchResultsList>
                   {displayResults.map((result) => (
-                    <SearchResultItem key={result.id}>
+                    <SearchResultItem key={result.id} onClick={() => navigate(`/plays/detail/${result.id}`)}>
                       <ResultImage>
                         <img 
                           src={result.posterImageUrl} 

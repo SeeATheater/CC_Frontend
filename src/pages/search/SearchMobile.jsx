@@ -198,7 +198,7 @@ const SearchMobile = () => {
               <SlideContainer ref={scrollRef}>
                 <SlideContent>
                   {upcomingShows.map((performance) => (
-                    <PerformanceCard key={performance.id}>
+                    <PerformanceCard key={performance.id} onClick={() => navigate(`/plays/detail/${performance.id}`)}>
                       <PerformanceImage>
                         <img 
                           src={performance.posterImageUrl} 
@@ -230,7 +230,7 @@ const SearchMobile = () => {
             <LoadingMessage>검색 중...</LoadingMessage>
           ) : displayResults.length > 0 ? (
             displayResults.map((result) => (
-              <SearchResultItem key={result.id}>
+              <SearchResultItem key={result.id} onClick={() => navigate(`/plays/detail/${result.id}`)}>
                 <ResultImage>
                   <img 
                     src={result.posterImageUrl} 
