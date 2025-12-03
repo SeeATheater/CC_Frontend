@@ -56,7 +56,6 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
-	localStorage.setItem('accessToken', 'e');
 
 	const {
 		data: dataClosing,
