@@ -73,7 +73,7 @@ function InquiryDetail() {
 			number: item.number,
 			email: item.email,
 			date: formatDate(item.createTime),
-			situation: item.inquiryStatu,
+			situation: item.inquiryStatus,
 			id: 1,
 		}));
 	}, [inquiryData]);
