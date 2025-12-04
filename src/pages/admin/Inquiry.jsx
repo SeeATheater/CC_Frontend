@@ -8,54 +8,37 @@ import UserTable from '@/components/Admin/UserTable';
 
 function Inquiry() {
 	const [searchTerm, setSearchTerm] = useState('');
-	const [currentPage, setCurrentPage] = useState(1);
+	const [currentPage, setCurrentPage] = useState(0);
 	const itemsPerPage = 10;
 
-	const inquiry_data = [
-		{
-			content: '문의',
-			userId: '아이디',
-			email: 'E-mail',
-			manage: '문의 내용',
-			date: '날짜/시간(최신순)',
-			situation: '진행도',
-			id: 0,
-		},
-		{
-			content: '2매 구매했는데 표는 어떻게 가져가나요?',
-			userId: 'diana8443',
-			email: ' junsiyeon123654@gmail.com',
-			manage: '/admin/inquiry/',
-			date: '2024.01.18 / 14:00',
-			situation: '미완료',
-			id: 1,
-		},
-		{
-			content: '2매 구매했는데 표는 어떻게 가져가나요?',
-			userId: 'diana8443',
-			email: ' junsiyeon123654@gmail.com',
-			manage: '/admin/inquiry/',
-			date: '2024.01.18 / 14:00',
-			situation: '미완료',
-			id: 2,
-		},
-		{
-			content: '2매 구매했는데 표는 어떻게 가져가나요?',
-			userId: 'diana8443',
-			email: ' junsiyeon123654@gmail.com',
-			manage: '/admin/inquiry/',
-			date: '2024.01.18 / 14:00',
-			situation: '미완료',
-			id: 3,
-		},
-	];
+	const apiUrl = searchTerm
+		? `/admin/inquiry?keyword=${searchTerm}&page=${currentPage}&size=${itemsPerPage}`
+		: `/admin/inquiry?page=${currentPage}&size=${itemsPerPage}`;
 
 	const {
 		data: inquiryData,
 		error: inquiryError,
 		loading: inquiryLoading,
-	} = useCustomFetch(`/inquirys?page=0&size=${itemsPerPage}`);
+	} = useCustomFetch(apiUrl);
 	console.log(inquiryData?.result);
+
+	function formatDate(dateString) {
+		const date = new Date(dateString);
+
+		const year = date.getFullYear();
+		const month = date.getMonth() + 1; // 0부터 시작하므로 +1
+		const day = date.getDate();
+
+		const hours = date.getHours();
+		const minutes = date.getMinutes();
+
+		const m = month.toString().padStart(2, '0');
+		const d = day.toString().padStart(2, '0');
+		const h = hours.toString().padStart(2, '0');
+		const min = minutes.toString().padStart(2, '0');
+
+		return `${year}.${m}.${d} / ${h}:${min}`;
+	}
 
 	const headerRow = {
 		content: '문의',
@@ -69,11 +52,11 @@ function Inquiry() {
 	const apiRows = useMemo(() => {
 		if (!inquiryData || !inquiryData.result) return [];
 		return inquiryData.result.inquiryList.map((item) => ({
-			content: item.memberId,
-			userId: item.name,
+			content: item.title,
+			userId: item.userName,
 			email: item.email,
 			manage: `/admin/inquiry/${item.inquiryId}`,
-			date: item.createTime,
+			date: formatDate(item.createdAt),
 			situation: item.inquiryStatus,
 		}));
 	}, [inquiryData]);

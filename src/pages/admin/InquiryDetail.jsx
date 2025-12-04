@@ -8,24 +8,6 @@ import SimpleTable from '@/components/Admin/SimpleTable';
 import Search from '@/assets/icons/searchBlack.svg?react';
 
 function InquiryDetail() {
-	const inquiry_data = [
-		{
-			name: '이름',
-			number: '전화번호',
-			email: 'E-mail',
-			date: '문의작성일',
-			situation: '진행도',
-			id: 0,
-		},
-		{
-			name: '전시연',
-			number: '010-1234-5678',
-			email: ' junsiyeon123654@gmail.com',
-			date: '2024.01.18 / 14:00',
-			situation: '미완료',
-			id: 1,
-		},
-	];
 	const { inquiryId } = useParams();
 	const [searchTerm, setSearchTerm] = useState('');
 
@@ -38,8 +20,9 @@ function InquiryDetail() {
 		data: inquiryData,
 		error: inquiryError,
 		loading: inquiryLoading,
-	} = useCustomFetch(`/inquirys/${inquiryId}`);
+	} = useCustomFetch(`/admin/inquiry/${inquiryId}`);
 	console.log(inquiryData?.result);
+
 	function formatDate(dateString) {
 		const date = new Date(dateString);
 
@@ -69,10 +52,10 @@ function InquiryDetail() {
 	const apiRows = useMemo(() => {
 		if (!inquiryData || !inquiryData.result) return [];
 		return [inquiryData?.result].map((item) => ({
-			name: item.inquiryMemberName,
-			number: item.number,
-			email: item.email,
-			date: formatDate(item.createTime),
+			name: item.memberName,
+			number: item.memberPhoneNumber,
+			email: item.memberEmail,
+			date: formatDate(item.createdAt),
 			situation: item.inquiryStatus,
 			id: 1,
 		}));
@@ -100,17 +83,15 @@ function InquiryDetail() {
 				<div>
 					<p className="boxtitle">문의 내용</p>
 					<Box>
-						<p className="inquiryTitle">
-							제목: {inquiryData?.result.inquiryTitle}
-						</p>
-						<p>{inquiryData?.result.inquiryContent}</p>
+						<p className="inquiryTitle">제목: {inquiryData?.result.title}</p>
+						<p>{inquiryData?.result.content}</p>
 					</Box>
 				</div>
 
 				<div>
 					<p>답변</p>
 					<Box>
-						<p>{inquiryData?.result.inquiryReply}</p>
+						<p>{inquiryData?.result.reply}</p>
 					</Box>
 				</div>
 			</ContentArea>
