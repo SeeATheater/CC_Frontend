@@ -1,11 +1,11 @@
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import useCustomFetch from '@/utils/hooks/useCustomFetch';
+
 import SimpleTable from '@/components/Admin/SimpleTable';
-
 import Search from '@/assets/icons/searchBlack.svg?react';
-
 
 function InquiryDetail() {
 	const inquiry_data = [
@@ -26,12 +26,59 @@ function InquiryDetail() {
 			id: 1,
 		},
 	];
+	const { inquiryId } = useParams();
+	const [searchTerm, setSearchTerm] = useState('');
+
 	const navigate = useNavigate();
 	const goBack = () => {
 		navigate(-1);
 	};
 
-	const [searchTerm, setSearchTerm] = useState('');
+	const {
+		data: inquiryData,
+		error: inquiryError,
+		loading: inquiryLoading,
+	} = useCustomFetch(`/inquirys/${inquiryId}`);
+	console.log(inquiryData?.result);
+	function formatDate(dateString) {
+		const date = new Date(dateString);
+
+		const year = date.getFullYear();
+		const month = date.getMonth() + 1; // 0부터 시작하므로 +1
+		const day = date.getDate();
+
+		const hours = date.getHours();
+		const minutes = date.getMinutes();
+
+		const m = month.toString().padStart(2, '0');
+		const d = day.toString().padStart(2, '0');
+		const h = hours.toString().padStart(2, '0');
+		const min = minutes.toString().padStart(2, '0');
+
+		return `${year}.${m}.${d} / ${h}:${min}`;
+	}
+
+	const headerRow = {
+		name: '이름',
+		number: '전화번호',
+		email: 'E-mail',
+		date: '문의작성일',
+		situation: '진행도',
+		id: 0,
+	};
+	const apiRows = useMemo(() => {
+		if (!inquiryData || !inquiryData.result) return [];
+		return [inquiryData?.result].map((item) => ({
+			name: item.inquiryMemberName,
+			number: item.number,
+			email: item.email,
+			date: formatDate(item.createTime),
+			situation: item.inquiryStatu,
+			id: 1,
+		}));
+	}, [inquiryData]);
+
+	const addedData = [headerRow, ...apiRows];
 
 	return (
 		<Container>
@@ -49,29 +96,21 @@ function InquiryDetail() {
 
 			<Title onClick={goBack}>{'<'} 일대일 문의</Title>
 			<ContentArea>
-				<SimpleTable data={inquiry_data} />
+				<SimpleTable data={addedData} />
 				<div>
 					<p className="boxtitle">문의 내용</p>
 					<Box>
 						<p className="inquiryTitle">
-							제목: 2매 구매했는데 표는 어떻게 가져가나요?
+							제목: {inquiryData?.result.inquiryTitle}
 						</p>
-						<p>
-							실종 티켓을 2매 구매했습니다. 2매는 표를 어떻게 가져가야 하나요?
-							2025 2월 1일 14시 공연 티켓입니다. 실종 티켓을 2매 구매했습니다.
-							2매는 표를 어떻게 가져가야 하나요? 2025 2월 1일 14시 공연
-							티켓입니다.
-						</p>
+						<p>{inquiryData?.result.inquiryContent}</p>
 					</Box>
 				</div>
 
 				<div>
 					<p>답변</p>
 					<Box>
-						<p>
-							1일 전에 카카오톡으로 다른 예매창들과 같게 예매번호와 바코드를
-							전달드립니다.
-						</p>
+						<p>{inquiryData?.result.inquiryReply}</p>
 					</Box>
 				</div>
 			</ContentArea>
@@ -145,7 +184,6 @@ const FilterArea = styled.div`
 	display: flex;
 	justify-content: space-between;
 	margin-bottom: 36px;
-
 `;
 const SearchInput = styled.div`
 	display: flex;

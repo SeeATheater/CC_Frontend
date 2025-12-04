@@ -25,7 +25,7 @@ function Gallery() {
 		data: picData,
 		error,
 		loading,
-	} = useCustomFetch(`/photoAlbums?cursorId=${cursorId}&size=15`);
+	} = useCustomFetch(`/photoAlbums?size=10`);
 	console.log('picData', picData);
 
 	if (loading) {

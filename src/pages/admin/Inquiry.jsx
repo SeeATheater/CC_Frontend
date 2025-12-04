@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import useCustomFetch from '@/utils/hooks/useCustomFetch';
+
 import FilterHeader from '@/components/Admin/FilterHeader';
 import UserTable from '@/components/Admin/UserTable';
 
 function Inquiry() {
+	const [searchTerm, setSearchTerm] = useState('');
+	const [currentPage, setCurrentPage] = useState(1);
+	const itemsPerPage = 10;
+
 	const inquiry_data = [
 		{
 			content: '문의',
@@ -44,7 +50,34 @@ function Inquiry() {
 		},
 	];
 
-	const [searchTerm, setSearchTerm] = useState('');
+	const {
+		data: inquiryData,
+		error: inquiryError,
+		loading: inquiryLoading,
+	} = useCustomFetch(`/inquirys?page=0&size=${itemsPerPage}`);
+	console.log(inquiryData?.result);
+
+	const headerRow = {
+		content: '문의',
+		userId: '아이디',
+		email: '이메일',
+		manage: '관리',
+		date: '날짜/시간(최신순)',
+		situation: '진행도',
+	};
+
+	const apiRows = useMemo(() => {
+		if (!inquiryData || !inquiryData.result) return [];
+		return inquiryData.result.inquiryList.map((item) => ({
+			content: item.memberId,
+			userId: item.name,
+			email: item.email,
+			manage: `/admin/inquiry/${item.inquiryId}`,
+			date: item.createTime,
+			situation: item.inquiryStatus,
+		}));
+	}, [inquiryData]);
+
 	const [visibleColumns, setVisibleColumns] = useState([
 		'content',
 		'userId',
@@ -53,8 +86,15 @@ function Inquiry() {
 		'date',
 		'situation',
 	]);
-	const [currentPage, setCurrentPage] = useState(1);
-	const itemsPerPage = 20;
+
+	const handleColumnToggle = (column) => {
+		setVisibleColumns((prev) =>
+			prev.includes(column)
+				? prev.filter((c) => c !== column)
+				: [...prev, column],
+		);
+	};
+	const paginatedData = [headerRow, ...apiRows];
 
 	const filterKeys = ['email', 'date', 'situation'];
 	const filterLabels = {
@@ -63,24 +103,12 @@ function Inquiry() {
 		date: '날짜/시간(최신순)',
 		situation: '진행도',
 	};
-	const filteredData = useMemo(() => {
-		const content = inquiry_data.slice(1);
-		return content.filter((user) =>
-			Object.entries(user).some(
-				([key, val]) =>
-					visibleColumns.includes(key) &&
-					val.toLowerCase().includes(searchTerm.toLowerCase()),
-			),
-		);
-	}, [searchTerm, visibleColumns, inquiry_data]);
 
-	const paginatedData = useMemo(() => {
-		const start = (currentPage - 1) * itemsPerPage;
-		return filteredData.slice(start, start + itemsPerPage);
-	}, [filteredData, currentPage]);
+	const totalPages = inquiryData?.result.totalPages;
+	//문의 api에는 totalPages 정보 없음 (hasNext만)
+	const isLast = inquiryData?.result.last;
+	const isFirst = inquiryData?.result.first;
 
-	const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-	
 	return (
 		<Container>
 			<Content>
@@ -96,7 +124,7 @@ function Inquiry() {
 					/>
 
 					<UserTable
-						data={[inquiry_data[0], ...paginatedData]}
+						data={paginatedData}
 						currentPage={currentPage}
 						setCurrentPage={setCurrentPage}
 						totalPages={totalPages}
