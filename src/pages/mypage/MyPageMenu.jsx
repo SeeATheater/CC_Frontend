@@ -23,7 +23,7 @@ function MyPageMenu() {
 	if (data) {
 		console.log(data?.result);
 	}
-
+	0;
 	const { fetchData } = useCustomFetch();
 
 	const handleLogout = async () => {
@@ -118,6 +118,7 @@ function MyPageMenu() {
 							</ul>
 						)}
 					</section>
+					{/*
 					<section>
 						<h1>계정 관리</h1>
 						<ul>
@@ -127,6 +128,7 @@ function MyPageMenu() {
 							</li>
 						</ul>
 					</section>
+					*/}
 					<section>
 						<h1>기타</h1>
 						<ul>
