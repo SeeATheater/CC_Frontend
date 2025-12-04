@@ -10,7 +10,6 @@ import { AdminListPage } from '@/pages/admin/STYLE/admin-list.style';
 import Pagination from 'react-js-pagination';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 function TicketManagement() {
-	const navigate = useNavigate();
 	const requests = [
 		{
 			id: '1',
@@ -19,32 +18,32 @@ function TicketManagement() {
 			bookingCount: '25/60',
 		},
 	];
-	const { data, loading, error } = useCustomFetch(
-		'/admin/ticket/history?page=0&size=20',
-	);
+	const navigate = useNavigate();
 
-	const changePageHandler = (page) => {
-		setPage(page);
-	};
-	const [stockList, setStockList] = useState([]);
-	const [currentList, setCurrentList] = useState([]);
+	const [searchKeyword, setSearchKeyword] = useState('');
+
+	const [page, setPage] = useState(0);
+	const size = 20;
+
+	const url = `/admin/ticket/history?page=${page}&size=${size}${
+		searchKeyword ? `&keyword=${searchKeyword}` : ''
+	}`;
+
+	const { data, loading, error } = useCustomFetch(url);
+
+	const [list, setList] = useState([]);
 
 	useEffect(() => {
 		if (data) {
-			setStockList(data?.result?.content || data); // data 구조 맞게
+			setList(data?.result?.content || []);
 		}
 	}, [data]);
 
-	const [page, setPage] = useState(1);
-	const itemsPerPage = 10;
-	const indexOfLastItem = page * itemsPerPage;
-	const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+	console.log('티켓관리목록', data);
 
-	useEffect(() => {
-		if (Array.isArray(stockList)) {
-			setCurrentList(stockList.slice(indexOfFirstItem, indexOfLastItem));
-		}
-	}, [page, stockList]);
+	const changePageHandler = (pageNum) => {
+		setPage(pageNum - 1);
+	};
 
 	function formatDateTime(isoString) {
 		const d = new Date(isoString);
@@ -63,7 +62,7 @@ function TicketManagement() {
 			<AdminListPage>
 				<SectionTitle>소극장 공연 관리</SectionTitle>
 				<SubNav page={'tickets'} />
-				<SearchOptionBar />
+				<SearchOptionBar onSearch={setSearchKeyword} />
 				<table>
 					<thead>
 						<tr>
@@ -74,24 +73,25 @@ function TicketManagement() {
 						</tr>
 					</thead>
 					<tbody>
-						{currentList.map((request, index) => (
-							<tr key={request.realTicketId || index}>
-								<td>{request.showTitle}</td>
-								<td>{formatDateTime(request.performanceDateTime)}</td>
-								<td>{request.quantity}</td>
-								<td>
-									<button onClick={() => navigate(`${request.realTicketId}`)}>
-										상세
-									</button>
-								</td>
-							</tr>
-						))}
+						{list &&
+							list.map((request, index) => (
+								<tr key={request.realTicketId || index}>
+									<td>{request.showTitle}</td>
+									<td>{formatDateTime(request.performanceDateTime)}</td>
+									<td>{request.quantity}</td>
+									<td>
+										<button onClick={() => navigate(`${request.realTicketId}`)}>
+											상세
+										</button>
+									</td>
+								</tr>
+							))}
 					</tbody>
 				</table>
 				<Pagination
-					activePage={page}
-					itemsCountPerPage={itemsPerPage}
-					totalItemsCount={stockList.length}
+					activePage={page + 1}
+					itemsCountPerPage={size}
+					totalItemsCount={data?.result?.numberOfElements}
 					className="pagination"
 					pageRangeDisplayed={5}
 					onChange={changePageHandler}
