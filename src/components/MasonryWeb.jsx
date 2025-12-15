@@ -1,14 +1,21 @@
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 function MasonryWeb({ imageData }) {
 	const hasImages = imageData?.length > 0;
+	console.log(imageData);
 
+	const navigate = useNavigate();
+	const goAlbum = (photoAlbumId) => {
+		if (!photoAlbumId) return;
+		navigate(`/production/album/${photoAlbumId}`);
+	};
 	return (
 		<>
 			{hasImages ? (
 				<ImageArea>
 					{imageData?.map((data, idx) => (
-						<Item key={idx}>
+						<Item key={idx} onClick={() => goAlbum(data.photoAlbumId)}>
 							<img src={data?.imageUrl} alt="공연사진" className="pic" />
 							<Text>
 								<p className="title">{data?.amateurShowName}</p>
@@ -45,6 +52,8 @@ const Item = styled.div`
 	margin-bottom: 32px;
 	width: 100%;
 	display: inline-block;
+
+	cursor: pointer;
 
 	.pic {
 		width: 100%;
