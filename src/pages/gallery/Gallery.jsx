@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import Masonry from '@/components/Masonry';
 import MasonryWeb from '@/components/MasonryWeb';
@@ -12,32 +12,91 @@ import GalleryIcon from '@/assets/icons/Gallery.svg?react';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 function Gallery() {
+	const SIZE = 15;
 	const navigate = useNavigate();
 	const roleToken = sessionStorage.getItem('selectedRole');
-	const [cursorId, setCursorId] = useState(0);
+
+	const mobileObserverRef = useRef(null);
+	const webObserverRef = useRef(null);
+
+	const { fetchData } = useCustomFetch();
+
+	const [photoList, setPhotoList] = useState([]);
+	const [cursorId, setCursorId] = useState(null);
+	const [hasNext, setHasNext] = useState(true);
+	const [isFetching, setIsFetching] = useState(false);
 
 	const navigateToUpload = () => {
 		navigate('/production/upload_photo');
 		window.scrollTo(0, 0);
 	};
 
-	const {
-		data: picData,
-		error,
-		loading,
-	} = useCustomFetch(`/photoAlbums?size=10`);
-	console.log('picData', picData);
+	const fetchPhotos = async () => {
+		if (isFetching || !hasNext) return;
+		if (cursorId === null && photoList.length > 0) return;
 
-	if (loading) {
-		return <div>로딩 중...</div>;
-	}
+		setIsFetching(true);
+
+		const url =
+			cursorId === null
+				? `/photoAlbums?size=${SIZE}`
+				: `/photoAlbums?cursorId=${cursorId}&size=${SIZE}`;
+
+		try {
+			const res = await fetchData(url, 'GET');
+			const result = res?.data?.result;
+			console.log(result);
+
+			if (result) {
+				setPhotoList((prev) => [...prev, ...(result.photoAlbumDTOs || [])]);
+				setHasNext(result.hasNext);
+				setCursorId(result.nextCursor);
+			}
+		} finally {
+			setIsFetching(false);
+		}
+	};
+	useEffect(() => {
+		if (photoList.length === 0) {
+			fetchPhotos();
+		}
+	}, []);
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting && hasNext && !isFetching) {
+					fetchPhotos();
+				}
+			},
+			{
+				rootMargin: '100px',
+				threshold: 0,
+			},
+		);
+
+		if (mobileObserverRef.current) {
+			observer.observe(mobileObserverRef.current);
+		}
+		if (webObserverRef.current) {
+			observer.observe(webObserverRef.current);
+		}
+
+		return () => observer.disconnect();
+	}, [hasNext, isFetching, cursorId]);
 
 	return (
 		<>
 			<Mobile>
 				<Hamburger title={'사진첩'} />
-				<Masonry imageData={picData?.result} />
-				{roleToken == 'PERFORMER' && (
+				<Masonry imageData={photoList} />
+
+				<div ref={mobileObserverRef} />
+
+				{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
+				{!hasNext && <ExtraMessage>마지막 사진입니다.</ExtraMessage>}
+
+				{roleToken === 'PERFORMER' && (
 					<FixedProdButton>
 						<ProdButton onClick={navigateToUpload}>
 							<GalleryIcon height={28} />
@@ -51,21 +110,28 @@ function Gallery() {
 				<SideMenuWrapper>
 					<HomeIconMenu isWeb={true} selectedMenu="gallery" />
 				</SideMenuWrapper>
+
 				<Container>
 					<SearchBar />
 					<TitleArea>
 						<h3>사진첩</h3>
-						{roleToken == 'PERFORMER' && (
+						{roleToken === 'PERFORMER' && (
 							<Button onClick={navigateToUpload}>사진 등록</Button>
 						)}
 					</TitleArea>
 
-					<MasonryWeb imageData={picData?.result} />
+					<MasonryWeb imageData={photoList} />
+
+					<div ref={webObserverRef} />
+
+					{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
+					{!hasNext && <ExtraMessage>마지막 사진입니다.</ExtraMessage>}
 				</Container>
 			</Web>
 		</>
 	);
 }
+
 export default Gallery;
 
 const SideMenuWrapper = styled.div`
@@ -152,4 +218,11 @@ const ProdButton = styled.div`
 		font-weight: ${({ theme }) => theme.font.fontWeight.extraBold};
 		color: ${({ theme }) => theme.colors.grayWhite};
 	}
+`;
+
+const ExtraMessage = styled.p`
+	text-align: center;
+	font-size: ${({ theme }) => theme.font.fontSize.body14};
+	font-weight: ${({ theme }) => theme.font.fontWeight.medium};
+	color: ${({ theme }) => theme.colors.grayMain};
 `;

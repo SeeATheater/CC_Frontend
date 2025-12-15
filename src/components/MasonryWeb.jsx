@@ -1,13 +1,13 @@
 import styled from 'styled-components';
 
 function MasonryWeb({ imageData }) {
-	const hasImages = imageData?.photoAlbumDTOs?.length > 0;
+	const hasImages = imageData?.length > 0;
 
 	return (
 		<>
 			{hasImages ? (
 				<ImageArea>
-					{imageData?.photoAlbumDTOs.map((data, idx) => (
+					{imageData?.map((data, idx) => (
 						<Item key={idx}>
 							<img src={data?.imageUrl} alt="공연사진" className="pic" />
 							<Text>
