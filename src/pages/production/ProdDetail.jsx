@@ -29,35 +29,26 @@ function ProdDetail() {
 		data: AlbumData,
 		error: AlbumError,
 		loading: AlbumLoading,
-	} = useCustomFetch(`https://api.seeatheater.site/photoAlbums/${AlbumId}`);
+	} = useCustomFetch(`/photoAlbums/${AlbumId}`);
 
 	console.log('picData', picData);
 	console.log('AlbumData', AlbumData);
 
-	const mockData = [
-		{
-			production: '홍익극연구회',
-			theatre: '실종',
-			date: '2025.04.25~2025.04.28',
-			location: '홍익대학교 학생회관 3층 소극장',
-			message: `홍익극연구회 20회 공연 <실종>을 무사히 마쳤습니다~!
-                    3일동안 수고한 우리 배우분들과 스텝분들에게 감사인사를 🙏
-                    어쩌구 저쩌구 자축~~~~~`,
-		},
-	];
 	return (
 		<>
 			<Mobile>
 				<Hamburger back={true} title={picData?.result.performerName} />
 
 				<Content>
-					<Carousel CarouselData={AlbumData?.result.imageResultDTOs} />
+					<Carousel
+						CarouselData={AlbumData?.result.imageResultWithPresignedUrlDTOs}
+					/>
 
 					<TextArea>
 						<h3 className="title">{AlbumData?.result.amateurShowName}</h3>
 
-						<p className="subInfo">{mockData[0].date}</p>
-						<p className="subInfo">{mockData[0].location}</p>
+						<p className="subInfo">{AlbumData?.result.schedule}</p>
+						<p className="subInfo">{AlbumData?.result.detailAddress}</p>
 						<Hr />
 						<p className="message">{AlbumData?.result.content}</p>
 					</TextArea>
@@ -71,10 +62,10 @@ function ProdDetail() {
 						{picData?.result.singlePhotoAlbumDTOs.map((data) => (
 							<ImgCard
 								onClick={() => {
-									navigate(`/production/album/${data.photoAlbumId}`);
+									navigate(`/production/album/${prodId}/${data.photoAlbumId}`);
 								}}
 							>
-								<img src={data.imageUrl} />
+								<img src={data?.imageResultWithPresignedUrlDTO?.presignedUrl} />
 								<p>{data.amateurShowName}</p>
 							</ImgCard>
 						))}
@@ -91,7 +82,9 @@ function ProdDetail() {
 					</Production>
 					<Intro>
 						<div className="photoArea">
-							<Carousel CarouselData={AlbumData?.result.imageResultDTOs} />
+							<Carousel
+								CarouselData={AlbumData?.result.imageResultWithPresignedUrlDTOs}
+							/>
 						</div>
 
 						<TextArea>
@@ -102,9 +95,8 @@ function ProdDetail() {
 								</div>
 								<ThreeDots />
 							</div>
-							{/* 기간, 극장에 대한 데이터 따로 조회해야 함 */}
-							<p className="subInfo">{mockData[0].date}</p>
-							<p className="subInfo">{mockData[0].location}</p>
+							<p className="subInfo">{AlbumData?.result.schedule}</p>
+							<p className="subInfo">{AlbumData?.result.detailAddress}</p>
 							<Hr />
 							<p className="message">{AlbumData?.result.content}</p>
 						</TextArea>
@@ -119,10 +111,14 @@ function ProdDetail() {
 							{picData?.result.singlePhotoAlbumDTOs.map((data) => (
 								<ImgCard
 									onClick={() => {
-										navigate(`/production/${prodId}/${data.photoAlbumId}`);
+										navigate(
+											`/production/album/${prodId}/${data.photoAlbumId}`,
+										);
 									}}
 								>
-									<img src={data.imageUrl} />
+									<img
+										src={data?.imageResultWithPresignedUrlDTO?.presignedUrl}
+									/>
 									<div className="textArea">
 										<p className="title">{data.amateurShowName}</p>
 										<p className="theatre">{data.detailAddress}</p>
