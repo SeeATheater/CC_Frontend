@@ -1,19 +1,28 @@
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 import Hamburger from '@/components/Hamburger';
 import Carousel from '@/components/Carousel';
+import ConfirmDeleteModal from '@/components/Production/ConfirmDeleteModal';
 
 import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 import ChevronRight from '@/assets/icons/chevronRight.svg?react';
 import ThreeDots from '@/assets/icons/threeDotsVertical.svg?react';
+import EditPen from '@/assets/icons/EditPen.svg?react';
+import Trash from '@/assets/icons/Trash.svg?react';
 
 function ProdDetail() {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const menuRef = useRef(null);
 	const { prodId } = useParams();
 	const { AlbumId } = useParams();
+	const { fetchData } = useCustomFetch();
 	const navigate = useNavigate();
+
 	const goBack = () => {
 		navigate(-1);
 		window.scrollTo(0, 0);
@@ -33,6 +42,37 @@ function ProdDetail() {
 
 	console.log('picData', picData);
 	console.log('AlbumData', AlbumData);
+
+	const toggleMenu = () => {
+		setIsMenuOpen((prev) => !prev);
+	};
+
+	useEffect(() => {
+		const handleClickOutside = (e) => {
+			if (menuRef.current && !menuRef.current.contains(e.target)) {
+				setIsMenuOpen(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+
+	const handleDeleteAlbum = async () => {
+		try {
+			await fetchData(`/photoAlbums/${AlbumId}`, 'DELETE');
+
+			setIsDeleteModalOpen(false);
+
+			// 삭제 후 이동 (상황에 맞게 조정)
+			navigate(-1); // 이전 페이지로
+		} catch (error) {
+			console.error('삭제 실패', error);
+			alert('삭제에 실패했습니다.');
+		}
+	};
 
 	return (
 		<>
@@ -74,6 +114,13 @@ function ProdDetail() {
 			</Mobile>
 
 			<Web>
+				{isDeleteModalOpen && (
+					<ConfirmDeleteModal
+						isOpen={isDeleteModalOpen}
+						onCancel={() => setIsDeleteModalOpen(false)}
+						onConfirm={handleDeleteAlbum}
+					/>
+				)}
 				<SideBar />
 				<Container>
 					<Production>
@@ -93,7 +140,35 @@ function ProdDetail() {
 									<h3 className="title">{AlbumData?.result.amateurShowName}</h3>
 									<ChevronRightGray />
 								</div>
-								<ThreeDots />
+								<MenuWrapper ref={menuRef}>
+									<ThreeDots onClick={toggleMenu} />
+
+									{isMenuOpen && (
+										<Menu>
+											<MenuItem
+												onClick={() => {
+													setIsMenuOpen(false);
+													// 수정 로직
+												}}
+												className="editText"
+											>
+												<StyledPen width={16} height={16} />
+												<span>수정하기 </span>
+											</MenuItem>
+
+											<MenuItem
+												className="deleteText"
+												onClick={() => {
+													setIsMenuOpen(false);
+													setIsDeleteModalOpen(true);
+												}}
+											>
+												<StyledTrash width={16} height={16} />
+												<span>삭제하기</span>
+											</MenuItem>
+										</Menu>
+									)}
+								</MenuWrapper>
 							</div>
 							<p className="subInfo">{AlbumData?.result.schedule}</p>
 							<p className="subInfo">{AlbumData?.result.detailAddress}</p>
@@ -140,6 +215,12 @@ const ChevronLeftGray = styled(ChevronLeft)`
 `;
 const ChevronRightGray = styled(ChevronRight)`
 	color: ${({ theme }) => theme.colors.gray400};
+`;
+const StyledTrash = styled(Trash)`
+	color: ${({ theme }) => theme.colors.grayMain};
+`;
+const StyledPen = styled(EditPen)`
+	color: ${({ theme }) => theme.colors.redWarning};
 `;
 
 const Mobile = styled.div`
@@ -342,5 +423,49 @@ const Intro = styled.div`
 
 	.photoArea {
 		width: 440px;
+	}
+`;
+
+const MenuWrapper = styled.div`
+	position: relative;
+`;
+
+const Menu = styled.div`
+	position: absolute;
+	top: 32px;
+	right: 0;
+
+	width: 220px;
+	background-color: ${({ theme }) => theme.colors.grayWhite};
+	border-radius: 8px;
+	box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.08);
+
+	display: flex;
+	flex-direction: column;
+	z-index: 10;
+`;
+
+const MenuItem = styled.button`
+	height: 54px;
+	padding: 0 20px;
+
+	display: flex;
+	gap: 12px;
+	align-items: center;
+
+	background: none;
+	border: none;
+	cursor: pointer;
+
+	font-size: ${({ theme }) => theme.font.fontSize.body14};
+	color: ${({ theme }) => theme.colors.blackMain};
+	font-weight: ${({ theme }) => theme.font.fontWeight.bold};
+
+	&:hover {
+		background-color: ${({ theme }) => theme.colors.gray2};
+	}
+
+	&.deleteText {
+		color: ${({ theme }) => theme.colors.redWarning};
 	}
 `;

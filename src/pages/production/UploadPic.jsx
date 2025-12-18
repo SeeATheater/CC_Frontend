@@ -16,6 +16,7 @@ import CalendarPeriod from '@/components/CalendarPeriod';
 
 import ChevronDown from '@/assets/icons/chevronDown.svg?react';
 
+
 function UploadPic() {
 	const navigate = useNavigate();
 
