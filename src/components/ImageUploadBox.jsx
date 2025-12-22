@@ -10,6 +10,7 @@ function ImageUploadBox({
 	webHeight,
 	round,
 	onUploadSuccess,
+	filePath,
 }) {
 	const [imageSrc, setImageSrc] = useState(null);
 
@@ -29,7 +30,7 @@ function ImageUploadBox({
 		try {
 			// presigned URL 요청 (🎉 여기 고침)
 			const res = await axios.post(
-				'https://api.seeatheater.site/s3/uploadUrls?filePath=amateurShow',
+				`https://api.seeatheater.site/s3/uploadUrls?filePath=${filePath}`,
 				[file.type.split('/')[1]],
 				{
 					headers: {
