@@ -202,6 +202,7 @@ function RegisterStep1() {
 						height="220px"
 						webWidth="228px"
 						webHeight="320px"
+						filePath="amateurShow"
 						value={formData.posterImageUrl}
 					/>
 					<p>{formData.posterImageUrl}</p>

@@ -117,6 +117,7 @@ function RegisterStep2() {
 						height="220px"
 						webWidth="228px"
 						webHeight="320px"
+						filePath="notice"
 					/>
 				</div>
 				{/*	<div>

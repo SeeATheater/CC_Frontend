@@ -1,13 +1,14 @@
 import styled from 'styled-components';
 import SearchBoxBlack from '@/assets/icons/SearchBoxBlack.svg?react';
 import SearchBarBlack from '@/components/SearchBarBlack.jsx';
-function SearchOptionBar() {
+function SearchOptionBar({ onSearch }) {
 	return (
 		<>
 			<SearchOptionArea>
 				<div style={{ width: '360px' }}>
-					<SearchBarBlack />
+					<SearchBarBlack onSearch={onSearch} />
 				</div>
+				{/*
 				<div>
 					<label>
 						<input type="checkbox" />
@@ -31,6 +32,7 @@ function SearchOptionBar() {
 					</label>
 					<SearchBoxBlack />
 				</div>
+				*/}
 			</SearchOptionArea>
 		</>
 	);
