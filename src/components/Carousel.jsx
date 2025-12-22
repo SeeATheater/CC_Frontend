@@ -11,7 +11,7 @@ function Carousel({ CarouselData }) {
 	return (
 		<Container>
 			<ImageArea>
-				<img src={CarouselData[currentIndex].imageUrl} />
+				<img src={CarouselData[currentIndex].presignedUrl} />
 			</ImageArea>
 
 			<DotWrapper>

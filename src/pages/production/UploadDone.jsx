@@ -6,15 +6,15 @@ import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 function UploadDone() {
 	const navigate = useNavigate();
 	const { state } = useLocation();
-
 	const albumId = state?.albumId;
+	const prodId = state?.prodId;
 
 	const goToAlbum = () => {
 		if (!albumId) {
 			alert('앨범 정보를 불러올 수 없습니다.');
 			return;
 		}
-		navigate(`/production/album/${albumId}`);
+		navigate(`/production/album/${prodId}/${albumId}`);
 	};
 
 	return (

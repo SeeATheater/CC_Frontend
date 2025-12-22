@@ -7,6 +7,8 @@ const SimpleTable = ({ data }) => {
 	const headers = Object.keys(data[0]).filter((key) => key !== 'id');
 	const rows = data.slice(1);
 
+	console.log((data))
+
 	return (
 		<Table>
 			<thead>
