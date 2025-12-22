@@ -3,6 +3,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
+
 import useAxios from '@/utils/hooks/useAxios';
 import { getPresignedUrl } from '@/utils/apis/getPresignedUrl';
 import { uploadImageToS3 } from '@/utils/apis/uploadImageToS3';
@@ -15,8 +16,11 @@ import CalendarPeriod from '@/components/CalendarPeriod';
 
 import ChevronDown from '@/assets/icons/chevronDown.svg?react';
 
+
 function UploadPic() {
-	const [file, setFile] = useState(null);
+	const navigate = useNavigate();
+
+	const [files, setFiles] = useState([]);
 	const [selected, setSelected] = useState(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [showModal, setShowModal] = useState(false);
@@ -24,20 +28,25 @@ function UploadPic() {
 	const [customOptions, setCustomOptions] = useState([]);
 	const [inputValue, setInputValue] = useState('');
 	const [textContent, setTextContent] = useState('');
-	const isFormValid = Boolean(selected?.title && selected?.date && file);
-	const navigate = useNavigate();
 
+	const isFormValid = Boolean(
+		selected?.title &&
+			selected?.date &&
+			selected?.value &&
+			files.length > 0 &&
+			textContent.trim().length > 0,
+	);
 	const searchInput = encodeURIComponent(inputValue);
 	const {
 		data: searchData,
 		error: searchError,
 		loading: searchLoading,
 	} = useCustomFetch(`/search?keyword=${searchInput}&page=0&size=10`);
-	//console.log('입력값:', inputValue);
-	//console.log(searchInput);
-	//console.log('결과:', searchData);
-	//console.log(searchLoading);
-	//console.log('선택된 항목:', selected)
+
+	console.log('선택됨', selected);
+	console.log('files:', files);
+	console.log('files.length:', files.length);
+	console.log('isFormValid:', isFormValid);
 
 	const searchOptions = (searchData?.result?.content || []).map((item) => ({
 		value: item.showId,
@@ -119,12 +128,19 @@ function UploadPic() {
 		setShowCalendar(false);
 		setInputValue('');
 	};
-	const handleFileChange = (selectedFile) => {
-		setFile(selectedFile);
-	};
 
+	const handleFileChange = (selectedFiles) => {
+		setFiles(selectedFiles);
+	};
 	const axiosClient = useAxios();
 	const { fetchData } = useCustomFetch(null, 'POST', null);
+
+	//console.log('선택', selected.value);
+
+	const getProdId = async (amateurShowId) => {
+		const res = await axiosClient.get(`/amateurs/${amateurShowId}`);
+		return res.data.result.memberId;
+	};
 
 	const handleUpload = async () => {
 		if (!isFormValid) {
@@ -133,36 +149,44 @@ function UploadPic() {
 		}
 
 		try {
-			const extension = file.name.split('.').pop().toLowerCase();
+			const extensions = files.map((file) =>
+				file.name.split('.').pop().toLowerCase(),
+			);
 
-			const { imageUrl, uploadUrl, keyName } = await getPresignedUrl(
+			const presignedList = await getPresignedUrl(
 				axiosClient,
-				extension,
+				extensions,
 				'photoAlbum',
 			);
 
-			console.log('uploadUrl:', uploadUrl);
-			console.log('keyName:', keyName);
-			console.log('imageUrl:', imageUrl);
-
-			await uploadImageToS3(file, uploadUrl);
+			await Promise.all(
+				presignedList.map((item, idx) =>
+					uploadImageToS3(files[idx], item.uploadUrl),
+				),
+			);
 
 			const postBody = {
 				amateurShowId: selected.value,
 				content: textContent,
-				imageRequestDTOs: [{ keyName }],
+				imageRequestDTOs: presignedList.map((item) => ({
+					keyName: item.keyName,
+				})),
 			};
 
 			const res = await fetchData('/photoAlbums', 'POST', postBody);
 
-			// 서버 응답 구조: res.data.result.photoAlbumId
 			const albumId = res?.data?.result?.photoAlbumId;
-
 			if (!albumId) {
-				throw new Error('서버에서 photoAlbumId를 반환하지 않았습니다.');
+				throw new Error('photoAlbumId가 없습니다.');
 			}
+			const prodId = await getProdId(selected.value);
 
-			navigate('/production/uploadDone', { state: { albumId } });
+			navigate('/production/uploadDone', {
+				state: {
+					albumId,
+					prodId,
+				},
+			});
 		} catch (err) {
 			console.error(err);
 			alert('업로드 실패: ' + err.message);

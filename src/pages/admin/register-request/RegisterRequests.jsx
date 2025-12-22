@@ -9,8 +9,10 @@ import { useState, useEffect } from 'react';
 import { AdminListPage } from '@/pages/admin/STYLE/admin-list.style';
 import Pagination from 'react-js-pagination';
 function RegisterRequests() {
-	const navigate = useNavigate();
-
+	localStorage.setItem(
+		'accessToken',
+		'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY19hZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwiZXhwIjoxNzY0ODMyOTc2fQ.M4t2FG4nyPdgOdi9B5nzHNp-ehGdTbWXP2CucvDM3HZChwuP1ORJCRIiZBm5mRJdoymTb1beM__nfuFPXTT5xg',
+	);
 	const testRequests = [
 		{
 			id: 'diama8843',
@@ -22,39 +24,35 @@ function RegisterRequests() {
 		},
 	];
 
-	const { data, loading, error } = useCustomFetch(
-		'/admin/approval/showList?page=0&size=20',
-		'GET',
-	);
+	const navigate = useNavigate();
 
-	const changePageHandler = (page) => {
-		setPage(page);
-	};
-	const [stockList, setStockList] = useState([]);
-	const [currentList, setCurrentList] = useState([]);
+	const [searchKeyword, setSearchKeyword] = useState('');
+
+	const [page, setPage] = useState(0);
+	const size = 20;
+
+	const url = `/admin/approval/showList?page=${page}&size=${size}${
+		searchKeyword ? `&keyword=${searchKeyword}` : ''
+	}`;
+
+	const { data, loading, error } = useCustomFetch(url, 'GET');
+
+	const [list, setList] = useState([]);
 
 	useEffect(() => {
 		if (data) {
-			setStockList(data?.result?.content || data); // data 구조 맞게
+			setList(data?.result?.content || []);
 		}
 	}, [data]);
 
-	const [page, setPage] = useState(1);
-	const itemsPerPage = 10;
-	const indexOfLastItem = page * itemsPerPage;
-	const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
-	useEffect(() => {
-		if (Array.isArray(stockList)) {
-			setCurrentList(stockList.slice(indexOfFirstItem, indexOfLastItem));
-		}
-	}, [page, stockList]);
-
+	const changePageHandler = (pageNum) => {
+		setPage(pageNum - 1);
+	};
 	return (
 		<>
 			<AdminListPage>
 				<SectionTitle>등록 요청 관리</SectionTitle>
-				<SearchOptionBar />
+				<SearchOptionBar onSearch={setSearchKeyword} />
 				<table>
 					<thead>
 						<tr>
@@ -68,34 +66,34 @@ function RegisterRequests() {
 						</tr>
 					</thead>
 					<tbody>
-						{console.log(currentList)}
-						{currentList.map((request, index) => (
-							<tr key={request.showId || index}>
-								<td>{request.showId}</td>
-								<td>{request.username}</td>
-								<td>{request.email}</td>
-								<td>{request.phone}</td>
-								<td>{request.showName}</td>
-								<td>{request.amateurStatus}</td>
-								<td>
-									<button
-										onClick={() => {
-											localStorage.setItem('detail', JSON.stringify(request));
-											navigate(`${request.showId}`);
-										}}
-									>
-										상세
-									</button>
-								</td>
-							</tr>
-						))}
+						{console.log(list)}
+						{list &&
+							list.map((request, index) => (
+								<tr key={request.showId || index}>
+									<td>{request.showId}</td>
+									<td>{request.username}</td>
+									<td>{request.email}</td>
+									<td>{request.phone}</td>
+									<td>{request.showName}</td>
+									<td>{request.amateurStatus}</td>
+									<td>
+										<button
+											onClick={() => {
+												localStorage.setItem('detail', JSON.stringify(request));
+												navigate(`${request.showId}`);
+											}}
+										>
+											상세
+										</button>
+									</td>
+								</tr>
+							))}
 					</tbody>
 				</table>
 				<Pagination
-					activePage={page}
-					itemsCountPerPage={itemsPerPage}
-					totalItemsCount={stockList.length}
-					className="pagination"
+					activePage={page + 1}
+					itemsCountPerPage={size}
+					totalItemsCount={data?.result?.numberOfElements}
 					pageRangeDisplayed={5}
 					onChange={changePageHandler}
 				/>

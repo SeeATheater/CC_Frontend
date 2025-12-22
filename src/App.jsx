@@ -44,7 +44,7 @@ function App() {
 
 			<Route path="/small-theater/*" element={<SmallTheaterRoutes />} />
 
-			<Route path="/search" element={<SearchMobile/>} />
+			<Route path="/search" element={<SearchMobile />} />
 			<Route path="/ticketing/:playId" element={<TicketingPage />} />
 			<Route path="/kakaoPay/approve" element={<KakaoPayApprove />} />
 			<Route path="/board/*" element={<Board />} />
@@ -56,9 +56,12 @@ function App() {
 
 			<Route path="/notification" element={<Notification />} />
 			<Route path="/production/:prodId" element={<Production />} />
-			<Route path="/production/album/:AlbumId" element={<ProdDetail />} />
+			<Route
+				path="/production/album/:prodId/:AlbumId"
+				element={<ProdDetail />}
+			/>
 			<Route path="/production/upload_photo" element={<UploadPic />} />
-			<Route path='/production/uploadDone' element={<UploadDone />}/>
+			<Route path="/production/uploadDone" element={<UploadDone />} />
 
 			<Route path="/mypage/*" element={<MyPageRoutes />} />
 

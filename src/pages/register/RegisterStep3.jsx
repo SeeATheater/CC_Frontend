@@ -78,6 +78,7 @@ function RegisterStep3() {
 									webWidth="160px"
 									webHeight="160px"
 									round="true"
+									filePath="casting"
 									onUploadSuccess={(fileInfo) =>
 										handleActorImageUpload(idx, fileInfo)
 									}

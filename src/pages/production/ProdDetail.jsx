@@ -1,19 +1,28 @@
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 import Hamburger from '@/components/Hamburger';
 import Carousel from '@/components/Carousel';
+import ConfirmDeleteModal from '@/components/Production/ConfirmDeleteModal';
 
 import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 import ChevronRight from '@/assets/icons/chevronRight.svg?react';
 import ThreeDots from '@/assets/icons/threeDotsVertical.svg?react';
+import EditPen from '@/assets/icons/EditPen.svg?react';
+import Trash from '@/assets/icons/Trash.svg?react';
 
 function ProdDetail() {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const menuRef = useRef(null);
 	const { prodId } = useParams();
 	const { AlbumId } = useParams();
+	const { fetchData } = useCustomFetch();
 	const navigate = useNavigate();
+
 	const goBack = () => {
 		navigate(-1);
 		window.scrollTo(0, 0);
@@ -29,35 +38,57 @@ function ProdDetail() {
 		data: AlbumData,
 		error: AlbumError,
 		loading: AlbumLoading,
-	} = useCustomFetch(`https://api.seeatheater.site/photoAlbums/${AlbumId}`);
+	} = useCustomFetch(`/photoAlbums/${AlbumId}`);
 
 	console.log('picData', picData);
 	console.log('AlbumData', AlbumData);
 
-	const mockData = [
-		{
-			production: '홍익극연구회',
-			theatre: '실종',
-			date: '2025.04.25~2025.04.28',
-			location: '홍익대학교 학생회관 3층 소극장',
-			message: `홍익극연구회 20회 공연 <실종>을 무사히 마쳤습니다~!
-                    3일동안 수고한 우리 배우분들과 스텝분들에게 감사인사를 🙏
-                    어쩌구 저쩌구 자축~~~~~`,
-		},
-	];
+	const toggleMenu = () => {
+		setIsMenuOpen((prev) => !prev);
+	};
+
+	useEffect(() => {
+		const handleClickOutside = (e) => {
+			if (menuRef.current && !menuRef.current.contains(e.target)) {
+				setIsMenuOpen(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+
+	const handleDeleteAlbum = async () => {
+		try {
+			await fetchData(`/photoAlbums/${AlbumId}`, 'DELETE');
+
+			setIsDeleteModalOpen(false);
+
+			// 삭제 후 이동 (상황에 맞게 조정)
+			navigate(-1); // 이전 페이지로
+		} catch (error) {
+			console.error('삭제 실패', error);
+			alert('삭제에 실패했습니다.');
+		}
+	};
+
 	return (
 		<>
 			<Mobile>
 				<Hamburger back={true} title={picData?.result.performerName} />
 
 				<Content>
-					<Carousel CarouselData={AlbumData?.result.imageResultDTOs} />
+					<Carousel
+						CarouselData={AlbumData?.result.imageResultWithPresignedUrlDTOs}
+					/>
 
 					<TextArea>
 						<h3 className="title">{AlbumData?.result.amateurShowName}</h3>
 
-						<p className="subInfo">{mockData[0].date}</p>
-						<p className="subInfo">{mockData[0].location}</p>
+						<p className="subInfo">{AlbumData?.result.schedule}</p>
+						<p className="subInfo">{AlbumData?.result.detailAddress}</p>
 						<Hr />
 						<p className="message">{AlbumData?.result.content}</p>
 					</TextArea>
@@ -71,10 +102,10 @@ function ProdDetail() {
 						{picData?.result.singlePhotoAlbumDTOs.map((data) => (
 							<ImgCard
 								onClick={() => {
-									navigate(`/production/album/${data.photoAlbumId}`);
+									navigate(`/production/album/${prodId}/${data.photoAlbumId}`);
 								}}
 							>
-								<img src={data.imageUrl} />
+								<img src={data?.imageResultWithPresignedUrlDTO?.presignedUrl} />
 								<p>{data.amateurShowName}</p>
 							</ImgCard>
 						))}
@@ -83,6 +114,13 @@ function ProdDetail() {
 			</Mobile>
 
 			<Web>
+				{isDeleteModalOpen && (
+					<ConfirmDeleteModal
+						isOpen={isDeleteModalOpen}
+						onCancel={() => setIsDeleteModalOpen(false)}
+						onConfirm={handleDeleteAlbum}
+					/>
+				)}
 				<SideBar />
 				<Container>
 					<Production>
@@ -91,7 +129,9 @@ function ProdDetail() {
 					</Production>
 					<Intro>
 						<div className="photoArea">
-							<Carousel CarouselData={AlbumData?.result.imageResultDTOs} />
+							<Carousel
+								CarouselData={AlbumData?.result.imageResultWithPresignedUrlDTOs}
+							/>
 						</div>
 
 						<TextArea>
@@ -100,11 +140,38 @@ function ProdDetail() {
 									<h3 className="title">{AlbumData?.result.amateurShowName}</h3>
 									<ChevronRightGray />
 								</div>
-								<ThreeDots />
+								<MenuWrapper ref={menuRef}>
+									<ThreeDots onClick={toggleMenu} />
+
+									{isMenuOpen && (
+										<Menu>
+											<MenuItem
+												onClick={() => {
+													setIsMenuOpen(false);
+													// 수정 로직
+												}}
+												className="editText"
+											>
+												<StyledPen width={16} height={16} />
+												<span>수정하기 </span>
+											</MenuItem>
+
+											<MenuItem
+												className="deleteText"
+												onClick={() => {
+													setIsMenuOpen(false);
+													setIsDeleteModalOpen(true);
+												}}
+											>
+												<StyledTrash width={16} height={16} />
+												<span>삭제하기</span>
+											</MenuItem>
+										</Menu>
+									)}
+								</MenuWrapper>
 							</div>
-							{/* 기간, 극장에 대한 데이터 따로 조회해야 함 */}
-							<p className="subInfo">{mockData[0].date}</p>
-							<p className="subInfo">{mockData[0].location}</p>
+							<p className="subInfo">{AlbumData?.result.schedule}</p>
+							<p className="subInfo">{AlbumData?.result.detailAddress}</p>
 							<Hr />
 							<p className="message">{AlbumData?.result.content}</p>
 						</TextArea>
@@ -119,10 +186,14 @@ function ProdDetail() {
 							{picData?.result.singlePhotoAlbumDTOs.map((data) => (
 								<ImgCard
 									onClick={() => {
-										navigate(`/production/${prodId}/${data.photoAlbumId}`);
+										navigate(
+											`/production/album/${prodId}/${data.photoAlbumId}`,
+										);
 									}}
 								>
-									<img src={data.imageUrl} />
+									<img
+										src={data?.imageResultWithPresignedUrlDTO?.presignedUrl}
+									/>
 									<div className="textArea">
 										<p className="title">{data.amateurShowName}</p>
 										<p className="theatre">{data.detailAddress}</p>
@@ -144,6 +215,12 @@ const ChevronLeftGray = styled(ChevronLeft)`
 `;
 const ChevronRightGray = styled(ChevronRight)`
 	color: ${({ theme }) => theme.colors.gray400};
+`;
+const StyledTrash = styled(Trash)`
+	color: ${({ theme }) => theme.colors.grayMain};
+`;
+const StyledPen = styled(EditPen)`
+	color: ${({ theme }) => theme.colors.redWarning};
 `;
 
 const Mobile = styled.div`
@@ -346,5 +423,49 @@ const Intro = styled.div`
 
 	.photoArea {
 		width: 440px;
+	}
+`;
+
+const MenuWrapper = styled.div`
+	position: relative;
+`;
+
+const Menu = styled.div`
+	position: absolute;
+	top: 32px;
+	right: 0;
+
+	width: 220px;
+	background-color: ${({ theme }) => theme.colors.grayWhite};
+	border-radius: 8px;
+	box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.08);
+
+	display: flex;
+	flex-direction: column;
+	z-index: 10;
+`;
+
+const MenuItem = styled.button`
+	height: 54px;
+	padding: 0 20px;
+
+	display: flex;
+	gap: 12px;
+	align-items: center;
+
+	background: none;
+	border: none;
+	cursor: pointer;
+
+	font-size: ${({ theme }) => theme.font.fontSize.body14};
+	color: ${({ theme }) => theme.colors.blackMain};
+	font-weight: ${({ theme }) => theme.font.fontWeight.bold};
+
+	&:hover {
+		background-color: ${({ theme }) => theme.colors.gray2};
+	}
+
+	&.deleteText {
+		color: ${({ theme }) => theme.colors.redWarning};
 	}
 `;

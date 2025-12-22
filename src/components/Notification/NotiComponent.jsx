@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import { useState } from 'react';
+
 import Noti from '@/components/Notification/Noti';
 import PillToggleGroup from '@/components/PillToggleGroup';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
@@ -6,31 +8,42 @@ import useCustomFetch from '@/utils/hooks/useCustomFetch';
 function NotiComponent() {
 	const options = ['전체', '소극장 공연', '추천 공연'];
 
+	const [selectedOption, setSelectedOption] = useState('전체');
+
 	const { data: notiData, error, loading } = useCustomFetch(`/notice`);
-
-	console.log('error:', error);
-	console.log('loading:', loading);
-	console.log('data:', notiData);
-
 	const { fetchData: markAsRead } = useCustomFetch(null, 'PATCH');
 
 	const handleClick = async (noticeId) => {
 		try {
 			await markAsRead(`/notice/${noticeId}`);
-			location.reload(); //새로고침으로 변경사항 반영
+			location.reload();
 		} catch (error) {
 			console.error('알림 읽음 처리 실패', error);
 		}
 	};
+	const filteredNotices = notiData?.result?.items.filter((noti) => {
+		if (selectedOption === '전체') return true;
+		if (selectedOption === '추천 공연') return noti.noticeType === 'AD';
+		if (selectedOption === '소극장 공연') return noti.noticeType !== 'AD';
+		return true;
+	});
+	console.log(filteredNotices);
+
+	if (loading) return <div>로딩 중...</div>;
+	if (error) return <div>알림을 불러오지 못했습니다.</div>;
 
 	return (
 		<Box>
 			<Toggle>
-				<PillToggleGroup options={options} />
+				<PillToggleGroup
+					options={options}
+					value={selectedOption}
+					onSelect={setSelectedOption}
+				/>
 			</Toggle>
 
 			<NotiList>
-				{notiData?.result.items.map((noti) => (
+				{filteredNotices?.map((noti) => (
 					<Noti
 						key={noti.id}
 						type={noti.noticeType}
@@ -42,6 +55,8 @@ function NotiComponent() {
 						onClick={() => handleClick(noti.id)}
 					/>
 				))}
+
+				{filteredNotices && <ExtraMessage>알림이 없습니다.</ExtraMessage>}
 			</NotiList>
 		</Box>
 	);
@@ -101,4 +116,12 @@ const NotiList = styled.div`
     @media (min-width: 768px) 
         gap: 0px;
 	}	
+`;
+
+const ExtraMessage = styled.p`
+	text-align: center;
+	font-size: ${({ theme }) => theme.font.fontSize.body14};
+	font-weight: ${({ theme }) => theme.font.fontWeight.medium};
+	color: ${({ theme }) => theme.colors.grayMain};
+	margin: 20px 0;
 `;

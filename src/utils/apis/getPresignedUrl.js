@@ -1,12 +1,11 @@
-export async function getPresignedUrl(axiosClient, imageExtension, filePath) {
-	const url = `${import.meta.env.VITE_APP_API_URL}/s3/uploadUrl?imageExtension=${imageExtension}&filePath=${filePath}`;
+export async function getPresignedUrl(axiosClient, extensions, filePath) {
+	const url = `${import.meta.env.VITE_APP_API_URL}/s3/uploadUrls?filePath=${filePath}`;
 
-	const res = await axiosClient.get(url);
-	const data = res.data;
+	const res = await axiosClient.post(url, extensions, {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
 
-	return {
-		uploadUrl: data.uploadUrl,
-		imageUrl: data.imageUrl,
-		keyName: data.keyName,
-	};
+	return res.data;
 }

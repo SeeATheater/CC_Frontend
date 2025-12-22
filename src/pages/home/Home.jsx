@@ -56,21 +56,25 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
+	localStorage.setItem(
+		'accessToken',
+		'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuYXdqc3dsZG5qczFAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfQVVESUVOQ0UiLCJleHAiOjE3NjQ4MzEwOTF9.-_glsRbix5jJmVSMnEmHjo8bJBVZX7jg46oAtWsWbg7Wb8NUyDQY8z6WzBrht2aWelBE4tJQJ9i0v-_JoA8KVw',
+	);
 
 	const {
 		data: dataClosing,
-		/*
+
 		loading: loadingClosing,
 		error: errorClosing,
-		*/
 	} = useCustomFetch('/amateurs/closing');
 
-	// const {
-	// 	data: dataRanking,
-	// 	loading: loadingRanking,
-	// 	error: errorRanking,
-	// } = useCustomFetch('/amateurs/ranking');
+	const {
+		data: dataRanking,
+		loading: loadingRanking,
+		error: errorRanking,
+	} = useCustomFetch('/amateurs/ranking');
 
+	console.log('데이터 랭킹', dataRanking);
 	const {
 		data: dataHotBoard,
 		// loading: loadingHotBoard,
@@ -84,7 +88,7 @@ function Home() {
 		// error: errorBoard,
 	} = useCustomFetch('/boards/all?page=0&size=5');
 
-	console.log(dataClosing?.result);
+	console.log('오늘 마감인 공연', dataClosing?.result);
 	return (
 		<HomeWrapper>
 			<SideMenuWrapper>
@@ -103,10 +107,12 @@ function Home() {
 					</div>
 					<h1>오늘 마감인 공연</h1>
 					<div className="only-web">
-						<CarouselWeb banners={banners} />
+						{dataClosing?.result && (
+							<CarouselWeb banners={dataClosing?.result} />
+						)}
 					</div>
 					<div className="only-mobile">
-						<CarouselMobile banners={banners} />
+						{dataClosing?.result && <CarouselMobile banners={banners} />}
 					</div>
 					<div className="only-mobile">
 						<HomeIconMenu />
@@ -119,7 +125,8 @@ function Home() {
 					<h1>
 						<span className="only-web-inline">✨</span>소극장 공연 랭킹
 					</h1>
-					<Ranking data={banners} />
+					{dataRanking?.result && <Ranking data={dataRanking.result} />}
+
 					<div style={{ paddingRight: '20px' }}>
 						<button className="light only-mobile" style={{ marginTop: '26px' }}>
 							소극장 공연 보러가기
