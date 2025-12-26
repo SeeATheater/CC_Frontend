@@ -28,9 +28,8 @@ function ImageUploadBox({
 		reader.readAsDataURL(file);
 
 		try {
-			// presigned URL 요청 (🎉 여기 고침)
 			const res = await axios.post(
-				`https://api.seeatheater.site/s3/uploadUrls?filePath=${filePath}`,
+				import.meta.env.VITE_APP_API_URL+`/s3/uploadUrls?filePath=${filePath}`,
 				[file.type.split('/')[1]],
 				{
 					headers: {
