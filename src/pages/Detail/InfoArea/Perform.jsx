@@ -24,7 +24,12 @@ function Perform(props) {
 							<p>{props?.data.result.roadAddress}</p>
 							<p className="copy">복사</p>
 						</div>
-						<div className="map"></div>
+						<div className="map" id="map">
+							<KakaoMap
+								location={props?.data.result.roadAddress}
+								hallName={props?.data.result.hallName}
+							/>
+						</div>
 					</Location>
 					<WebLocation>
 						<p>{props?.data.result.roadAddress}</p>

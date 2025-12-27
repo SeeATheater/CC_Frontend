@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { useState } from 'react';
 
+import { formatDateTime } from '@/utils/formatDateTime';
+
 import Location from '@/assets/icons/location.svg?react';
 import Time from '@/assets/icons/time.svg?react';
 import Price from '@/assets/icons/price.svg?react';
@@ -83,7 +85,8 @@ function Info({ playData }) {
 							<div className="gap8">
 								{playData?.result.rounds.map((data) => (
 									<p className="grayTxt">
-										{data.roundNumber}회차 {data.performanceDateTime}
+										{data.roundNumber}회차{' '}
+										{formatDateTime(data.performanceDateTime)}
 									</p>
 								))}
 							</div>
