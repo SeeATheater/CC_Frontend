@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import Masonry from '@/components/Masonry';
 import MasonryWeb from '@/components/MasonryWeb';
 import Hamburger from '@/components/Hamburger';
-import SearchBar from '@/components/SearchBar';
+import SearchPC from '@/pages/search/SearchPC';
 import HomeIconMenu from '@/components/HomeIconMenu';
 import GalleryIcon from '@/assets/icons/Gallery.svg?react';
 
@@ -112,7 +112,7 @@ function Gallery() {
 				</SideMenuWrapper>
 
 				<Container>
-					<SearchBar />
+					<SearchPC />
 					<TitleArea>
 						<h3>사진첩</h3>
 						{roleToken === 'PERFORMER' && (

@@ -6,7 +6,7 @@ import ChevronRight from '@/assets/icons/chevronRight.svg?react';
 import BoardPreviewCardList from '@/components/BoardPreviewCardList';
 import BoardPreviewList from '@/components/BoardPreviewList';
 import BoardPreviewCardWeb from '@/components/BoardPreviewCardWeb';
-import SearchBar from '@/components/SearchBar';
+import SearchPC from '@/pages/search/SearchPC';
 import CarouselWeb from '@/components/CarouselWeb';
 import CarouselMobile from '@/components/CarouselMobile';
 import Hamburger from '@/components/Hamburger';
@@ -56,10 +56,10 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
-	localStorage.setItem(
-		'accessToken',
-		'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuYXdqc3dsZG5qczFAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfQVVESUVOQ0UiLCJleHAiOjE3NjQ4MzEwOTF9.-_glsRbix5jJmVSMnEmHjo8bJBVZX7jg46oAtWsWbg7Wb8NUyDQY8z6WzBrht2aWelBE4tJQJ9i0v-_JoA8KVw',
-	);
+	// localStorage.setItem(
+	// 	'accessToken',
+	// 	'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuYXdqc3dsZG5qczFAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfQVVESUVOQ0UiLCJleHAiOjE3NjQ4MzEwOTF9.-_glsRbix5jJmVSMnEmHjo8bJBVZX7jg46oAtWsWbg7Wb8NUyDQY8z6WzBrht2aWelBE4tJQJ9i0v-_JoA8KVw',
+	// );
 
 	const {
 		data: dataClosing,
@@ -103,7 +103,7 @@ function Home() {
 						className="only-web"
 						style={{ marginBottom: '40px', maxWidth: '1180px' }}
 					>
-						<SearchBar />
+						<SearchPC />
 					</div>
 					<h1>오늘 마감인 공연</h1>
 					<div className="only-web">
