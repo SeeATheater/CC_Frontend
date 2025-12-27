@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 import { useState } from 'react';
 
-import { formatDateTime } from '@/utils/formatDateTime';
-
 import Location from '@/assets/icons/location.svg?react';
 import Time from '@/assets/icons/time.svg?react';
 import Price from '@/assets/icons/price.svg?react';
