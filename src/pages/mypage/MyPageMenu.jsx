@@ -111,7 +111,7 @@ function MyPageMenu() {
 						{role === 'producer' && (
 							<ul>
 								<li onClick={() => navigate('/mypage/tickets')}>내 티켓</li>
-								<li>내가 쓴 글</li>
+								<li onClick={() => navigate('/mypage/myposts')}> 내가 쓴 글</li>
 								<li onClick={() => navigate('/mypage/liked-theater')}>
 									좋아요한 극단
 								</li>
@@ -132,7 +132,7 @@ function MyPageMenu() {
 					<section>
 						<h1>기타</h1>
 						<ul>
-							<li>1:1 문의</li>
+							<li onClick={() => navigate('/mypage/query')}>1:1 문의</li>
 							<li onClick={() => navigate('/mypage/about-cc')}>CC 정보</li>
 							<li className="color-warning" onClick={confirmDeactivate}>
 								회원 탈퇴
