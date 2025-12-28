@@ -20,6 +20,9 @@ import RefundDetail from '@/pages/admin/refund/RefundDetail.jsx';
 import Inquiry from '@/pages/admin/Inquiry.jsx';
 import InquiryDetail from '@/pages/admin/InquiryDetail.jsx';
 import MyPageManagement from '@/pages/admin/mypage/MypageManagement.jsx';
+import BoardManage from '@/pages/admin/board/BoardManage';
+import BoardManageDetail1 from '@/pages/admin/board/BoardManageDetail1';
+import BoardManageDetail2 from '@/pages/admin/board/BoardManageDetail2';
 
 function AdminRoutes() {
 	return (
@@ -55,6 +58,10 @@ function AdminRoutes() {
 
 				<Route path="refunds" element={<RefundManagement />} />
 				<Route path="refunds/:refundId" element={<RefundDetail />} />
+
+				<Route path="board" element={<BoardManage />} />
+				<Route path="board/:id" element={<BoardManageDetail1 />} />
+				<Route path="board/:id/comments" element={<BoardManageDetail2 />} />
 
 				<Route path="inquiry" element={<Inquiry />} />
 				<Route path="inquiry/:inquiryId" element={<InquiryDetail />} />
