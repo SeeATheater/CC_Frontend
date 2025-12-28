@@ -9,10 +9,6 @@ import { useState, useEffect } from 'react';
 import { AdminListPage } from '@/pages/admin/STYLE/admin-list.style';
 import Pagination from 'react-js-pagination';
 function RegisterRequests() {
-	localStorage.setItem(
-		'accessToken',
-		'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY19hZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwiZXhwIjoxNzY0ODMyOTc2fQ.M4t2FG4nyPdgOdi9B5nzHNp-ehGdTbWXP2CucvDM3HZChwuP1ORJCRIiZBm5mRJdoymTb1beM__nfuFPXTT5xg',
-	);
 	const testRequests = [
 		{
 			id: 'diama8843',
