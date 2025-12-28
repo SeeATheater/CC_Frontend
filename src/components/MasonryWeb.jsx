@@ -22,8 +22,8 @@ function MasonryWeb({ imageData }) {
 							<img src={data?.imageUrl} alt="공연사진" className="pic" />
 							<Text>
 								<p className="title">{data?.amateurShowName}</p>
-								{data.detailAddress && (
-									<p className="theatre">{data?.detailAddress}</p>
+								{data.performerName && (
+									<p className="theatre">{data?.performerName}</p>
 								)}
 							</Text>
 						</Item>
@@ -77,7 +77,7 @@ const Text = styled.div`
 		color: ${({ theme }) => theme.colors.grayMain};
 	}
 	.theatre {
-		font-size: ${({ theme }) => theme.font.fontSize.body10};
+		font-size: ${({ theme }) => theme.font.fontSize.body4};
 		color: ${({ theme }) => theme.colors.gray400};
 		font-weight: ${({ theme }) => theme.font.fontWeight.regular};
 	}

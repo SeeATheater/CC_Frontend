@@ -98,7 +98,8 @@ function Info({ playData }) {
 							<div className="gap8">
 								{playData?.result.rounds.map((data) => (
 									<p className="grayTxt">
-										{data.roundNumber}회차 {data.performanceDateTime}
+										{data.roundNumber}회차{' '}
+										{formatDateTime(data.performanceDateTime)}
 									</p>
 								))}
 							</div>

@@ -2,13 +2,13 @@ import styled from 'styled-components';
 
 import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 
-function TopBar({ onPrev, onNext, children }) {
+function TopBar({ onPrev, onNext, nextText, children }) {
 	return (
 		<div style={{ height: '120px' }}>
 			<Top>
 				<ChevronLeftPink />
 				<p>{children}</p>
-				<button onClick={onNext}></button>
+				<button onClick={onNext}>{nextText}</button>
 			</Top>
 		</div>
 	);
