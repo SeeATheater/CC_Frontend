@@ -17,14 +17,10 @@ function ImageUploadBox({
 	};
 
 	const handleChange = (e) => {
-		const files = Array.from(e.target.files || []);
-		if (files.length === 0) return;
+		const file = e.target.files?.[0];
+		if (!file) return;
 
-		onFileSelect?.(files);
-
-		// 미리보기 생성
-		const previews = files.map((file) => URL.createObjectURL(file));
-		setPreviewUrls(previews);
+		onFileSelect(file); // ✅ File 하나만 전달
 	};
 
 	return (
