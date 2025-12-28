@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import Location from '@/assets/icons/location.svg?react';
 import Time from '@/assets/icons/time.svg?react';
@@ -39,6 +40,20 @@ function Info({ playData }) {
 
 		return `${month}.${day} (${dayOfWeek}) ${hours}:${minutes}`;
 	}
+
+	const navigate = useNavigate();
+	const { playId } = useParams();
+	// 예매 버튼 클릭 핸들러
+	const handleBookClick = () => {
+		if (playId) {
+			// /ticketing/:playId 경로로 이동
+			navigate(`/ticketing/${playId}`); 
+		} else {
+			console.error('Play ID is missing for ticketing.');
+			// 임시 - playId가 없는 경우, 필요하다면 적절한 에러 페이지나 홈으로 이동하도록 설정
+		}
+	};
+
 
 	return (
 		<Container>
@@ -83,7 +98,8 @@ function Info({ playData }) {
 							<div className="gap8">
 								{playData?.result.rounds.map((data) => (
 									<p className="grayTxt">
-										{data.roundNumber}회차 {data.performanceDateTime}
+										{data.roundNumber}회차{' '}
+										{formatDateTime(data.performanceDateTime)}
 									</p>
 								))}
 							</div>
@@ -132,7 +148,7 @@ function Info({ playData }) {
 					{activeTab === 'gallery' && <Gallery data={playData} />}
 				</ContentArea>
 
-				<BookBtn>예매하러 가기</BookBtn>
+				<BookBtn onClick={handleBookClick}>예매하러 가기</BookBtn>
 			</Mobile>
 
 			<Web>
@@ -228,7 +244,7 @@ function Info({ playData }) {
 						</ContentArea>
 					</WebLeft>
 
-					<BookBtn>예매하러 가기</BookBtn>
+					<BookBtn onClick={handleBookClick}>예매하러 가기</BookBtn>
 				</WebContent>
 			</Web>
 		</Container>

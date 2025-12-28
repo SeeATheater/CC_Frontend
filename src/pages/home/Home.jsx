@@ -6,7 +6,7 @@ import ChevronRight from '@/assets/icons/chevronRight.svg?react';
 import BoardPreviewCardList from '@/components/BoardPreviewCardList';
 import BoardPreviewList from '@/components/BoardPreviewList';
 import BoardPreviewCardWeb from '@/components/BoardPreviewCardWeb';
-import SearchBar from '@/components/SearchBar';
+import SearchPC from '@/pages/search/SearchPC';
 import CarouselWeb from '@/components/CarouselWeb';
 import CarouselMobile from '@/components/CarouselMobile';
 import Hamburger from '@/components/Hamburger';
@@ -56,8 +56,8 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
-
-	const {
+	
+  const {
 		data: dataClosing,
 
 		loading: loadingClosing,
@@ -99,7 +99,7 @@ function Home() {
 						className="only-web"
 						style={{ marginBottom: '40px', maxWidth: '1180px' }}
 					>
-						<SearchBar />
+						<SearchPC />
 					</div>
 					<h1>오늘 마감인 공연</h1>
 					<div className="only-web">

@@ -21,7 +21,7 @@ function Masonry({ imageData }) {
 							<img src={data?.imageUrl} alt="공연사진" className="pic" />
 							<Text>
 								<p className="title">{data?.amateurShowName}</p>
-								{data?.place && <p className="theatre">{data.place}</p>}
+								{data?.performerName && <p className="theatre">{data.performerName}</p>}
 							</Text>
 						</Item>
 					))}

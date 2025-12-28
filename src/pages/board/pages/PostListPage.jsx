@@ -10,6 +10,7 @@ import {
   LoadMoreContainer,
   SideMenuWrapper 
 } from '@/pages/board/styles/commonStyles';
+import FullScreenMenu from '@/components/FullScreenMenu';
 import HomeIconMenu from '@/components/HomeIconMenu';
 import Header from '@/pages/board/components/BoardHeader';
 import TabBar from '@/pages/board/components/TabBar';
@@ -127,6 +128,11 @@ const PostListPage = () => {
 
   const showFloatingButton = canCreatePost(activeTab);
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  if (isMenuOpen) {
+    return <FullScreenMenu onClose={() => setIsMenuOpen(false)} />;
+  }
+
   return (
     <div>
       <SideMenuWrapper>
@@ -137,7 +143,7 @@ const PostListPage = () => {
         {!isPC && (
           <Header 
             title="board" 
-            onMenuClick={() => console.log('메뉴 클릭')}
+            onMenuClick={() => setIsMenuOpen(true)}
             onSearchClick={() => navigate("/search")}
           />
         )}

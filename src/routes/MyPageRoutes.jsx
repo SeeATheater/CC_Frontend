@@ -11,6 +11,8 @@ import AboutCC from '@/pages/mypage/about-cc/AboutCC';
 import RegisteredPerformances from '@/pages/mypage/ADMIN/registered-performances/RegisteredPerformances';
 import RegisteredDetail from '@/pages/mypage/ADMIN/registered-performances/RegisteredDetail';
 import BookingHistory from '@/pages/mypage/booking-history/BookingHistory';
+import MyPost from '@/pages/mypage/mypost/MyPost';
+import MyQueryPage from '@/pages/mypage/query/MyQueryPage';
 
 function MyPageRoutes() {
 	return (
@@ -36,6 +38,8 @@ function MyPageRoutes() {
 					element={<RegisteredDetail />}
 				/>
 				<Route path="booking-history" element={<BookingHistory />} />
+				<Route path="myposts" element={<MyPost />} />
+				<Route path="query/*" element={<MyQueryPage />} />
 			</Route>
 		</Routes>
 	);
