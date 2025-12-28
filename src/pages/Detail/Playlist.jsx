@@ -8,7 +8,7 @@ import NowShowing from '@/components/Detail/NowShowing';
 import WebPlayCard from '@/components/Detail/WebPlayCard';
 import WebListCard from '@/components/Detail/WebListCard';
 import Ticket from '@/assets/icons/Ticket.svg?react';
-import SearchBar from '@/components/SearchBar';
+import SearchPC from '@/pages/search/SearchPC';
 import HomeIconMenu from '@/components/HomeIconMenu';
 import Footer from '@/components/Footer';
 
@@ -54,7 +54,7 @@ function Playlist() {
 					<HomeIconMenu isWeb={true} selectedMenu="plays" />
 				</SideMenuWrapper>
 				<WebContent>
-					<SearchBar />
+					<SearchPC />
 					<WebHot>
 						<h3 className="Todays">요즘 🔥HOT한 소극장 연극</h3>
 						<CardWrapper>

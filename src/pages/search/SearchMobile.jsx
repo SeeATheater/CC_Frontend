@@ -8,9 +8,24 @@ import useAxios from '@/utils/hooks/useAxios';
 import ChevronPink from '@/assets/icons/chevronLeft.svg';
 import ClosePink from '@/assets/icons/ClosePink.svg';
 
+const RECENT_SEARCHES_KEY = 'recentSearches';
+const MAX_RECENT_SEARCHES = 20;
+
 const SearchMobile = () => {
   const navigate = useNavigate();
-  const [recentSearches, setRecentSearches] = useState(['실종', '홍익극연구회', '카포네 트릴로지']);
+  
+  // localStorage에서 최근 검색어 불러오기
+  const loadRecentSearches = () => {
+    try {
+      const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error('최근 검색어 불러오기 실패:', error);
+      return [];
+    }
+  };
+
+  const [recentSearches, setRecentSearches] = useState(loadRecentSearches);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [upcomingShows, setUpcomingShows] = useState([]);
@@ -55,16 +70,30 @@ const SearchMobile = () => {
     fetchUpcomingShows();
   }, []);
 
+  // localStorage에 최근 검색어 저장
+  const saveRecentSearches = (searches) => {
+    try {
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches));
+    } catch (error) {
+      console.error('최근 검색어 저장 실패:', error);
+    }
+  };
+
   const handleBackClick = () => {
     navigate(-1);
   };
 
   const removeRecentSearch = (index) => {
-    setRecentSearches(prev => prev.filter((_, i) => i !== index));
+    setRecentSearches(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      saveRecentSearches(updated);
+      return updated;
+    });
   };
 
   const clearAllSearches = () => {
     setRecentSearches([]);
+    saveRecentSearches([]);
   };
 
   const handleSearch = (value) => {
@@ -121,7 +150,9 @@ const SearchMobile = () => {
     if (newSearch) {
       setRecentSearches(prev => {
         const filteredSearches = prev.filter(search => search !== newSearch);
-        return [newSearch, ...filteredSearches].slice(0, 20);
+        const updated = [newSearch, ...filteredSearches].slice(0, MAX_RECENT_SEARCHES);
+        saveRecentSearches(updated);
+        return updated;
       });
     }
   };
@@ -172,20 +203,24 @@ const SearchMobile = () => {
                 </ClearAllButton>
               )}
             </div>
-            <RecentSearches>
-              {recentSearches.map((search, index) => (
-                <RecentSearchBox key={index} onClick={() => handleRecentSearchClick(search)}>
-                  {search}
-                  <DeleteButton 
-                    src={ClosePink} 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeRecentSearch(index);
-                    }}
-                  />
-                </RecentSearchBox>
-              ))}
-            </RecentSearches>
+            {recentSearches.length > 0 ? (
+              <RecentSearches>
+                {recentSearches.map((search, index) => (
+                  <RecentSearchBox key={index} onClick={() => handleRecentSearchClick(search)}>
+                    {search}
+                    <DeleteButton 
+                      src={ClosePink} 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeRecentSearch(index);
+                      }}
+                    />
+                  </RecentSearchBox>
+                ))}
+              </RecentSearches>
+            ) : (
+              <NoRecentSearches>최근 검색어가 없습니다.</NoRecentSearches>
+            )}
             <Divider/>
           </RecentSearchSection>
 
@@ -370,6 +405,13 @@ const DeleteButton = styled.img`
   cursor: pointer;
   width: 8px;
   height: 8px;
+`;
+
+const NoRecentSearches = styled.div`
+  margin: 20px 0px;
+  text-align: center;
+  color: #929292;
+  font-size: 12px;
 `;
 
 const Divider = styled.div`
