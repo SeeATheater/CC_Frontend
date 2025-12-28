@@ -56,7 +56,8 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
-	const {
+	
+  const {
 		data: dataClosing,
 
 		loading: loadingClosing,
