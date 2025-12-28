@@ -56,10 +56,6 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
-	localStorage.setItem(
-		'accessToken',
-		'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuYXdqc3dsZG5qczFAbmF2ZXIuY29tIiwiYXV0aCI6IlJPTEVfQVVESUVOQ0UiLCJleHAiOjE3NjQ4MzEwOTF9.-_glsRbix5jJmVSMnEmHjo8bJBVZX7jg46oAtWsWbg7Wb8NUyDQY8z6WzBrht2aWelBE4tJQJ9i0v-_JoA8KVw',
-	);
 
 	const {
 		data: dataClosing,
