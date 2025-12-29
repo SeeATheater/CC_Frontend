@@ -4,7 +4,8 @@ import Hamburger from '@/components/Hamburger';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 function MyPageMenu() {
 	const navigate = useNavigate();
-	const role = localStorage.getItem('token');
+	const role = sessionStorage.getItem('selectedRole');
+
 
 	const {
 		data,
@@ -70,9 +71,9 @@ function MyPageMenu() {
 			<Wrapper>
 				<LeftWrapper>
 					<h1 className="title">마이페이지</h1>
-					<h1 className="color-pink only-web" style={{ marginTop: '62px' }}>
-						{role === 'producer' && 'user'}
-						{role === 'user' && 'user'}
+					<h1 className="color-pink" style={{ marginTop: '62px' }}>
+						{role === 'PERFORMER' && '공연진'}
+						{role === 'AUDIENCE' && '관객'}
 					</h1>
 					<p></p>
 					<h1 className="color-pink only-web">
@@ -101,14 +102,14 @@ function MyPageMenu() {
 					</h1>
 					<section>
 						<h1>MY</h1>
-						{role === 'performer' && (
+						{role === 'PERFORMER' && (
 							<ul>
 								<li onClick={() => navigate('registered-performances')}>
 									등록한 공연
 								</li>
 							</ul>
 						)}
-						{role === 'producer' && (
+						{role === 'AUDIENCE' && (
 							<ul>
 								<li onClick={() => navigate('/mypage/tickets')}>내 티켓</li>
 								<li onClick={() => navigate('/mypage/myposts')}> 내가 쓴 글</li>
