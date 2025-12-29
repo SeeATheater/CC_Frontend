@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import KakaoMap from '@/components/KakaoMap';
 
 function Perform(props) {
-	console.log('show data:', props);
+	//console.log('show data:', props);
 
 	return (
 		<Container>
