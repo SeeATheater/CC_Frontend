@@ -15,7 +15,7 @@ function Noti({ contentId, type, content, when, checked, onClick }) {
 		let url = null;
 
 		if (type === 'COMMENT' || type === 'REPLY' || type === 'HOT') {
-			url = `/board/${contentId}`;
+			url = `/board/post//${contentId}`;
 		}
 
 		if (type === 'AMATEURSHOW' || type === 'TICKET' || type === 'REMIND') {
