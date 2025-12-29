@@ -33,6 +33,7 @@ function MyPageMenu() {
 		if (res?.status === 200) {
 			localStorage.removeItem('accessToken');
 			localStorage.removeItem('refreshToken');
+			sessionStorage.removeItem('selectedRole');
 			navigate('/login');
 		} else {
 			console.error('로그아웃 실패:', res);
