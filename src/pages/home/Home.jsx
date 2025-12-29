@@ -129,12 +129,15 @@ function Home() {
 						</button>
 					</div>
 				</Wrapper>
-				<RegisterButton
+				<div className='only-web'>
+<RegisterButton
 					onClick={() => navigate('/small-theater/register/step1')}
 				>
 					<p>공연을 준비하고 있다면?</p>
 					<h1>공연 등록하러가기</h1>
 				</RegisterButton>
+				</div>
+				
 				{/*게시판 섹선*/}
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
