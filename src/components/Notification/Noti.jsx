@@ -77,13 +77,17 @@ function Noti({ contentId, id, type, content, when, checked }) {
 		const created = new Date(createdAt);
 		const diffMs = now - created;
 
+		const diffMinutes = Math.floor(diffMs / (1000 * 60));
 		const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+		if (diffMinutes < 60) {
+			return diffMinutes <= 0 ? '방금 전' : `${diffMinutes}분 전`;
+		}
 
 		if (diffHours < 24) {
 			return `${diffHours}시간 전`;
-		} else {
-			return `${created.getMonth() + 1}월 ${created.getDate()}일`;
 		}
+		return `${created.getFullYear()}.${created.getMonth() + 1}.${created.getDate()}`;
 	}
 
 	return (
