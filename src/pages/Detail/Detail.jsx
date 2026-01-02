@@ -14,10 +14,10 @@ function Detail() {
 		loading,
 	} = useCustomFetch(`/amateurs/${playId}`);
 
-	console.log('error:', error);
-	console.log('loading:', loading);
-	console.log('SummData:', playData);
-
+	//console.log('error:', error);
+	//console.log('loading:', loading);
+	//console.log('SummData:', playData);
+	
 	if (loading || !playData?.result) {
 		return <EyeRollingSVG />;
 	}
