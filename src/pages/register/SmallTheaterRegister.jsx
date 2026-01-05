@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import TopBar from '@/components/TopBar';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import Footer from '@/components/Footer';
 /* 현재 step 번호 계산*/
 
 function SmallTheaterRegister() {
@@ -81,6 +82,7 @@ function SmallTheaterRegister() {
 			<ContentWrapper>
 				<Outlet context={{ nextStep, prevStep, formData, setFormData }} />
 			</ContentWrapper>
+			<Footer />
 		</Wrapper>
 	);
 }

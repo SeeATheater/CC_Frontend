@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Hamburger from '@/components/Hamburger';
+import Footer from '@/components/Footer';	
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 function MyPageMenu() {
 	const navigate = useNavigate();
@@ -141,7 +142,9 @@ function MyPageMenu() {
 						</ul>
 					</section>
 				</RightWrapper>
+				
 			</Wrapper>
+			<Footer />
 		</div>
 	);
 }
