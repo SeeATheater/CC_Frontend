@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 function BoardPreviewList({ data }) {
 	/*
@@ -11,7 +12,7 @@ function BoardPreviewList({ data }) {
 	];
 	*/
 	console.log('게시판 미리보기', data);
-
+const navigate=useNavigate();
 	const boardTypeLabel = {
 		NORMAL: '일반',
 		PROMOTION: '홍보',
@@ -21,7 +22,7 @@ function BoardPreviewList({ data }) {
 			<List>
 				{data &&
 					data.map((item) => (
-						<Li key={item.boardId}>
+						<Li key={item.boardId} onClick={() => navigate(`/board/post/${item.boardId}`)}>
 							<div>{boardTypeLabel[item.boardType] || item.boardType}</div>
 							<h3>{item.title}</h3>
 							<p>{item.content}</p>
