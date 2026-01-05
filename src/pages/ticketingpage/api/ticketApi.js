@@ -6,7 +6,7 @@ export const TICKET_ENDPOINTS = {
   TICKET_TYPES: (amateurShowId) => `/tickets/${amateurShowId}/selectTicket`,
   RESERVE_TICKET: (amateurShowId, amateurRoundId, amateurTicketId) => 
     `/tickets/${amateurShowId}/reserve?amateurRoundId=${amateurRoundId}&amateurTicketId=${amateurTicketId}`,
-  KAKAO_PAY_READY: (ticketId) => `/kakaoPay/ready?ticketId=${ticketId}`
+  KAKAO_PAY_READY: (memberTicketId) => `/kakaoPay/ready?memberTicketId=${memberTicketId}`
 };
 
 // 예매 관련 API 서비스

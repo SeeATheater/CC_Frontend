@@ -1,17 +1,30 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 
-function Carousel({ CarouselData }) {
-	const [currentIndex, setCurrentIndex] = useState(0);
+import ImageUploadBox from '@/components/ImageUploadBox2';
 
-	if (!CarouselData || CarouselData.length === 0) {
-		return <p>이미지가 없습니다.</p>;
-	}
+function UploadCarousel({ CarouselData, onAddImage, onRemoveImage }) {
+	const [currentIndex, setCurrentIndex] = useState(0);
 
 	return (
 		<Container>
 			<ImageArea>
-				<img src={CarouselData[currentIndex].presignedUrl} />
+				{CarouselData[currentIndex].type === 'image' ? (
+					<>
+						<img src={CarouselData[currentIndex].previewUrl} />
+						<DeleteBtn
+							onClick={() => onRemoveImage(CarouselData[currentIndex].index)}
+						>
+							✕
+						</DeleteBtn>
+					</>
+				) : (
+					<ImageUploadBox
+						size="100%"
+						aspect-ratio="1"
+						onFileSelect={onAddImage}
+					/>
+				)}
 			</ImageArea>
 
 			<DotWrapper>
@@ -27,7 +40,7 @@ function Carousel({ CarouselData }) {
 	);
 }
 
-export default Carousel;
+export default UploadCarousel;
 
 const Container = styled.div`
 	width: 100%;
@@ -65,4 +78,16 @@ const Dot = styled.div`
 	cursor: pointer;
 	background-color: ${({ $isActive, theme }) =>
 		$isActive ? theme.colors.pink500 : theme.colors.gray300};
+`;
+const DeleteBtn = styled.button`
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	border: none;
+	background: rgba(0, 0, 0, 0.6);
+	color: white;
+	cursor: pointer;
 `;

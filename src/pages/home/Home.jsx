@@ -6,7 +6,7 @@ import ChevronRight from '@/assets/icons/chevronRight.svg?react';
 import BoardPreviewCardList from '@/components/BoardPreviewCardList';
 import BoardPreviewList from '@/components/BoardPreviewList';
 import BoardPreviewCardWeb from '@/components/BoardPreviewCardWeb';
-import SearchBar from '@/components/SearchBar';
+import SearchPC from '@/pages/search/SearchPC';
 import CarouselWeb from '@/components/CarouselWeb';
 import CarouselMobile from '@/components/CarouselMobile';
 import Hamburger from '@/components/Hamburger';
@@ -57,11 +57,10 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
+const navigate = useNavigate();
 
-
-	const {
-		data: dataClosing,
-
+const {
+	data: dataClosing,
 		loading: loadingClosing,
 		error: errorClosing,
 	} = useCustomFetch('/amateurs/closing');
@@ -101,7 +100,7 @@ function Home() {
 						className="only-web"
 						style={{ marginBottom: '40px', maxWidth: '1180px' }}
 					>
-						<SearchBar />
+						<SearchPC />
 					</div>
 					<h1>오늘 마감인 공연 (데이터 없음)</h1>
 					<div className="only-web">

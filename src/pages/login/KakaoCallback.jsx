@@ -37,7 +37,7 @@ function KakaoCallback() {
 			try {
 				const response = await axiosInstance.post(
 					`${import.meta.env.VITE_APP_API_URL}/auth/kakao/callback`,
-					{ code, role },
+					{ code, role, redirectUri: import.meta.env.VITE_KAKAO_REDIRECT_URI },
 				);
 				const { accessToken, refreshToken } = response.data;
 				localStorage.setItem('accessToken', accessToken);

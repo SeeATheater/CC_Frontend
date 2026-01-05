@@ -2,27 +2,25 @@ import { useRef, useState } from 'react';
 import styled from 'styled-components';
 import Camera from '@/assets/icons/Camera.svg?react';
 
-function ImageUploadBox({ size, webSize, round, onFileSelect  }) {
+function ImageUploadBox({
+	size,
+	webSize,
+	round,
+	onFileSelect,
+	multiple = true,
+}) {
 	const fileInputRef = useRef(null);
-	const [previewUrl, setPreviewUrl] = useState(null);
+	const [previewUrls, setPreviewUrls] = useState([]);
 
 	const handleClick = () => {
 		fileInputRef.current.click();
 	};
 
 	const handleChange = (e) => {
-		const file = e.target.files[0];
-		if (file && file.type.startsWith('image/')) {
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setPreviewUrl(reader.result);
-			};
-			reader.readAsDataURL(file);
+		const file = e.target.files?.[0];
+		if (!file) return;
 
-            if (onFileSelect) {
-				onFileSelect(file);
-			}
-		}
+		onFileSelect(file); // ✅ File 하나만 전달
 	};
 
 	return (
@@ -34,15 +32,19 @@ function ImageUploadBox({ size, webSize, round, onFileSelect  }) {
 				onClick={handleClick}
 				role="button"
 			>
-				{previewUrl ? (
-					<Preview src={previewUrl} alt="uploaded preview" />
+				{previewUrls.length > 0 ? (
+					previewUrls.map((url, idx) => (
+						<Preview key={idx} src={url} alt="uploaded preview" />
+					))
 				) : (
 					<Camera />
 				)}
 			</Box>
+
 			<input
 				type="file"
 				accept="image/*"
+				multiple={multiple}
 				style={{ display: 'none' }}
 				ref={fileInputRef}
 				onChange={handleChange}
@@ -52,7 +54,6 @@ function ImageUploadBox({ size, webSize, round, onFileSelect  }) {
 }
 
 export default ImageUploadBox;
-
 const Box = styled.div`
 	background: ${({ theme }) => theme.colors.gray200};
 	width: ${(props) => props.size || '150px'};

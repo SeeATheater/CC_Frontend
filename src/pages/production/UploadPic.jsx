@@ -2,14 +2,15 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
 
 import useAxios from '@/utils/hooks/useAxios';
 import { getPresignedUrl } from '@/utils/apis/getPresignedUrl';
 import { uploadImageToS3 } from '@/utils/apis/uploadImageToS3';
-//import useCustomFetch from '@/utils/hooks/useAxios';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 import ImageUploadBox from '@/components/ImageUploadBox2';
+import UploadCarousel from '@/components/Production/UploadCarousel';
 import TopBar from '@/components/TopBar';
 import Modal from '@/components/Production/Modal';
 import CalendarPeriod from '@/components/CalendarPeriod';
@@ -17,13 +18,10 @@ import CalendarPeriod from '@/components/CalendarPeriod';
 import ChevronDown from '@/assets/icons/chevronDown.svg?react';
 
 function UploadPic() {
-	const data = [
-		{ title: '실종', date: '25.04.25~25.04.27' },
-		{ title: '카포네 트릴로지', date: '25.05.01~25.05.03' },
-		{ title: '킬링시저', date: '25.06.10~25.06.13' },
-	];
+	const navigate = useNavigate();
 
-	const [file, setFile] = useState(null);
+	const [images, setImages] = useState([]); // File + previewUrl
+
 	const [selected, setSelected] = useState(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [showModal, setShowModal] = useState(false);
@@ -31,19 +29,25 @@ function UploadPic() {
 	const [customOptions, setCustomOptions] = useState([]);
 	const [inputValue, setInputValue] = useState('');
 	const [textContent, setTextContent] = useState('');
-	const isFormValid = Boolean(selected?.title && selected?.date && file);
 
+	const isFormValid = Boolean(
+		selected?.title &&
+			selected?.date &&
+			selected?.value &&
+			images.length > 0 &&
+			textContent.trim().length > 0,
+	);
 	const searchInput = encodeURIComponent(inputValue);
 	const {
 		data: searchData,
 		error: searchError,
 		loading: searchLoading,
 	} = useCustomFetch(`/search?keyword=${searchInput}&page=0&size=10`);
-	//console.log('입력값:', inputValue);
-	//console.log(searchInput);
-	//console.log('결과:', searchData);
-	//console.log(searchLoading);
-	//console.log('선택된 항목:', selected)
+
+	console.log('선택됨', selected);
+	console.log('images:', images);
+	console.log('images.length:', images.length);
+	console.log('isFormValid:', isFormValid);
 
 	const searchOptions = (searchData?.result?.content || []).map((item) => ({
 		value: item.showId,
@@ -125,48 +129,123 @@ function UploadPic() {
 		setShowCalendar(false);
 		setInputValue('');
 	};
-	const handleFileChange = (selectedFile) => {
-		setFile(selectedFile);
+
+	const handleFileChange = (selectedFiles) => {
+		setImages(selectedFiles);
 	};
 
 	const axiosClient = useAxios();
 	const { fetchData } = useCustomFetch(null, 'POST', null);
+
+	const MobileOption = (props) => {
+		const { data } = props;
+
+		return (
+			<div {...props.innerProps} style={{ padding: '8px 4px' }}>
+				<LabelWrapper>
+					<Title>{data.title}</Title>
+					<Date>{data.date}</Date>
+				</LabelWrapper>
+			</div>
+		);
+	};
+
+	const MobileSingleValue = ({ data }) => {
+		return (
+			<LabelWrapper>
+				<Title>{data.title}</Title>
+				<Date>{data.date}</Date>
+			</LabelWrapper>
+		);
+	};
+
+	const MAX_IMAGES = 4;
+
+	const handleAddImage = (file) => {
+		if (!file) return;
+		if (images.length >= MAX_IMAGES) {
+			alert('사진은 최대 4장까지 업로드할 수 있어요.');
+			return;
+		}
+
+		const reader = new FileReader();
+		reader.onloadend = () => {
+			setImages((prev) => [
+				...prev,
+				{
+					file,
+					previewUrl: reader.result,
+				},
+			]);
+		};
+		reader.readAsDataURL(file);
+	};
+
+	const handleRemoveImage = (index) => {
+		setImages((prev) => prev.filter((_, i) => i !== index));
+	};
+
+	const carouselData = [
+		...images.map((img, index) => ({
+			type: 'image',
+			previewUrl: img.previewUrl,
+			index,
+		})),
+		...(images.length < MAX_IMAGES ? [{ type: 'add' }] : []),
+	];
+
+	const getProdId = async (amateurShowId) => {
+		const res = await axiosClient.get(`/amateurs/${amateurShowId}`);
+		return res.data.result.memberId;
+	};
+
 	const handleUpload = async () => {
+		const files = images.map((img) => img.file);
+
 		if (!isFormValid) {
 			alert('모든 필수 정보를 입력해 주세요.');
 			return;
 		}
 
 		try {
-			const extension = file.name.split('.').pop().toLowerCase();
+			const extensions = files.map((file) =>
+				file.name.split('.').pop().toLowerCase(),
+			);
 
-			const { uploadUrl, publicUrl, keyName } = await getPresignedUrl(
+			const presignedList = await getPresignedUrl(
 				axiosClient,
-				extension,
+				extensions,
 				'photoAlbum',
 			);
 
-			console.log('S3 응답:', uploadUrl); // 디버깅용
-			console.log('keyName:', keyName); // 디버깅용
-			console.log('publicUrl:', publicUrl); // 디버깅용
-
-			//const url = `https://ccbucket-0528.s3.ap-northeast-2.amazonaws.com/${uploadUrl}`;
-			await uploadImageToS3(axiosClient, extension, uploadUrl);
+			await Promise.all(
+				presignedList.map((item, idx) =>
+					uploadImageToS3(files[idx], item.uploadUrl),
+				),
+			);
 
 			const postBody = {
 				amateurShowId: selected.value,
 				content: textContent,
-				imageRequestDTOs: [{ keyName: keyName, imageUrl: publicUrl }],
+				imageRequestDTOs: presignedList.map((item) => ({
+					keyName: item.keyName,
+				})),
 			};
-			console.log(postBody);
 
 			const res = await fetchData('/photoAlbums', 'POST', postBody);
-			//console.log(postBody)
-			if (res.status !== 200 && res.status !== 201) {
-				throw new Error(`서버 응답 오류: ${res.status}`);
+
+			const albumId = res?.data?.result?.photoAlbumId;
+			if (!albumId) {
+				throw new Error('photoAlbumId가 없습니다.');
 			}
-			console.log('응답 데이터:', res.data);
-			alert('등록 완료!');
+			const prodId = await getProdId(selected.value);
+
+			navigate('/production/uploadDone', {
+				state: {
+					albumId,
+					prodId,
+				},
+			});
 		} catch (err) {
 			console.error(err);
 			alert('업로드 실패: ' + err.message);
@@ -177,7 +256,9 @@ function UploadPic() {
 		<>
 			<Mobile>
 				{menuOpen && <Overlay onClick={() => setMenuOpen(false)} />}
-				<TopBar> 사진첩 게시 </TopBar>
+				<TopBar onNext={handleUpload} nextText={'완료'}>
+					사진첩 게시
+				</TopBar>
 				<Content>
 					<StyledSelect
 						options={options}
@@ -185,15 +266,29 @@ function UploadPic() {
 						onChange={handleSelectChange}
 						placeholder="공연을 선택해주세요"
 						isSearchable={false}
-						components={{ IndicatorSeparator: () => null }}
+						components={{
+							IndicatorSeparator: () => null,
+							Option: MobileOption,
+							SingleValue: MobileSingleValue,
+						}}
 						onMenuOpen={() => setMenuOpen(true)}
 						onMenuClose={() => setMenuOpen(false)}
 					/>
-					<ImageUploadBox
-						size="362px"
-						aspect-ratio="1"
-						onFileSelect={handleFileChange}
-					/>
+					{images.length === 0 ? (
+						<ImageUploadBox
+							size="362px"
+							aspect-ratio="1"
+							onFileSelect={handleAddImage}
+						/>
+					) : (
+						<CarouselWrapper>
+							<UploadCarousel
+								CarouselData={carouselData}
+								onAddImage={handleAddImage}
+								onRemoveImage={handleRemoveImage}
+							/>
+						</CarouselWrapper>
+					)}
 					<textarea
 						className="add"
 						placeholder="공연에서 있었던 이야기를 작성해 주세요"
@@ -271,11 +366,22 @@ function UploadPic() {
 							</UploadBtn>
 						</UpperArea>
 
-						<ImageUploadBox
-							size="362px"
-							aspect-ratio="1"
-							onFileSelect={handleFileChange}
-						/>
+						{images.length === 0 ? (
+							<ImageUploadBox
+								size="362px"
+								aspect-ratio="1"
+								onFileSelect={handleAddImage}
+							/>
+						) : (
+							<CarouselWrapper>
+								<UploadCarousel
+									CarouselData={carouselData}
+									onAddImage={handleAddImage}
+									onRemoveImage={handleRemoveImage}
+								/>
+							</CarouselWrapper>
+						)}
+
 						<textarea
 							className="add"
 							placeholder="공연에서 있었던 이야기를 작성해 주세요"
@@ -297,6 +403,7 @@ function UploadPic() {
 }
 
 export default UploadPic;
+
 const ChevronDownGray = styled(ChevronDown)`
 	color: ${({ theme }) => theme.colors.gray400};
 `;
@@ -393,37 +500,30 @@ const StyledSelect = styled(Select).attrs({
 	width: 60%;
 
 	.custom__control {
-		border-radius: 3px;
 		border: none;
-		padding: 8px 4px;
 		box-shadow: none;
+		padding: 6px 4px;
 		background-color: white;
 	}
 
+	.custom__value-container {
+		padding: 8px;
+	}
+
 	.custom__menu {
-		border-radius: 3px;
 		z-index: 100;
 	}
 
 	.custom__option {
-		cursor: pointer;
-		padding: 8px 4px;
-		background-color: white;
-
-		&:hover {
-			background-color: #f9f9f9;
-		}
-
-		&--is-selected {
-			background-color: #f4e5f7;
-		}
+		padding: 10px 8px;
 	}
+
 	.custom__placeholder {
 		color: ${({ theme }) => theme.colors.gray400};
-		font-size: ${({ theme }) => theme.font.fontSize.title16};
-		font-weight: ${({ theme }) => theme.font.fontWeight.extraBold};
+		font-size: ${({ theme }) => theme.font.fontSize.body14};
 	}
 `;
+
 const UpperArea = styled.div`
 	display: flex;
 	align-items: center;
@@ -525,4 +625,8 @@ const ChangeBtn = styled.button`
 	color: ${({ theme }) => theme.colors.gray500};
 	font-size: ${({ theme }) => theme.font.fontSize.body12};
 	cursor: pointer;
+`;
+const CarouselWrapper = styled.div`
+	width: 362px;
+	aspect-ratio: 1;
 `;

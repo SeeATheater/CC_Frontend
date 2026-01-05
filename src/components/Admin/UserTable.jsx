@@ -10,14 +10,14 @@ const UserTable = ({
 	setCurrentPage,
 	totalPages,
 	visibleColumns,
+	isLast,
+	isFirst,
+	loading,
+	searchLoading,
 }) => {
 	const navigate = useNavigate();
 
-	const allHeaders = Object.keys(data[0]);
-
-	const handleDetailClick = (link) => {
-		navigate(link);
-	};
+	const allHeaders = Object.keys(data[0] ?? {});
 
 	return (
 		<Wrapper>
@@ -32,7 +32,7 @@ const UserTable = ({
 					</tr>
 				</thead>
 				<tbody>
-					{data.slice(1).map((user, idx) => (
+					{data.slice(1).map((row, idx) => (
 						<tr key={idx}>
 							{allHeaders.map((key) => {
 								if (!visibleColumns.includes(key) && key !== 'manage')
@@ -41,39 +41,29 @@ const UserTable = ({
 								if (key === 'manage') {
 									return (
 										<StyledTd key={key}>
-											<DetailButton
-												onClick={() => handleDetailClick(user.manage)}
-											>
+											<DetailButton onClick={() => navigate(row.manage)}>
 												상세
 											</DetailButton>
 										</StyledTd>
 									);
 								}
-
-								if (key === 'situation') {
-									const situation = user[key];
-									let text = '';
-									let color = '';
-
-									if (situation === 'WAITING_APPROVAL') {
-										text = '확인전';
-										color = 'pink600';
-									} else if (situation === 'REJECTED') {
-										text = '반려';
-										color = 'gray400';
-									} else {
-										text = '등록';
-										color = 'grayMain';
-									}
-
+								if (key === 'amateurShowStatus') {
 									return (
-										<StyledTd key={key} $color={color}>
-											{text}
+										<StyledTd>
+											{row.amateurShowStatus === 'ONGOING' && (
+												<p className="black-txt">공연중</p>
+											)}
+											{row.amateurShowStatus === 'ENDED' && (
+												<p className="gray-txt">공연 종료</p>
+											)}
+											{row.amateurShowStatus === 'YET' && (
+												<p className="pink-txt">공연 전</p>
+											)}
 										</StyledTd>
 									);
 								}
 
-								return <StyledTd key={key}>{user[key]}</StyledTd>;
+								return <StyledTd key={key}>{row[key]}</StyledTd>;
 							})}
 						</tr>
 					))}
@@ -82,8 +72,8 @@ const UserTable = ({
 
 			<Pagination>
 				<PageBtn
-					onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-					disabled={currentPage === 1}
+					onClick={() => setCurrentPage(currentPage - 1)}
+					disabled={isFirst}
 				>
 					<ChevronLeftGray />
 				</PageBtn>
@@ -91,18 +81,16 @@ const UserTable = ({
 				{Array.from({ length: totalPages }, (_, i) => (
 					<PageBtn
 						key={i}
-						onClick={() => setCurrentPage(i + 1)}
-						active={currentPage === i + 1}
+						onClick={() => setCurrentPage(i)}
+						active={currentPage === i}
 					>
 						{i + 1}
 					</PageBtn>
 				))}
 
 				<PageBtn
-					onClick={() =>
-						setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-					}
-					disabled={currentPage === totalPages}
+					onClick={() => setCurrentPage(currentPage + 1)}
+					disabled={isLast}
 				>
 					<ChevronRightGray />
 				</PageBtn>
@@ -118,7 +106,7 @@ const ChevronLeftGray = styled(ChevronLeft)`
 	height: 16px;
 `;
 const ChevronRightGray = styled(ChevronRight)`
-	fill: ${({ theme }) => theme.colors.gray400};
+	color: ${({ theme }) => theme.colors.gray400};
 	height: 16px;
 `;
 const Wrapper = styled.div`
@@ -149,19 +137,16 @@ const StyledTable = styled.table`
 `;
 
 const StyledTd = styled.td`
-	color: ${({ theme, $color }) =>
-		theme.colors[$color] || theme.colors.grayMain};
-	&.situation-pink {
-		color: ${({ theme }) => theme.colors.pink600};
-	}
-	&.situation-gray400 {
-		color: ${({ theme }) => theme.colors.gray400};
-	}
-	&.situation-default {
+	.black-txt {
 		color: ${({ theme }) => theme.colors.grayMain};
 	}
+	.gray-txt {
+		color: ${({ theme }) => theme.colors.gray400};
+	}
+	.pink-txt {
+		color: ${({ theme }) => theme.colors.pink600};
+	}
 `;
-
 const DetailButton = styled.button`
 	width: 39px;
 	height: 20px;

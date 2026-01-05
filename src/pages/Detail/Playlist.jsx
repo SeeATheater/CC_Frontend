@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Hamburger from '@/components/Hamburger';
 import PlayCard from '@/components/Detail/PlayCard';
@@ -7,7 +8,7 @@ import NowShowing from '@/components/Detail/NowShowing';
 import WebPlayCard from '@/components/Detail/WebPlayCard';
 import WebListCard from '@/components/Detail/WebListCard';
 import Ticket from '@/assets/icons/Ticket.svg?react';
-import SearchBar from '@/components/SearchBar';
+import SearchPC from '@/pages/search/SearchPC';
 import HomeIconMenu from '@/components/HomeIconMenu';
 import Footer from '@/components/Footer';
 
@@ -17,9 +18,9 @@ import SamplePoster from '@/assets/mock/images/실종.png';
 
 function Playlist() {
 	const [current, setCurrent] = useState(0);
+	const navigate = useNavigate();
 
-	const token = 'producer';
-	localStorage.setItem('token', token);
+	const roleToken = sessionStorage.getItem('selectedRole');
 
 	const {
 		data: todayData,
@@ -42,6 +43,10 @@ function Playlist() {
 	} = useCustomFetch(`/amateurs/ongoing`);
 	console.log('ongoing:', ongoingData);
 
+	const toRegist = () => {
+		navigate(`/small-theater/register`);
+	};
+
 	return (
 		<Container>
 			<Web>
@@ -49,7 +54,7 @@ function Playlist() {
 					<HomeIconMenu isWeb={true} selectedMenu="plays" />
 				</SideMenuWrapper>
 				<WebContent>
-					<SearchBar />
+					<SearchPC />
 					<WebHot>
 						<h3 className="Todays">요즘 🔥HOT한 소극장 연극</h3>
 						<CardWrapper>
@@ -136,9 +141,9 @@ function Playlist() {
 						))}
 					</MappingArea>
 				</Now>
-				{token && (
+				{roleToken == 'PERFORMER' && (
 					<FixedProdButton>
-						<ProdButton>
+						<ProdButton onClick={toRegist}>
 							<Ticket height={28} />
 							<p>공연등록</p>
 						</ProdButton>

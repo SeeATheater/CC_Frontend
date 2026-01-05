@@ -1,49 +1,137 @@
+import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+
 import Masonry from '@/components/Masonry';
 import MasonryWeb from '@/components/MasonryWeb';
 import Hamburger from '@/components/Hamburger';
-import SearchBar from '@/components/SearchBar';
+import SearchPC from '@/pages/search/SearchPC';
 import HomeIconMenu from '@/components/HomeIconMenu';
+import GalleryIcon from '@/assets/icons/Gallery.svg?react';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
-import styled from 'styled-components';
-
 function Gallery() {
-	const token = 'producer';
-	localStorage.setItem('token', token);
+	const SIZE = 15;
+	const navigate = useNavigate();
+	const roleToken = sessionStorage.getItem('selectedRole');
 
-	const { data: picData, error, loading } = useCustomFetch(`/photoAlbums`);
-	console.log("picData", picData);
+	const mobileObserverRef = useRef(null);
+	const webObserverRef = useRef(null);
 
+	const { fetchData } = useCustomFetch();
 
-	if (loading || !picData?.result) {
-		return <div>로딩 중...</div>;
-	}
+	const [photoList, setPhotoList] = useState([]);
+	const [cursorId, setCursorId] = useState(null);
+	const [hasNext, setHasNext] = useState(true);
+	const [isFetching, setIsFetching] = useState(false);
+
+	const navigateToUpload = () => {
+		navigate('/production/upload_photo');
+		window.scrollTo(0, 0);
+	};
+
+	const fetchPhotos = async () => {
+		if (isFetching || !hasNext) return;
+		if (cursorId === null && photoList.length > 0) return;
+
+		setIsFetching(true);
+
+		const url =
+			cursorId === null
+				? `/photoAlbums?size=${SIZE}`
+				: `/photoAlbums?cursorId=${cursorId}&size=${SIZE}`;
+
+		try {
+			const res = await fetchData(url, 'GET');
+			const result = res?.data?.result;
+			console.log(result);
+
+			if (result) {
+				setPhotoList((prev) => [...prev, ...(result.photoAlbumDTOs || [])]);
+				setHasNext(result.hasNext);
+				setCursorId(result.nextCursor);
+			}
+		} finally {
+			setIsFetching(false);
+		}
+	};
+	useEffect(() => {
+		if (photoList.length === 0) {
+			fetchPhotos();
+		}
+	}, []);
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting && hasNext && !isFetching) {
+					fetchPhotos();
+				}
+			},
+			{
+				rootMargin: '100px',
+				threshold: 0,
+			},
+		);
+
+		if (mobileObserverRef.current) {
+			observer.observe(mobileObserverRef.current);
+		}
+		if (webObserverRef.current) {
+			observer.observe(webObserverRef.current);
+		}
+
+		return () => observer.disconnect();
+	}, [hasNext, isFetching, cursorId]);
 
 	return (
 		<>
 			<Mobile>
 				<Hamburger title={'사진첩'} />
-				<Masonry imageData={picData?.result} />
+				<Masonry imageData={photoList} />
+
+				<div ref={mobileObserverRef} />
+
+				{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
+				{!hasNext && <ExtraMessage>마지막 사진입니다.</ExtraMessage>}
+
+				{roleToken === 'PERFORMER' && (
+					<FixedProdButton>
+						<ProdButton onClick={navigateToUpload}>
+							<GalleryIcon height={28} />
+							<p>사진등록</p>
+						</ProdButton>
+					</FixedProdButton>
+				)}
 			</Mobile>
 
 			<Web>
 				<SideMenuWrapper>
-					<HomeIconMenu isWeb={true} selectedMenu="plays"/>
+					<HomeIconMenu isWeb={true} selectedMenu="gallery" />
 				</SideMenuWrapper>
+
 				<Container>
-					<SearchBar />
+					<SearchPC />
 					<TitleArea>
 						<h3>사진첩</h3>
-						<Button>사진 등록</Button>
+						{roleToken === 'PERFORMER' && (
+							<Button onClick={navigateToUpload}>사진 등록</Button>
+						)}
 					</TitleArea>
 
-					<MasonryWeb imageData={picData?.result} />
+					<MasonryWeb imageData={photoList} />
+
+					<div ref={webObserverRef} />
+
+					{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
+					{!hasNext && <ExtraMessage>마지막 사진입니다.</ExtraMessage>}
 				</Container>
 			</Web>
 		</>
 	);
 }
+
 export default Gallery;
 
 const SideMenuWrapper = styled.div`
@@ -106,4 +194,35 @@ const Button = styled.button`
 	font-size: ${({ theme }) => theme.font.fontSize.body14};
 	font-weight: ${({ theme }) => theme.font.fontWeight.bold};
 	color: ${({ theme }) => theme.colors.grayWhite};
+`;
+const FixedProdButton = styled.div`
+	position: fixed;
+	bottom: 170px;
+	right: 22px;
+	z-index: 100;
+`;
+
+const ProdButton = styled.div`
+	display: flex;
+	gap: 8px;
+	align-items: center;
+
+	padding: 8px 12px;
+	border-radius: 30px;
+
+	background: ${({ theme }) => theme.colors.pink500};
+	width: fit-content;
+
+	p {
+		font-size: ${({ theme }) => theme.font.fontSize.body14};
+		font-weight: ${({ theme }) => theme.font.fontWeight.extraBold};
+		color: ${({ theme }) => theme.colors.grayWhite};
+	}
+`;
+
+const ExtraMessage = styled.p`
+	text-align: center;
+	font-size: ${({ theme }) => theme.font.fontSize.body14};
+	font-weight: ${({ theme }) => theme.font.fontWeight.medium};
+	color: ${({ theme }) => theme.colors.grayMain};
 `;

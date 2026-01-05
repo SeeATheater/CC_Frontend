@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { searchAPI } from '@/pages/search/api/searchApi';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
@@ -7,9 +8,25 @@ import useAxios from '@/utils/hooks/useAxios';
 import ClosePinkBig from '@/assets/icons/ClosePinkBig.svg';
 import SearchIcon from '@/assets/icons/searchGrey.svg?react';
 
+const RECENT_SEARCHES_KEY = 'recentSearches';
+const MAX_RECENT_SEARCHES = 20;
+
 const SearchPC = () => {
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [recentSearches, setRecentSearches] = useState(['실종', '홍익극연구회', '카포네 트릴로지']);
+  
+  // localStorage에서 최근 검색어 불러오기
+  const loadRecentSearches = () => {
+    try {
+      const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error('최근 검색어 불러오기 실패:', error);
+      return [];
+    }
+  };
+
+  const [recentSearches, setRecentSearches] = useState(loadRecentSearches);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [upcomingShows, setUpcomingShows] = useState([]);
@@ -55,12 +72,26 @@ const SearchPC = () => {
     fetchUpcomingShows();
   }, []);
 
+  // localStorage에 최근 검색어 저장
+  const saveRecentSearches = (searches) => {
+    try {
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches));
+    } catch (error) {
+      console.error('최근 검색어 저장 실패:', error);
+    }
+  };
+
   const removeRecentSearch = (index) => {
-    setRecentSearches(prev => prev.filter((_, i) => i !== index));
+    setRecentSearches(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      saveRecentSearches(updated);
+      return updated;
+    });
   };
 
   const clearAllSearches = () => {
     setRecentSearches([]);
+    saveRecentSearches([]);
   };
 
   const handleSearch = (value) => {
@@ -117,7 +148,9 @@ const SearchPC = () => {
     if (newSearch) {
       setRecentSearches(prev => {
         const filteredSearches = prev.filter(search => search !== newSearch);
-        return [newSearch, ...filteredSearches].slice(0, 20);
+        const updated = [newSearch, ...filteredSearches].slice(0, MAX_RECENT_SEARCHES);
+        saveRecentSearches(updated);
+        return updated;
       });
     }
   };
@@ -200,20 +233,24 @@ const SearchPC = () => {
                     </ClearAllButton>
                   )}
                 </SectionHeader>
-                <RecentSearches>
-                  {recentSearches.map((search, index) => (
-                    <RecentSearchTag key={index} onClick={() => handleRecentSearchClick(search)}>
-                      {search}
-                      <DeleteButton 
-                        src={ClosePinkBig} 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeRecentSearch(index);
-                        }}
-                      />
-                    </RecentSearchTag>
-                  ))}
-                </RecentSearches>
+                {recentSearches.length > 0 ? (
+                  <RecentSearches>
+                    {recentSearches.map((search, index) => (
+                      <RecentSearchTag key={index} onClick={() => handleRecentSearchClick(search)}>
+                        {search}
+                        <DeleteButton 
+                          src={ClosePinkBig} 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeRecentSearch(index);
+                          }}
+                        />
+                      </RecentSearchTag>
+                    ))}
+                  </RecentSearches>
+                ) : (
+                  <NoRecentSearches>최근 검색어가 없습니다.</NoRecentSearches>
+                )}
               </RecentSearchSection>
 
               {/* 임박한 공연 */}
@@ -224,7 +261,7 @@ const SearchPC = () => {
                 ) : upcomingShows.length > 0 ? (
                   <UpcomingPerformances>
                     {upcomingShows.map((performance) => (
-                      <PerformanceCard key={performance.id}>
+                      <PerformanceCard key={performance.id} onClick={() => navigate(`/plays/detail/${performance.id}`)}>
                         <PerformanceImage>
                           <img 
                             src={performance.posterImageUrl} 
@@ -256,7 +293,7 @@ const SearchPC = () => {
               ) : displayResults.length > 0 ? (
                 <SearchResultsList>
                   {displayResults.map((result) => (
-                    <SearchResultItem key={result.id}>
+                    <SearchResultItem key={result.id} onClick={() => navigate(`/plays/detail/${result.id}`)}>
                       <ResultImage>
                         <img 
                           src={result.posterImageUrl} 
@@ -420,6 +457,13 @@ const DeleteButton = styled.img`
   height: 12px;
 
   &:hover {  }
+`;
+
+const NoRecentSearches = styled.div`
+  text-align: center;
+  color: #929292;
+  font-size: 14px;
+  padding: 20px 0;
 `;
 
 // 임박한 공연 영역   ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ

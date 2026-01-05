@@ -1,11 +1,32 @@
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 
 import Board from '@/assets/icons/board-filled.svg?react';
 import Logo from '@/assets/icons/logo.svg?react';
 import Movie from '@/assets/icons/movie-filled.svg?react';
 
-function Noti({ type, content, when, checked, onClick }) {
-	//REPLY(댓글 알림), COMMENT(댓글 알림), HOT(게시글 알림), AMATEURSHOW(좋아요 한 극단 공연 등록), TICKET(예매완료), REMIND(공연 당일 리마인드)
+function Noti({ contentId, type, content, when, checked, onClick }) {
+	const navigate = useNavigate();
+
+	//REPLY(댓글 알림), COMMENT(댓글 알림), HOT(게시글 알림),
+	//AMATEURSHOW(좋아요 한 극단 공연 등록), TICKET(예매완료), REMIND(공연 당일 리마인드)
+
+	const moveTo = () => {
+		let url = null;
+
+		if (type === 'COMMENT' || type === 'REPLY' || type === 'HOT') {
+			url = `/board/${contentId}`;
+		}
+
+		if (type === 'AMATEURSHOW' || type === 'TICKET' || type === 'REMIND') {
+			url = `/plays/detail/${contentId}`;
+		}
+
+		if (url) {
+			navigate(url);
+		}
+	};
+	
 	const renderIcon = () => {
 		if (type === 'AMATEURSHOW' || type === 'REMIND' || type === 'TICKET')
 			return <Movie width={16} />;
@@ -47,7 +68,7 @@ function Noti({ type, content, when, checked, onClick }) {
 	}
 
 	return (
-		<Container checked={checked} onClick={onClick}>
+		<Container checked={checked} onClick={(onClick, moveTo)}>
 			<div className="smallTitle">
 				{renderIcon()}
 				<p className="category">{getCategoryLabel()}</p>
