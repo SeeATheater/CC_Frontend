@@ -54,7 +54,7 @@ function BoardPreviewCardList({ data }) {
 				onMouseMove={handleMouseMove}
 			>
 				{data &&
-					data.map((item) => (
+					data?.result.content.map((item) => (
 						<Card key={item.boardId}>
 							<h3>{item.title}</h3>
 							<p>{item.content}</p>

@@ -21,7 +21,9 @@ function Masonry({ imageData }) {
 							<img src={data?.imageUrl} alt="공연사진" className="pic" />
 							<Text>
 								<p className="title">{data?.amateurShowName}</p>
-								{data?.performerName && <p className="theatre">{data.performerName}</p>}
+								{data?.performerName && (
+									<p className="theatre">{data.performerName}</p>
+								)}
 							</Text>
 						</Item>
 					))}
@@ -43,8 +45,7 @@ const EmptyMessage = styled.div`
 `;
 
 const ImageArea = styled.div`
-	//고정 너비에서 수정 필요
-	column-width: 176px;
+	column-count: 2;
 	column-gap: 11px;
 `;
 
