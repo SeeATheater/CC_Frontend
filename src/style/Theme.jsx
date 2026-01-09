@@ -31,10 +31,12 @@ const theme = {
 			body13: '13px',
 			body12: '12px',
 			body10: '10px',
+			body8: '8px',
 		},
 
 		fontWeight: {
 			regular: 400,
+			medium: 500,
 			bold: 700,
 			extraBold: 800,
 		},
