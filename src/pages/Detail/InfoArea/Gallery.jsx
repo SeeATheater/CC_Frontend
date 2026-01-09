@@ -5,7 +5,7 @@ import useCustomFetch from '@/utils/hooks/useCustomFetch';
 import Masonry from '@/components/Masonry';
 
 function Gallery(props) {
-	console.log(props.data.result.memberId);
+	//console.log(props.data.result.memberId);
 
 	const {
 		data: picData,
@@ -13,9 +13,9 @@ function Gallery(props) {
 		loading,
 	} = useCustomFetch(`/photoAlbums/member/${props?.data.result.memberId}`);
 
-	console.log('error:', error);
-	console.log('loading:', loading);
-	console.log('data:', picData);
+	//console.log('error:', error);
+	//console.log('loading:', loading);
+	//console.log('data:', picData);
 
 	return (
 		<Container>

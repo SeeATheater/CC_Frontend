@@ -1,21 +1,33 @@
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
+import useCustomFetch from '@/utils/hooks/useCustomFetch';
+
 import Board from '@/assets/icons/board-filled.svg?react';
 import Logo from '@/assets/icons/logo.svg?react';
 import Movie from '@/assets/icons/movie-filled.svg?react';
 
-function Noti({ contentId, type, content, when, checked, onClick }) {
+function Noti({ contentId, id, type, content, when, checked }) {
 	const navigate = useNavigate();
 
 	//REPLY(댓글 알림), COMMENT(댓글 알림), HOT(게시글 알림),
 	//AMATEURSHOW(좋아요 한 극단 공연 등록), TICKET(예매완료), REMIND(공연 당일 리마인드)
 
+	const { fetchData } = useCustomFetch();
+	const handleClick = async (noticeId) => {
+		console.log(`[PATCH 요청 시작] ID: ${noticeId}`);
+		try {
+			await fetchData(`/notice/${noticeId}`, 'PATCH');
+		} catch (error) {
+			console.error('알림 읽음 처리 실패', error);
+		}
+	};
+
 	const moveTo = () => {
 		let url = null;
 
 		if (type === 'COMMENT' || type === 'REPLY' || type === 'HOT') {
-			url = `/board/${contentId}`;
+			url = `/board/post/${contentId}`;
 		}
 
 		if (type === 'AMATEURSHOW' || type === 'TICKET' || type === 'REMIND') {
@@ -26,7 +38,14 @@ function Noti({ contentId, type, content, when, checked, onClick }) {
 			navigate(url);
 		}
 	};
-	
+
+	const handleContainerClick = async () => {
+		if (!checked) {
+			await handleClick(id);
+		}
+		moveTo();
+	};
+
 	const renderIcon = () => {
 		if (type === 'AMATEURSHOW' || type === 'REMIND' || type === 'TICKET')
 			return <Movie width={16} />;
@@ -58,17 +77,21 @@ function Noti({ contentId, type, content, when, checked, onClick }) {
 		const created = new Date(createdAt);
 		const diffMs = now - created;
 
+		const diffMinutes = Math.floor(diffMs / (1000 * 60));
 		const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+		if (diffMinutes < 60) {
+			return diffMinutes <= 0 ? '방금 전' : `${diffMinutes}분 전`;
+		}
 
 		if (diffHours < 24) {
 			return `${diffHours}시간 전`;
-		} else {
-			return `${created.getMonth() + 1}월 ${created.getDate()}일`;
 		}
+		return `${created.getFullYear()}.${created.getMonth() + 1}.${created.getDate()}`;
 	}
 
 	return (
-		<Container checked={checked} onClick={(onClick, moveTo)}>
+		<Container checked={checked} onClickCapture={handleContainerClick}>
 			<div className="smallTitle">
 				{renderIcon()}
 				<p className="category">{getCategoryLabel()}</p>
@@ -86,6 +109,9 @@ const Container = styled.div`
 	flex-direction: column;
 	gap: 12px;
 	padding: 16px 20px;
+
+	cursor: pointer;
+	pointer-events: auto;
 
 	background-color: ${({ checked, theme }) =>
 		checked ? theme.colors.grayWhite : theme.colors.pink100};

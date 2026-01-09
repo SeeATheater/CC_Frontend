@@ -1,9 +1,10 @@
 import styled from 'styled-components';
 import { useState } from 'react';
 
+import useCustomFetch from '@/utils/hooks/useCustomFetch';
+
 import Noti from '@/components/Notification/Noti';
 import PillToggleGroup from '@/components/PillToggleGroup';
-import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 function NotiComponent() {
 	const options = ['전체', '소극장 공연', '추천 공연'];
@@ -11,16 +12,7 @@ function NotiComponent() {
 	const [selectedOption, setSelectedOption] = useState('전체');
 
 	const { data: notiData, error, loading } = useCustomFetch(`/notice`);
-	const { fetchData: markAsRead } = useCustomFetch(null, 'PATCH');
 
-	const handleClick = async (noticeId) => {
-		try {
-			await markAsRead(`/notice/${noticeId}`);
-			location.reload();
-		} catch (error) {
-			console.error('알림 읽음 처리 실패', error);
-		}
-	};
 	const filteredNotices = notiData?.result?.items.filter((noti) => {
 		if (selectedOption === '전체') return true;
 		if (selectedOption === '추천 공연') return noti.noticeType === 'AD';
@@ -46,17 +38,18 @@ function NotiComponent() {
 				{filteredNotices?.map((noti) => (
 					<Noti
 						key={noti.id}
+						id={noti.id}
 						type={noti.noticeType}
-						noticeType={noti.noticeType}
 						content={noti.message}
 						contentId={noti.contentId}
 						when={noti.createdAt}
 						checked={noti.isRead}
-						onClick={() => handleClick(noti.id)}
 					/>
 				))}
 
-				{filteredNotices && <ExtraMessage>알림이 없습니다.</ExtraMessage>}
+				{filteredNotices && filteredNotices.length === 0 && (
+					<ExtraMessage>알림이 없습니다.</ExtraMessage>
+				)}
 			</NotiList>
 		</Box>
 	);
@@ -111,11 +104,11 @@ const NotiList = styled.div`
 	display: flex;
 	flex-direction: column;
 
-    gap: 2px;
+	gap: 2px;
 
-    @media (min-width: 768px) 
-        gap: 0px;
-	}	
+	@media (min-width: 768px) {
+		gap: 0px;
+	}
 `;
 
 const ExtraMessage = styled.p`

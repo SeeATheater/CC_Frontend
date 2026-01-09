@@ -12,7 +12,7 @@ import GalleryIcon from '@/assets/icons/Gallery.svg?react';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 function Gallery() {
-	const SIZE = 15;
+	const SIZE = 20;
 	const navigate = useNavigate();
 	const roleToken = sessionStorage.getItem('selectedRole');
 
@@ -75,10 +75,12 @@ function Gallery() {
 			},
 		);
 
-		if (mobileObserverRef.current) {
+		const isMobile = window.innerWidth < 768;
+
+		if (isMobile && mobileObserverRef.current) {
 			observer.observe(mobileObserverRef.current);
 		}
-		if (webObserverRef.current) {
+		if (!isMobile && webObserverRef.current) {
 			observer.observe(webObserverRef.current);
 		}
 

@@ -15,7 +15,7 @@ import Gallery from './InfoArea/Gallery';
 function Info({ playData }) {
 	const [activeTab, setActiveTab] = useState('perform');
 
-	console.log('InfoData:', playData);
+	//console.log('InfoData:', playData);
 
 	const displayGenre = playData.result.hashtag
 		.split('#')
