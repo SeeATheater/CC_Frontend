@@ -2,10 +2,12 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Hamburger from '@/components/Hamburger';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
+import { useAuth } from '@/context/AuthContext';
 function MyPageMenu() {
 	const navigate = useNavigate();
 	const role = sessionStorage.getItem('selectedRole');
 
+	const { logout } = useAuth();
 
 	const {
 		data,
@@ -31,10 +33,7 @@ function MyPageMenu() {
 		const res = await fetchData('/auth/logout', 'POST', {});
 
 		if (res?.status === 200) {
-			localStorage.removeItem('accessToken');
-			localStorage.removeItem('refreshToken');
-			sessionStorage.removeItem('selectedRole');
-			navigate('/login');
+			logout('/');
 		} else {
 			console.error('로그아웃 실패:', res);
 		}
@@ -43,12 +42,7 @@ function MyPageMenu() {
 		const res = await fetchData('/member/myPage/deActive', 'PATCH', {});
 
 		if (res?.status === 200) {
-			// 토큰 삭제
-			localStorage.removeItem('accessToken');
-			localStorage.removeItem('refreshToken');
-
-			// 로그인 페이지로 이동 (혹은 메인)
-			navigate('/login');
+			logout('/');
 		} else {
 			console.error('회원 비활성화 실패:', res);
 		}
