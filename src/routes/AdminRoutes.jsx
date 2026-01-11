@@ -24,49 +24,62 @@ import BoardManage from '@/pages/admin/board/BoardManage';
 import BoardManageDetail1 from '@/pages/admin/board/BoardManageDetail1';
 import BoardManageDetail2 from '@/pages/admin/board/BoardManageDetail2';
 
+import AdminProtectedRoute from '@/routes/AdminProtectedRoute';
+import AdminLoginPage from '@/pages/admin/AdminLoginPage';
+
 function AdminRoutes() {
 	return (
 		<Routes>
-			<Route path="/" element={<Admin />}>
-				<Route path="dashboard" element={<Dashboard />} />
+			<Route path="login" element={<AdminLoginPage />} />
 
-				<Route path="users" element={<Users />} />
-				<Route path="users/:userId" element={<UsersDetail />} />
+			<Route element={<AdminProtectedRoute />}>
+				<Route path="/" element={<Admin />}>
+					<Route path="dashboard" element={<Dashboard />} />
 
-				<Route path="gallery" element={<AdminGallery />} />
-				<Route path="gallery/:galleryId" element={<GalleryDetail />} />
+					<Route path="users" element={<Users />} />
+					<Route path="users/:userId" element={<UsersDetail />} />
 
-				<Route path="plays" element={<AdminPlays />} />
-				<Route path="plays/:playId" element={<PlaysDetail />} />
-				<Route path="plays/:playId/register" element={<AdminPlayRegister />} />
-				<Route path="plays/:playId/review" element={<AdminPlayReview />} />
+					<Route path="gallery" element={<AdminGallery />} />
+					<Route path="gallery/:galleryId" element={<GalleryDetail />} />
 
-				<Route path="register-requests" element={<RegisterRequests />} />
-				<Route
-					path="register-requests/:registerId"
-					element={<RegisterRequestDetail />}
-				/>
+					<Route path="plays" element={<AdminPlays />} />
+					<Route path="plays/:playId" element={<PlaysDetail />} />
+					<Route
+						path="plays/:playId/register"
+						element={<AdminPlayRegister />}
+					/>
+					<Route path="plays/:playId/review" element={<AdminPlayReview />} />
 
-				<Route path="tickets" element={<TicketManagement />} />
-				<Route path="tickets/:ticketId" element={<TicketManagementDetail />} />
+					<Route path="register-requests" element={<RegisterRequests />} />
+					<Route
+						path="register-requests/:registerId"
+						element={<RegisterRequestDetail />}
+					/>
 
-				<Route path="reservations" element={<ReservationManagement />} />
-				<Route
-					path="reservations/:id"
-					element={<ReservationManagementDetail />}
-				/>
+					<Route path="tickets" element={<TicketManagement />} />
+					<Route
+						path="tickets/:ticketId"
+						element={<TicketManagementDetail />}
+					/>
 
-				<Route path="refunds" element={<RefundManagement />} />
-				<Route path="refunds/:refundId" element={<RefundDetail />} />
+					<Route path="reservations" element={<ReservationManagement />} />
+					<Route
+						path="reservations/:id"
+						element={<ReservationManagementDetail />}
+					/>
 
-				<Route path="board" element={<BoardManage />} />
-				<Route path="board/:id" element={<BoardManageDetail1 />} />
-				<Route path="board/:id/comments" element={<BoardManageDetail2 />} />
+					<Route path="refunds" element={<RefundManagement />} />
+					<Route path="refunds/:refundId" element={<RefundDetail />} />
 
-				<Route path="inquiry" element={<Inquiry />} />
-				<Route path="inquiry/:inquiryId" element={<InquiryDetail />} />
+					<Route path="board" element={<BoardManage />} />
+					<Route path="board/:id" element={<BoardManageDetail1 />} />
+					<Route path="board/:id/comments" element={<BoardManageDetail2 />} />
 
-				<Route path="mypage" element={<MyPageManagement />} />
+					<Route path="inquiry" element={<Inquiry />} />
+					<Route path="inquiry/:inquiryId" element={<InquiryDetail />} />
+
+					<Route path="mypage" element={<MyPageManagement />} />
+				</Route>
 			</Route>
 		</Routes>
 	);
