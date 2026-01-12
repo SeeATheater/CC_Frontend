@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 function BoardPreviewCardList({ data }) {
+	const navigate=useNavigate();
 	const mockData = [
 		{
 			title: '상상도 못한 게시판..ㄴ(°0°)ㄱ',
