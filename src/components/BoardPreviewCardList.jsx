@@ -56,8 +56,8 @@ function BoardPreviewCardList({ data }) {
 				onMouseMove={handleMouseMove}
 			>
 				{data &&
-					data.map((item) => (
-						<Card key={item.boardId} onClick={() => navigate(`/board/post/${item.boardId}`)}>
+					data?.result.content.map((item) => (
+						<Card key={item.boardId}>
 							<h3>{item.title}</h3>
 							<p>{item.content}</p>
 						</Card>

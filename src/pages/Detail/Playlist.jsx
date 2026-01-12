@@ -101,28 +101,30 @@ function Playlist() {
 
 						<CarouselWrapper>
 							<CarouselTrack $current={current}>
-								{todayData?.result.map((data, idx) => (
-									<Slide key={data.amateurShowId}>
-										<PlayCard
-											key={data.amateurShowId}
-											name={data.name}
-											place={data.place}
-											posterImageUrl={data.posterImageUrl}
-											schedule={data.schedule}
-											amateurShowId={data.amateurShowId}
-										/>
-									</Slide>
-								))}
+								{todayData &&
+									todayData?.result.content.map((data, idx) => (
+										<Slide key={data.amateurShowId}>
+											<PlayCard
+												key={data.amateurShowId}
+												name={data.name}
+												place={data.place}
+												posterImageUrl={data.posterImageUrl}
+												schedule={data.schedule}
+												amateurShowId={data.amateurShowId}
+											/>
+										</Slide>
+									))}
 							</CarouselTrack>
 						</CarouselWrapper>
 						<IndicatorWrapper>
-							{todayData?.result.map((_, idx) => (
-								<Dot
-									key={idx}
-									className={idx === current ? 'active' : ''}
-									onClick={() => setCurrent(idx)}
-								/>
-							))}
+							{todayData &&
+								todayData?.result.content.map((_, idx) => (
+									<Dot
+										key={idx}
+										className={idx === current ? 'active' : ''}
+										onClick={() => setCurrent(idx)}
+									/>
+								))}
 						</IndicatorWrapper>
 					</MobileCarousel>
 				</Today>
@@ -243,8 +245,20 @@ const Today = styled.div`
 
 const CardWrapper = styled.div`
 	display: flex;
+	flex-wrap: nowrap;
+	overflow-x: auto;
+
 	gap: 32px;
+	width: 100%;
+
+	scroll-behavior: smooth;
+	&::-webkit-scrollbar {
+		display: none;
+	}
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 `;
+
 const CarouselWrapper = styled.div`
 	width: 100%;
 	overflow: hidden;
