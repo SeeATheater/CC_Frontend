@@ -22,7 +22,10 @@ function WebPlayCard({ name, posterImageUrl, place, schedule, amateurShowId }) {
 export default WebPlayCard;
 
 const Card = styled.div`
-	width: 362px;
+	flex: 0 0 calc((100% - (12px * 2)) / 3);
+	min-width: calc((100% - (12px * 2)) / 3);
+	box-sizing: border-box;
+
 	aspect-ratio: 1;
 	background: ${({ image }) =>
 		`linear-gradient(180deg, rgba(0, 0, 0, 0) 25.94%, rgba(0, 0, 0, 0.6) 77.94%),

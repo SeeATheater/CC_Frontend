@@ -13,6 +13,7 @@ import SmallTheaterRoutes from './routes/SmallTheaterRoutes.jsx';
 import Home from './pages/home/Home';
 import TicketingPage from './pages/ticketingpage/TicketingPage.jsx';
 import KakaoPayApprove from './pages/ticketingpage/pages/KakaoPayApprove.jsx';
+import KakaoPayComplete from './pages/ticketingpage/pages/KakaoPayComplete.jsx';
 import Board from './pages/board/Board';
 import Gallery from './pages/gallery/Gallery';
 import Info from './pages/info/Info';
@@ -46,7 +47,8 @@ function App() {
 
 			<Route path="/search" element={<SearchMobile />} />
 			<Route path="/ticketing/:playId" element={<TicketingPage />} />
-			<Route path="/kakaoPay/approve" element={<KakaoPayApprove />} />
+			<Route path="/kakaoPay/complete" element={<KakaoPayComplete />} />
+			{/*<Route path="/kakaoPay/approve" element={<KakaoPayApprove />} />*/}
 			<Route path="/board/*" element={<Board />} />
 			<Route path="/gallery" element={<Gallery />} />
 			<Route path="/info" element={<Info />} />

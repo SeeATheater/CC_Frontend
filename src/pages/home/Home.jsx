@@ -14,6 +14,7 @@ import Poster from '@/assets/images/test-poster2.png';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch.js';
 import { useNavigate } from 'react-router-dom';
+import Footer from '@/components/Footer';
 
 /* 코드 가독성 이슈로 추후 리팩토링 해야할듯 */
 const banners = [
@@ -56,10 +57,10 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
-	
-  const {
-		data: dataClosing,
+const navigate = useNavigate();
 
+const {
+	data: dataClosing,
 		loading: loadingClosing,
 		error: errorClosing,
 	} = useCustomFetch('/amateurs/closing');
@@ -101,7 +102,7 @@ function Home() {
 					>
 						<SearchPC />
 					</div>
-					<h1>오늘 마감인 공연</h1>
+					<h1>오늘 마감인 공연 (데이터 없음)</h1>
 					<div className="only-web">
 						{dataClosing?.result && (
 							<CarouselWeb banners={dataClosing?.result} />
@@ -129,17 +130,20 @@ function Home() {
 						</button>
 					</div>
 				</Wrapper>
-				<RegisterButton
+				<div className='only-web'>
+<RegisterButton
 					onClick={() => navigate('/small-theater/register/step1')}
 				>
 					<p>공연을 준비하고 있다면?</p>
 					<h1>공연 등록하러가기</h1>
 				</RegisterButton>
+				</div>
+				
 				{/*게시판 섹선*/}
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
 					<Bar>
-						<h1 style={{ fontSize: '14px', marginBottom: '12px' }}>
+						<h1 style={{ fontSize: '14px', marginBottom: '12px' }} onClick={()=>navigate('/board')}>
 							🔥지금 HOT 게시판
 						</h1>
 						<ChevronRight />
@@ -158,7 +162,9 @@ function Home() {
 						<button className="light only-mobile">게시판 보러가기</button>
 					</div>
 				</Wrapper>
+				<Footer />
 			</MainContent>
+			
 		</HomeWrapper>
 	);
 }

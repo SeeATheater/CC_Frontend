@@ -3,13 +3,17 @@ import styled from 'styled-components';
 
 function MasonryWeb({ imageData }) {
 	const hasImages = imageData?.length > 0;
-	console.log(imageData);
-
 	const navigate = useNavigate();
 	const goAlbum = (prodId, photoAlbumId) => {
 		if (!photoAlbumId) return;
 		navigate(`/production/album/${prodId}/${photoAlbumId}`);
 	};
+
+	console.log(
+		'중복 체크:',
+		imageData.map((d) => d.photoAlbumId),
+	);
+
 	return (
 		<>
 			{hasImages ? (
@@ -22,8 +26,8 @@ function MasonryWeb({ imageData }) {
 							<img src={data?.imageUrl} alt="공연사진" className="pic" />
 							<Text>
 								<p className="title">{data?.amateurShowName}</p>
-								{data.performerName && (
-									<p className="theatre">{data?.performerName}</p>
+								{data?.performerName && (
+									<p className="theatre">{data.performerName}</p>
 								)}
 							</Text>
 						</Item>
