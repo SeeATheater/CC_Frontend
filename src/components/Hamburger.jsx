@@ -49,8 +49,8 @@ function Hamburger({ hasLogo, title, back, noIcon }) {
 
 				{!noIcon && (
 					<Right>
-						<Alrert alt="알림" />
-						<Search alt="검색" onClick={() => navigate("/search")} />
+						<Alrert alt="알림" onClick={() => navigate('/notification')} />
+						<Search alt="검색" onClick={() => navigate('/search')} />
 					</Right>
 				)}
 			</ButtonArea>
