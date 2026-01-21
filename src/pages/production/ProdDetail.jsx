@@ -96,10 +96,10 @@ function ProdDetail() {
 				<Divide />
 				<MorePic>
 					<p className="galleryTitle">
-						'{picData?.result.performerName}'의 사진첩 더보기
+						'{AlbumData?.result.performerName}'의 사진첩 더보기
 					</p>
 					<ImgList>
-						{picData?.result.singlePhotoAlbumDTOs.map((data) => (
+						{picData?.result?.content.map((data) => (
 							<ImgCard
 								onClick={() => {
 									navigate(`/production/album/${prodId}/${data.photoAlbumId}`);
@@ -180,10 +180,10 @@ function ProdDetail() {
 					<Hr />
 					<MorePic>
 						<p className="galleryTitle">
-							'{picData?.result.performerName}'의 사진첩 더보기
+							'{AlbumData?.result.performerName}'의 사진첩 더보기
 						</p>
 						<ImgList>
-							{picData?.result.singlePhotoAlbumDTOs.map((data) => (
+							{picData?.result.content.map((data) => (
 								<ImgCard
 									onClick={() => {
 										navigate(
