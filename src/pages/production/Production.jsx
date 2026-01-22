@@ -6,6 +6,7 @@ import Hamburger from '@/components/Hamburger';
 import ProdGall from '@/components/Production/ProdGall';
 import ProdPlayCard from '@/components/ProdPlayCard';
 import LikedButton from '@/components/Production/LikedButton';
+import Footer from '@/components/Footer';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
@@ -53,107 +54,44 @@ function Production() {
 	return (
 		<>
 			<Mobile>
-				<Hamburger back={true} />
+				<Padding>
+					<Hamburger back={true} />
 
-				<Theatre>
-					<h3 className="production" onClick={navigateToDetail}>
-						{picData?.result.performerName}
-					</h3>
-					<LikedButton prodId={prodId} />
-				</Theatre>
-				<TabBar>
-					<TabItem
-						className={activeTab === 'plays' ? 'active' : ''}
-						onClick={() => setActiveTab('plays')}
-					>
-						연극
-					</TabItem>
-					<TabItem
-						className={activeTab === 'gallery' ? 'active' : ''}
-						onClick={() => setActiveTab('gallery')}
-					>
-						사진첩
-					</TabItem>
-				</TabBar>
-
-				<ContentArea>
-					{activeTab === 'plays' && (
-						<>
-							<SubText>{playData?.result.totalCount}개의 연극</SubText>
-							{roleToken == 'PERFORMER' && (
-								<FixedProdButton>
-									<ProdButton>
-										<Ticket height={28} />
-										<p>공연등록</p>
-									</ProdButton>
-								</FixedProdButton>
-							)}
-							<CardArea>
-								{playData?.result.shows.map((data) => (
-									<ProdPlayCard
-										detailAddress={data.detailAddress}
-										posterImageUrl={data.posterImageUrl}
-										showId={data.showId}
-										status={data.status}
-										title={data.title}
-									/>
-								))}
-							</CardArea>
-						</>
-					)}
-					{activeTab === 'gallery' && (
-						<>
-							<SubText>
-								{picData.result.singlePhotoAlbumDTOs.length}개의 사진첩
-							</SubText>
-							{roleToken == 'PERFORMER' && (
-								<FixedProdButton>
-									<ProdButton onClick={navigateToUpload}>
-										<Gallery height={28} />
-										<p>사진등록</p>
-									</ProdButton>
-								</FixedProdButton>
-							)}
-							<ProdGall imageData={picData} />
-						</>
-					)}
-				</ContentArea>
-			</Mobile>
-
-			<Web>
-				<SideBar />
-				<Container>
 					<Theatre>
-						<div className="theatreName">
-							<ChevronLeftGray onClick={goBack} />
-							<h3 className="production">{picData?.result.performerName}</h3>
-						</div>
-						{roleToken == 'PERFORMER' && activeTab === 'plays' && (
-							<Button>공연 등록</Button>
-						)}
-						{roleToken == 'PERFORMER' && activeTab === 'gallery' && (
-							<Button onClick={navigateToUpload}>사진 등록</Button>
-						)}
+						<h3 className="production" onClick={navigateToDetail}>
+							{picData?.result.performerName}
+						</h3>
+						<LikedButton prodId={prodId} />
 					</Theatre>
-					<AreaSelect>
-						<TabItemWeb
+					<TabBar>
+						<TabItem
 							className={activeTab === 'plays' ? 'active' : ''}
 							onClick={() => setActiveTab('plays')}
 						>
 							연극
-						</TabItemWeb>
-						<TabItemWeb
+						</TabItem>
+						<TabItem
 							className={activeTab === 'gallery' ? 'active' : ''}
 							onClick={() => setActiveTab('gallery')}
 						>
 							사진첩
-						</TabItemWeb>
-					</AreaSelect>
+						</TabItem>
+					</TabBar>
 
 					<ContentArea>
 						{activeTab === 'plays' && (
 							<>
 								<SubText>{playData?.result.totalCount}개의 연극</SubText>
+								{roleToken == 'PERFORMER' && (
+									<FixedProdButton>
+										<ProdButton
+											onClick={() => navigate('/small-theater/register/step1')}
+										>
+											<Ticket height={28} />
+											<p>공연등록</p>
+										</ProdButton>
+									</FixedProdButton>
+								)}
 								<CardArea>
 									{playData?.result.shows.map((data) => (
 										<ProdPlayCard
@@ -170,12 +108,88 @@ function Production() {
 						{activeTab === 'gallery' && (
 							<>
 								<SubText>
-									{picData.result.singlePhotoAlbumDTOs.length}개의 사진첩
+									{picLoading
+										? '로딩 중...'
+										: `${picData?.result?.content?.length || 0}개의 사진첩`}
 								</SubText>
+								{roleToken == 'PERFORMER' && (
+									<FixedProdButton>
+										<ProdButton onClick={navigateToUpload}>
+											<Gallery height={28} />
+											<p>사진등록</p>
+										</ProdButton>
+									</FixedProdButton>
+								)}
 								<ProdGall imageData={picData} />
 							</>
 						)}
 					</ContentArea>
+				</Padding>
+				<Footer />
+			</Mobile>
+
+			<Web>
+				<SideBar />
+				<Container>
+					<Padding>
+						<Theatre>
+							<div className="theatreName">
+								<ChevronLeftGray onClick={goBack} />
+								<h3 className="production">{picData?.result.performerName}</h3>
+							</div>
+							{roleToken == 'PERFORMER' && activeTab === 'plays' && (
+								<Button>공연 등록</Button>
+							)}
+							{roleToken == 'PERFORMER' && activeTab === 'gallery' && (
+								<Button onClick={navigateToUpload}>사진 등록</Button>
+							)}
+						</Theatre>
+						<AreaSelect>
+							<TabItemWeb
+								className={activeTab === 'plays' ? 'active' : ''}
+								onClick={() => setActiveTab('plays')}
+							>
+								연극
+							</TabItemWeb>
+							<TabItemWeb
+								className={activeTab === 'gallery' ? 'active' : ''}
+								onClick={() => setActiveTab('gallery')}
+							>
+								사진첩
+							</TabItemWeb>
+						</AreaSelect>
+
+						<ContentArea>
+							{activeTab === 'plays' && (
+								<>
+									<SubText>{playData?.result.totalCount}개의 연극</SubText>
+									<CardArea>
+										{playData?.result.shows.map((data) => (
+											<ProdPlayCard
+												detailAddress={data.detailAddress}
+												posterImageUrl={data.posterImageUrl}
+												showId={data.showId}
+												status={data.status}
+												title={data.title}
+											/>
+										))}
+									</CardArea>
+								</>
+							)}
+							{activeTab === 'gallery' && (
+								<>
+									<SubText>
+										{picLoading
+											? '로딩 중...'
+											: `${picData?.result?.content?.length || 0}개의 사진첩`}
+									</SubText>
+									<ProdGall imageData={picData} />
+								</>
+							)}
+						</ContentArea>
+					</Padding>
+
+					<Footer />
 				</Container>
 			</Web>
 		</>
@@ -188,8 +202,6 @@ const ChevronLeftGray = styled(ChevronLeft)`
 	color: ${({ theme }) => theme.colors.gray400};
 `;
 const Mobile = styled.div`
-	padding: 0 20px;
-
 	@media (min-width: 768px) {
 		display: none;
 	}
@@ -204,7 +216,6 @@ const Web = styled.div`
 const Container = styled.div`
 	width: 100%;
 	margin-left: 100px;
-	padding: 100px 100px 60px 60px;
 `;
 
 const Theatre = styled.div`
@@ -293,6 +304,17 @@ const CardArea = styled.div`
 
 	@media (min-width: 768px) {
 		gap: 80px;
+	}
+`;
+const Padding = styled.div`
+	padding: 0px 20px;
+	margin-bottom: 40px;
+
+	@media (min-width: 768px) {
+		padding: 60px 100px 100px 60px;
+		display: flex;
+		flex-direction: column;
+		gap: 40px;
 	}
 `;
 const ContentArea = styled.div`
