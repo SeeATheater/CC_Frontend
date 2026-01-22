@@ -5,32 +5,41 @@ import styled from 'styled-components';
 import Search from '@/assets/icons/searchBlack.svg?react';
 import SearchBg from '@/assets/icons/searchBlackBg.svg?react';
 import Image from '@/assets/mock/images/image1.png';
+import Carousel from '@/components/Carousel';
 
-import useCustomFetch from '@/utils/hooks/useAxios';
+import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 function GalleryDetail() {
 	const { galleryId } = useParams();
-	console.log('galleryId:', galleryId);
+	const [searchTerm, setSearchTerm] = useState(' ');
 
-	const {
-		data: picData,
-		error,
-		loading,
-	} = useCustomFetch(`/photoAlbums/${galleryId}`);
-	console.log('error:', error);
-	console.log('loading:', loading);
-	console.log('picData:', picData);
+	console.log('galleryId:', galleryId);
 
 	const {
 		data: AdminPicData,
 		error: AdError,
 		loading: AdLoading,
-	} = useCustomFetch(`/admin/photoAlbum/${galleryId}`);
+	} = useCustomFetch(galleryId ? `/admin/photoAlbum/${galleryId}` : null);
 	console.log('AdError:', AdError);
 	console.log('AdLoading:', AdLoading);
 	console.log('AdminPicData:', AdminPicData);
 
-	const [searchTerm, setSearchTerm] = useState('');
+	if (AdLoading) {
+		return (
+			<Container>
+				<Content>데이터를 로딩 중입니다...</Content>
+			</Container>
+		);
+	}
+
+	if (!AdminPicData) {
+		return (
+			<Container>
+				<Content>데이터가 존재하지 않습니다.</Content>
+			</Container>
+		);
+	}
+
 	return (
 		<Container>
 			<Content>
@@ -52,13 +61,12 @@ function GalleryDetail() {
 					</div>
 
 					<p className="uploader">
-						게시글 작성자: {AdminPicData?.result.uploaderName}
+						게시글 작성자: {AdminPicData?.result?.uploaderName}
 					</p>
 					<div className="gallery-content">
-						<img
-							src={picData?.result.imageResultDTOs[0].imageUrl}
-							alt="갤러리 이미지"
-						/>
+						<ImageArea>
+							<Carousel CarouselData={AdminPicData?.result.imageResultDTOs} />
+						</ImageArea>
 						<p>{AdminPicData?.result.content}</p>
 					</div>
 				</GallData>
@@ -96,17 +104,16 @@ const GallData = styled.div`
 		margin-bottom: 32px;
 	}
 	.gallery-content {
-		img {
-			height: 320px;
-			border-radius: 5px;
-			margin-bottom: 28px;
-		}
 		p {
 			max-width: 700px;
 		}
 		border: 1px solid #929292;
 		padding: 24px 28px;
 	}
+`;
+const ImageArea = styled.div`
+	width: 320px;
+	margin-bottom: 40px;
 `;
 
 const Title = styled.h3`
