@@ -7,6 +7,8 @@ import Alrert from '@/assets/icons/alrert.svg?react';
 import Search from '@/assets/icons/search.svg?react';
 import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 import Logo from '@/assets/icons/logo.svg?react';
+
+import { useAuth } from '@/context/AuthContext';
 import FullScreenMenu from './FullScreenMenu';
 
 /**
@@ -18,6 +20,7 @@ import FullScreenMenu from './FullScreenMenu';
  */
 function Hamburger({ hasLogo, title, back, noIcon }) {
 	const navigate = useNavigate();
+	const { isLoggedIn } = useAuth();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 	const goBack = () => {
@@ -49,7 +52,14 @@ function Hamburger({ hasLogo, title, back, noIcon }) {
 
 				{!noIcon && (
 					<Right>
-						<Alrert alt="알림" onClick={() => navigate('/notification')} />
+						<Alrert
+							alt="알림"
+							onClick={() => {
+								if (!isLoggedIn) {
+									navigate('/login');
+								} else navigate('/notification');
+							}}
+						/>
 						<Search alt="검색" onClick={() => navigate('/search')} />
 					</Right>
 				)}
