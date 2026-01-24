@@ -57,6 +57,7 @@ const banners = [
 
 function Home() {
 	const navigate = useNavigate();
+const role = sessionStorage.getItem('selectedRole');
 
 	const {
 		data: dataClosing,
@@ -129,15 +130,26 @@ function Home() {
 						</button>
 					</div>
 				</Wrapper>
-				<div className="only-web">
-					<RegisterButton
-						onClick={() => navigate('/small-theater/register/step1')}
-					>
-						<p>공연을 준비하고 있다면?</p>
-						<h1>공연 등록하러가기</h1>
-					</RegisterButton>
+				{role == 'PERFORMER' && <>
+				<div className='only-web'>
+				<RegisterButton
+					onClick={() => navigate('/small-theater/register/step1')}
+				>
+					<p>공연을 준비하고 있다면?</p>
+					<h1>공연 등록하러가기</h1>
+				</RegisterButton>
 				</div>
+				<div className='only-mobile'>
+				<RegisterButtonMobile
+					onClick={() => navigate('/small-theater/register/step1')}
+				>
+					<p>공연을 준비하고 있다면?</p>
+					<h1>공연 등록하러가기</h1>
+				</RegisterButtonMobile>
+				</div>
+				</>}
 
+				
 				{/*게시판 섹선*/}
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
@@ -268,5 +280,25 @@ const RegisterButton = styled.div`
 	h1 {
 		color: ${({ theme }) => theme.colors.pink600};
 		font-size: 20px;
+	}
+`;
+const RegisterButtonMobile = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	flex: 1;
+	max-width: 1180px;
+	background: ${({ theme }) => theme.colors.pink200};
+	padding: 8px;
+	margin: 30px 20px 0px 20px;
+
+	p {
+	font-size: 14px;	
+		color: ${({ theme }) => theme.colors.pink600};
+	}
+	h1 {
+		color: ${({ theme }) => theme.colors.pink600};
+		font-size: 16px;
 	}
 `;

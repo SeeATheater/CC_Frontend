@@ -29,7 +29,7 @@ import AdminRoutes from './routes/AdminRoutes.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import TestUploadPic from './pages/TEST/TestUploadPic';
 import SearchMobile from './pages/search/SearchMobile.jsx';
-
+import ServiceTerms from './pages/mypage/service-terms/ServiceTerms'
 function App() {
 	return (
 		<Routes>
@@ -72,6 +72,7 @@ function App() {
 			<Route path="*" element={<NotFoundPage />} />
 
 			<Route path="test/upload-pic" element={<TestUploadPic />} />
+			<Route path="/service" element={<ServiceTerms />} />
 		</Routes>
 	);
 }
