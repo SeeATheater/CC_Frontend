@@ -8,7 +8,7 @@ import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 function AdminPlays() {
 	const [currentPage, setCurrentPage] = useState(0);
-	const itemsPerPage = 10;
+	const itemsPerPage = 15;
 	const [searchTerm, setSearchTerm] = useState('');
 
 	const headerRow = {
@@ -29,9 +29,11 @@ function AdminPlays() {
 		loading: playLoading,
 	} = useCustomFetch(apiUrl);
 
+	console.log(playData)
+
 	const apiRows = useMemo(() => {
-		if (!playData || !playData.result) return [];
-		return playData?.result.map((item) => ({
+		if (!playData || !playData.result.content) return [];
+		return playData?.result?.content.map((item) => ({
 			showName: item.showName,
 			createdAt: item.createdAt,
 			performerName: item.performerName,
@@ -59,6 +61,7 @@ function AdminPlays() {
 	const totalPages = playData?.result.totalPages;
 	const isLast = playData?.result.last;
 	const isFirst = playData?.result.first;
+	const hasNext = playData?.result.hasNext
 
 	const paginatedData = [headerRow, ...apiRows];
 
@@ -85,6 +88,7 @@ function AdminPlays() {
 						totalPages={totalPages}
 						isLast={isLast}
 						isFirst={isFirst}
+						hasNext={hasNext}
 						visibleColumns={visibleColumns}
 					/>
 				</TableArea>

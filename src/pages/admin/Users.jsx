@@ -9,7 +9,7 @@ import React, { useState, useMemo } from 'react';
 
 function Users() {
 	const [currentPage, setCurrentPage] = useState(0);
-	const itemsPerPage = 10;
+	const itemsPerPage = 15;
 	const [searchTerm, setSearchTerm] = useState('');
 
 	const headerRow = {
@@ -30,7 +30,7 @@ function Users() {
 		error: userError,
 		loading: userLoading,
 	} = useCustomFetch(apiUrl);
-	console.log(userData?.result);
+	console.log(userData);
 
 	const apiRows = useMemo(() => {
 		if (!userData || !userData.result) return [];

@@ -23,7 +23,7 @@ function AdminGallery() {
 
 	const [searchTerm, setSearchTerm] = useState('');
 	const [currentPage, setCurrentPage] = useState(0);
-	const itemsPerPage = 10;
+	const itemsPerPage = 15;
 
 	const headerRow = {
 		title: '소극장 공연 이름',

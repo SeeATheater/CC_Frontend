@@ -59,8 +59,8 @@ function Home() {
 	const navigate = useNavigate();
 const role = sessionStorage.getItem('selectedRole');
 
-const {
-	data: dataClosing,
+	const {
+		data: dataClosing,
 		loading: loadingClosing,
 		error: errorClosing,
 	} = useCustomFetch('/amateurs/closing');
@@ -154,7 +154,10 @@ const {
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
 					<Bar>
-						<h1 style={{ fontSize: '14px', marginBottom: '12px' }} onClick={()=>navigate('/board')}>
+						<h1
+							style={{ fontSize: '14px', marginBottom: '12px' }}
+							onClick={() => navigate('/board')}
+						>
 							🔥지금 HOT 게시판
 						</h1>
 						<ChevronRight />
@@ -175,7 +178,6 @@ const {
 				</Wrapper>
 				<Footer />
 			</MainContent>
-			
 		</HomeWrapper>
 	);
 }
