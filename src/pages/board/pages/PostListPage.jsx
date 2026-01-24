@@ -21,6 +21,7 @@ import usePosts from '@/pages/board/hooks/usePosts';
 import useInfiniteScroll from '@/pages/board/hooks/useInfiniteScroll';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 import useAxios from '@/utils/hooks/useAxios';
+import Footer from '@/components/Footer';
 
 const PostListPage = () => {
   const [activeTab, setActiveTab] = useState('general');
@@ -236,6 +237,7 @@ const PostListPage = () => {
               )}
             </>
           )}
+          {isPC && (<Footer />)}
         </ContentArea>
         
         {!isPC && (

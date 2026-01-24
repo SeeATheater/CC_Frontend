@@ -28,6 +28,7 @@ import Tab from '@/pages/board/components/Icons/Tab.svg';
 import Lock from '@/pages/board/components/Icons/Lock.svg';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 import useAxios from '@/utils/hooks/useAxios';
+import Footer from '@/components/Footer';
 
 const PostDetailPage = () => {
   const { id } = useParams();
@@ -718,6 +719,7 @@ const PostDetailPage = () => {
         title="댓글을 수정하시겠어요?"
         actions={editModalActions}
       />
+      {isPC && (<Footer />)}
     </Container>
   );
 };

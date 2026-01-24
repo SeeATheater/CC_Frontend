@@ -168,42 +168,48 @@ const usePosts = () => {
   }, [userType]);
 
   // 게시글 목록 로드
-  const loadPosts = useCallback(async (category = 'general', pageNum = 0, reset = false) => {
-    if (loading) return;
-    
-    setLoading(true);
-    try {
-      const pageSize = isPC ? 6 : 20;
-      let incomingPosts = [];
+const loadPosts = useCallback(async (category = 'general', pageNum = 0, reset = false) => {
+  if (loading) return;
+  
+  setLoading(true);
+  try {
+    const pageSize = isPC ? 6 : 20;
+    let incomingPosts = [];
 
-      if (category === 'hot') {
-        const res = await boardApi.getHotBoards(fetchDataRef.current);
-        // useCustomFetch가 axios response를 반환하므로 .data 추출
-        const hotBoardsData = res.data || (res.isSuccess ? res.result : res);
-        incomingPosts = hotBoardsData.map(transformBoardData);
-        setHasMore(false);
-      } else {
-        const res = await boardApi.getBoardList(fetchDataRef.current, category, pageNum, pageSize);
-        // useCustomFetch가 axios response를 반환하므로 .data 추출
-        const boardData = res.data || (res.isSuccess ? res.result : res);
-        incomingPosts = boardData.content.map(transformBoardData);
-        setHasMore(!boardData.last);
-      }
-
-      if (reset) {
-        setPosts(incomingPosts);
-      } else {
-        setPosts(prev => {
-          const merged = [...prev, ...incomingPosts];
-          return merged.filter((post, idx, self) => idx === self.findIndex(p => p.id === post.id));
-        });
-      }
-    } catch (error) {
-      console.error('게시글 로드 실패:', error);
-    } finally {
-      setLoading(false);
+    if (category === 'hot') {
+      const res = await boardApi.getHotBoards(fetchDataRef.current);
+      // useCustomFetch가 axios response를 반환하므로 .data 추출 후 result 접근
+      const responseData = res.data || res;
+      const hotBoardsData = responseData.isSuccess ? responseData.result : responseData;
+      
+      // HOT 게시판 content 배열 처리 (배열 직접 반환 or content 속성)
+      const hotContent = Array.isArray(hotBoardsData) ? hotBoardsData : hotBoardsData.content;
+      incomingPosts = hotContent.map(transformBoardData);
+      setHasMore(hotBoardsData.hasNext || false);
+    } else {
+      const res = await boardApi.getBoardList(fetchDataRef.current, category, pageNum, pageSize);
+      // useCustomFetch가 axios response를 반환하므로 .data 추출
+      const responseData = res.data || res;
+      const boardData = responseData.isSuccess ? responseData.result : responseData;
+      
+      incomingPosts = boardData.content.map(transformBoardData);
+      setHasMore(!boardData.last);
     }
-  }, [isPC, transformBoardData, loading]); 
+
+    if (reset) {
+      setPosts(incomingPosts);
+    } else {
+      setPosts(prev => {
+        const merged = [...prev, ...incomingPosts];
+        return merged.filter((post, idx, self) => idx === self.findIndex(p => p.id === post.id));
+      });
+    }
+  } catch (error) {
+    console.error('게시글 로드 실패:', error);
+  } finally {
+    setLoading(false);
+  }
+}, [isPC, transformBoardData, loading]);
 
   // 더보기 
   const loadMore = useCallback((category) => {

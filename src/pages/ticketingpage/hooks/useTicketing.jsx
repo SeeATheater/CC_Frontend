@@ -273,14 +273,14 @@ const useTicketing = (amateurShowId) => {
       // axios 응답에서 data.result 추출
       const apiResponse1 = reserveResponse.data || reserveResponse;
       const ticketData = apiResponse1.result || apiResponse1;
-      const memberTicketId = ticketData.memberTicketId;
+      const tempTicketId = ticketData.tempTicketId;
 
-      if (!memberTicketId) {
+      if (!tempTicketId) {
         throw new Error('티켓 예매 중 오류가 발생했습니다.');
       }
 
       // 2단계: 카카오페이 결제 준비
-      const paymentResponse = await ticketingAPI.prepareKakaoPayment(fetchDataRef.current, memberTicketId);
+      const paymentResponse = await ticketingAPI.prepareKakaoPayment(fetchDataRef.current, tempTicketId);
       const apiResponse2 = paymentResponse.data || paymentResponse;
       const paymentData = apiResponse2.result || apiResponse2;  // axios 응답에서 data.result 추출
 

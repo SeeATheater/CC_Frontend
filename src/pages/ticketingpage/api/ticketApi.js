@@ -6,7 +6,7 @@ export const TICKET_ENDPOINTS = {
   TICKET_TYPES: (amateurShowId) => `/tickets/${amateurShowId}/selectTicket`,
   RESERVE_TICKET: (amateurShowId, amateurRoundId, amateurTicketId) => 
     `/tickets/${amateurShowId}/reserve?amateurRoundId=${amateurRoundId}&amateurTicketId=${amateurTicketId}`,
-  KAKAO_PAY_READY: (memberTicketId) => `/kakaoPay/ready?memberTicketId=${memberTicketId}`
+  KAKAO_PAY_READY: (tempTicketId) => `/kakaoPay/ready?tempTicketId=${tempTicketId}`
 };
 
 // 예매 관련 API 서비스
@@ -40,9 +40,9 @@ export const ticketingAPI = {
   },
 
   // 카카오페이 결제 준비
-  prepareKakaoPayment: async (fetchData, ticketId) => {
+  prepareKakaoPayment: async (fetchData, tempTicketId) => {
     const response = await fetchData(
-      TICKET_ENDPOINTS.KAKAO_PAY_READY(ticketId),
+      TICKET_ENDPOINTS.KAKAO_PAY_READY(tempTicketId),
       'POST'
     );
     return response;

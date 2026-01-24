@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import TopBar from '@/components/TopBar';
 import TopBarWeb from '@/components/TopBarWeb';
+import Footer from '@/components/Footer';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 
@@ -51,7 +52,7 @@ const MyQueryList = () => {
     switch (status) {
       case 'RECEIVED':
         return '답변 대기';
-      case 'ANSWERED':
+      case 'REPLIED':
         return '답변 완료';
       default:
         return '답변 대기';
@@ -60,8 +61,8 @@ const MyQueryList = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'ANSWERED':
-        return '#4CAF50';
+      case 'REPLIED':
+        return '#FFBEBB';
       case 'RECEIVED':
       default:
         return '#FFBEBB';

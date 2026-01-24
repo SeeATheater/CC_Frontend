@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import Like from '@/pages/board/components/Icons/Like.svg';
+import Comment from '@/pages/board/components/Icons/Comment.svg';
 import TopBar from '@/components/TopBar';
 import TopBarWeb from '@/components/TopBarWeb';
+import Footer from '@/components/Footer';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 
@@ -20,9 +23,14 @@ const MyPost = () => {
   const loadMyPosts = async () => {
     try {
       setLoading(true);
-      // API 호출 - 내가 쓴 글 조회 (임시 api 가정)
-      const response = await fetchData('/boards/my', 'GET');
-      const myPosts = response?.data?.content || response?.result?.content || [];
+      // API 호출 - 내가 쓴 글 조회
+      const response = await fetchData('/member/myPage/myBoard?page=0&size=20', 'GET');
+      
+      // 응답 데이터 추출 
+      const responseData = response.data || response;
+      const result = responseData.isSuccess ? responseData.result : responseData;
+      const myPosts = result.content || [];
+      
       setPosts(myPosts);
     } catch (error) {
       console.error('내가 쓴 글 조회 실패:', error);
@@ -115,11 +123,11 @@ const MyPost = () => {
                   <PostContent>{post.content}</PostContent>
                   <PostMeta>
                     <MetaItem>
-                      <span>👍</span>
+                      <img src={Like} alt="좋아요" width="20" height="20" />
                       <span>{post.likeCount || 0}</span>
                     </MetaItem>
                     <MetaItem>
-                      <span>💬</span>
+                      <img src={Comment} alt="댓글" width="20" height="20" /> 
                       <span>{post.commentCount || 0}</span>
                     </MetaItem>
                   </PostMeta>
