@@ -59,7 +59,7 @@ function Production() {
 
 					<Theatre>
 						<h3 className="production" onClick={navigateToDetail}>
-							{picData?.result.performerName}
+							{playData?.result.performerName}
 						</h3>
 						<LikedButton prodId={prodId} />
 					</Theatre>
@@ -135,7 +135,7 @@ function Production() {
 						<Theatre>
 							<div className="theatreName">
 								<ChevronLeftGray onClick={goBack} />
-								<h3 className="production">{picData?.result.performerName}</h3>
+								<h3 className="production">{playData?.result.performerName}</h3>
 							</div>
 							{roleToken == 'PERFORMER' && activeTab === 'plays' && (
 								<Button>공연 등록</Button>
