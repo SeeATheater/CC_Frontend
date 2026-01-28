@@ -74,7 +74,7 @@ const UserTable = ({
 			<Pagination>
 				<PageBtn
 					onClick={() => setCurrentPage(currentPage - 1)}
-					disabled={isFirst}
+					disabled={isFirst || currentPage === 0}
 				>
 					<ChevronLeftGray />
 				</PageBtn>
@@ -91,7 +91,11 @@ const UserTable = ({
 
 				<PageBtn
 					onClick={() => setCurrentPage(currentPage + 1)}
-					disabled={isLast === true || hasNext === false}
+					disabled={
+						isLast === true ||
+						hasNext === false ||
+						currentPage + 1 === totalPages
+					}
 				>
 					<ChevronRightGray />
 				</PageBtn>
