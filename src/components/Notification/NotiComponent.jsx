@@ -13,7 +13,7 @@ function NotiComponent() {
 
 	const { data: notiData, error, loading } = useCustomFetch(`/notice`);
 
-	const filteredNotices = notiData?.result?.items.filter((noti) => {
+	const filteredNotices = notiData?.result?.items?.filter((noti) => {
 		if (selectedOption === '전체') return true;
 		if (selectedOption === '추천 공연') return noti.noticeType === 'AD';
 		if (selectedOption === '소극장 공연') return noti.noticeType !== 'AD';

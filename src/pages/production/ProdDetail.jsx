@@ -28,6 +28,10 @@ function ProdDetail() {
 		navigate(-1);
 		window.scrollTo(0, 0);
 	};
+	const goDetail = (showId) => {
+		navigate(`/plays/detail/${showId}`);
+		window.scrollTo(0, 0);
+	};
 
 	const {
 		data: picData,
@@ -98,7 +102,7 @@ function ProdDetail() {
 					<Divide />
 					<MorePic>
 						<p className="galleryTitle">
-							'{AlbumData?.result.performerName}'의 사진첩 더보기
+							'{picData?.result?.content[0]?.performerName}'의 사진첩 더보기
 						</p>
 						<ImgList>
 							{picData?.result?.content.map((data) => (
@@ -155,7 +159,9 @@ function ProdDetail() {
 										<h3 className="title">
 											{AlbumData?.result.amateurShowName}
 										</h3>
-										<ChevronRightGray />
+										<ChevronRightGray
+											onClick={() => goDetail(AlbumData?.result?.amateurShowId)}
+										/>
 									</div>
 									<MenuWrapper ref={menuRef}>
 										<ThreeDots onClick={toggleMenu} />
@@ -197,7 +203,7 @@ function ProdDetail() {
 						<Hr />
 						<MorePic>
 							<p className="galleryTitle">
-								'{AlbumData?.result.performerName}'의 사진첩 더보기
+								'{picData?.result?.content[0]?.performerName}'의 사진첩 더보기
 							</p>
 							<ImgList>
 								{picData?.result.content.map((data) => (
@@ -231,9 +237,11 @@ export default ProdDetail;
 
 const ChevronLeftGray = styled(ChevronLeft)`
 	color: ${({ theme }) => theme.colors.gray400};
+	cursor: pointer;
 `;
 const ChevronRightGray = styled(ChevronRight)`
 	color: ${({ theme }) => theme.colors.gray400};
+	cursor: pointer;
 `;
 const StyledTrash = styled(Trash)`
 	color: ${({ theme }) => theme.colors.grayMain};
