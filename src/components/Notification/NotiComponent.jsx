@@ -1,28 +1,82 @@
 import styled from 'styled-components';
-import { useState } from 'react';
-
+import { useState, useEffect, useRef, useCallback } from 'react';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
-
 import Noti from '@/components/Notification/Noti';
 import PillToggleGroup from '@/components/PillToggleGroup';
 
 function NotiComponent() {
 	const options = ['전체', '소극장 공연', '추천 공연'];
+	const SIZE = 10;
 
 	const [selectedOption, setSelectedOption] = useState('전체');
+	const [notices, setNotices] = useState([]);
+	const [cursorId, setCursorId] = useState(null);
+	const [cursorCreated, setCursorCreated] = useState(null);
+	const [hasNext, setHasNext] = useState(true);
+	const [isFetching, setIsFetching] = useState(false);
 
-	const { data: notiData, error, loading } = useCustomFetch(`/notice`);
+	const isRequesting = useRef(false);
+	const observerRef = useRef(null);
+	const { fetchData } = useCustomFetch();
 
-	const filteredNotices = notiData?.result?.items?.filter((noti) => {
+	const fetchNoti = useCallback(async () => {
+		if (isRequesting.current || !hasNext) return;
+
+		isRequesting.current = true;
+		setIsFetching(true);
+
+		const url =
+			cursorId === null
+				? `/notice?size=${SIZE}`
+				: `/notice?cursorId=${cursorId}&cursorCreatedAt=${cursorCreated}&size=${SIZE}`;
+
+		try {
+			const res = await fetchData(url, 'GET');
+			const result = res?.data?.result;
+
+			if (result) {
+				setNotices((prev) => [...prev, ...(result.memberNotices || [])]);
+				setHasNext(result.hasNext);
+				setCursorId(result.nextCursorId);
+				setCursorCreated(result.nextCursorCreatedAt);
+			}
+		} catch (error) {
+			console.error('알림 로딩 실패:', error);
+		} finally {
+			isRequesting.current = false;
+			setIsFetching(false);
+		}
+	}, [cursorId, hasNext, isFetching, fetchData]);
+
+	useEffect(() => {
+		fetchNoti();
+	}, []);
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting && hasNext && !isFetching) {
+					fetchNoti();
+				}
+			},
+			{ rootMargin: '100px', threshold: 0 },
+		);
+
+		if (observerRef.current) {
+			observer.observe(observerRef.current);
+		}
+
+		return () => observer.disconnect();
+	}, [fetchNoti, hasNext, isFetching]);
+
+	const filteredNotices = notices.filter((noti) => {
 		if (selectedOption === '전체') return true;
 		if (selectedOption === '추천 공연') return noti.noticeType === 'AD';
 		if (selectedOption === '소극장 공연') return noti.noticeType !== 'AD';
 		return true;
 	});
-	console.log(filteredNotices);
 
-	if (loading) return <div>로딩 중...</div>;
-	if (error) return <div>알림을 불러오지 못했습니다.</div>;
+	console.log(notices);
 
 	return (
 		<Box>
@@ -35,7 +89,7 @@ function NotiComponent() {
 			</Toggle>
 
 			<NotiList>
-				{filteredNotices?.map((noti) => (
+				{filteredNotices.map((noti) => (
 					<Noti
 						key={noti.id}
 						id={noti.id}
@@ -47,7 +101,17 @@ function NotiComponent() {
 					/>
 				))}
 
-				{filteredNotices && filteredNotices.length === 0 && (
+				<div
+					ref={observerRef}
+					style={{
+						height: '50px',
+						marginBottom: '10px',
+					}}
+				>
+					{isFetching && <ExtraMessage>로딩 중...</ExtraMessage>}
+				</div>
+
+				{!isFetching && filteredNotices.length === 0 && (
 					<ExtraMessage>알림이 없습니다.</ExtraMessage>
 				)}
 			</NotiList>
@@ -56,7 +120,6 @@ function NotiComponent() {
 }
 
 export default NotiComponent;
-
 const Box = styled.div`
 	@media (min-width: 768px) {
 		width: 100%;
@@ -65,6 +128,7 @@ const Box = styled.div`
 		background-color: ${({ theme }) => theme.colors.grayWhite};
 		border-radius: 0px 5px 5px 5px;
 		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
 	}
 `;
 
