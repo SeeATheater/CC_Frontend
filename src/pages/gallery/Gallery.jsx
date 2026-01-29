@@ -19,11 +19,13 @@ function Gallery() {
 
 	const mobileObserverRef = useRef(null);
 	const webObserverRef = useRef(null);
+	const isRequesting = useRef(false);
 
 	const { fetchData } = useCustomFetch();
 
 	const [photoList, setPhotoList] = useState([]);
 	const [cursorId, setCursorId] = useState(null);
+	const [cursorUpdate, setCursorUpdate] = useState(null);
 	const [hasNext, setHasNext] = useState(true);
 	const [isFetching, setIsFetching] = useState(false);
 
@@ -33,27 +35,31 @@ function Gallery() {
 	};
 
 	const fetchPhotos = async () => {
-		if (isFetching || !hasNext) return;
-		if (cursorId === null && photoList.length > 0) return;
+		if (isRequesting.current || !hasNext) return;
+		//if (cursorId === null && photoList.length > 0) return;
 
+		isRequesting.current = true;
 		setIsFetching(true);
 
 		const url =
 			cursorId === null
 				? `/photoAlbums?size=${SIZE}`
-				: `/photoAlbums?cursorId=${cursorId}&size=${SIZE}`;
+				: `/photoAlbums?cursorId=${cursorId}&cursorUpdatedAt=${cursorUpdate}&size=${SIZE}`;
 
 		try {
 			const res = await fetchData(url, 'GET');
 			const result = res?.data?.result;
-			console.log(result);
+			console.log(url);
+			console.log(res?.data?.result);
 
 			if (result) {
 				setPhotoList((prev) => [...prev, ...(result.photoAlbumDTOs || [])]);
 				setHasNext(result.hasNext);
-				setCursorId(result.nextCursor);
+				setCursorId(result.nextCursorId);
+				setCursorUpdate(result.nextCursorUpdatedAt);
 			}
 		} finally {
+			isRequesting.current = false;
 			setIsFetching(false);
 		}
 	};
@@ -66,7 +72,7 @@ function Gallery() {
 	useEffect(() => {
 		const observer = new IntersectionObserver(
 			([entry]) => {
-				if (entry.isIntersecting && hasNext && !isFetching) {
+				if (entry.isIntersecting && hasNext && !isRequesting.current) {
 					fetchPhotos();
 				}
 			},
@@ -77,16 +83,18 @@ function Gallery() {
 		);
 
 		const isMobile = window.innerWidth < 768;
+		const target = isMobile
+			? mobileObserverRef.current
+			: webObserverRef.current;
 
-		if (isMobile && mobileObserverRef.current) {
-			observer.observe(mobileObserverRef.current);
-		}
-		if (!isMobile && webObserverRef.current) {
-			observer.observe(webObserverRef.current);
+		if (target) {
+			observer.observe(target);
 		}
 
 		return () => observer.disconnect();
 	}, [hasNext, isFetching, cursorId]);
+
+	console.log('photoList', photoList);
 
 	return (
 		<>
