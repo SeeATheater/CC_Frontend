@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import Hamburger from '@/components/Hamburger';
@@ -18,25 +18,81 @@ import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 
 function Production() {
 	const { prodId } = useParams();
+	const SIZE = 10;
 	const roleToken = sessionStorage.getItem('selectedRole');
-	//console.log(roleToken);
 
-	const {
-		data: playData,
-		error: playError,
-		loading: playLoading,
-	} = useCustomFetch(`/photoAlbums/member/${prodId}/shows?page=0&size=20`);
-	console.log('playData:', playData);
+	const [activeTab, setActiveTab] = useState('plays');
+	const navigate = useNavigate();
+
+	const [playTotalCount, setPlayTotalCount] = useState(0);
+	const [performerName, setPerformerName] = useState(null);
+
+	const [playList, setPlayList] = useState([]);
+	const [currentPage, setCurrentPage] = useState(0);
+	const [isFetching, setIsFetching] = useState(false);
+
+	const isRequesting = useRef(false);
+	const observerRef = useRef(null);
+	const { fetchData } = useCustomFetch();
+
+	const loadMorePlays = useCallback(async () => {
+		if (
+			isRequesting.current ||
+			(playTotalCount > 0 && playList.length >= playTotalCount)
+		)
+			return;
+
+		isRequesting.current = true;
+		setIsFetching(true);
+
+		const url = `/photoAlbums/member/${prodId}/shows?page=${currentPage}&size=${SIZE}`;
+
+		try {
+			const res = await fetchData(url, 'GET');
+			const result = res?.data?.result;
+
+			if (result) {
+				setPlayList((prev) => [...prev, ...(result.shows || [])]);
+				setPlayTotalCount(result.totalCount);
+				setPerformerName(result.performerName);
+				setCurrentPage((prev) => prev + 1);
+			}
+		} catch (error) {
+			console.error('공연 목록 로드 실패:', error);
+		} finally {
+			isRequesting.current = false;
+			setIsFetching(false);
+		}
+	}, [prodId, currentPage, playList.length, playTotalCount, fetchData]);
+
+	useEffect(() => {
+		loadMorePlays();
+	}, []);
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (
+					entry.isIntersecting &&
+					playList.length < playTotalCount &&
+					!isRequesting.current
+				) {
+					loadMorePlays();
+				}
+			},
+			{ threshold: 0.1 },
+		);
+
+		if (observerRef.current) observer.observe(observerRef.current);
+		return () => observer.disconnect();
+	}, [loadMorePlays, playList.length, playTotalCount]);
 
 	const {
 		data: picData,
 		error: picError,
 		loading: picLoading,
 	} = useCustomFetch(`/photoAlbums/member/${prodId}`);
-	console.log('picData:', picData);
-
-	const [activeTab, setActiveTab] = useState('plays');
-	const navigate = useNavigate();
+	console.log(picData);
 
 	const navigateToDetail = () => {
 		navigate(`/production/${prodId}/detail`);
@@ -51,6 +107,8 @@ function Production() {
 		window.scrollTo(0, 0);
 	};
 
+	//console.log('playList:', playList);
+
 	return (
 		<>
 			<Mobile>
@@ -59,7 +117,7 @@ function Production() {
 
 					<Theatre>
 						<h3 className="production" onClick={navigateToDetail}>
-							{playData?.result.performerName}
+							{performerName}
 						</h3>
 						<LikedButton prodId={prodId} />
 					</Theatre>
@@ -81,7 +139,7 @@ function Production() {
 					<ContentArea>
 						{activeTab === 'plays' && (
 							<>
-								<SubText>{playData?.result.totalCount}개의 연극</SubText>
+								<SubText>{playTotalCount}개의 연극</SubText>
 								{roleToken == 'PERFORMER' && (
 									<FixedProdButton>
 										<ProdButton
@@ -93,7 +151,7 @@ function Production() {
 									</FixedProdButton>
 								)}
 								<CardArea>
-									{playData?.result.shows.map((data) => (
+									{playList.map((data) => (
 										<ProdPlayCard
 											detailAddress={data.detailAddress}
 											posterImageUrl={data.posterImageUrl}
@@ -135,7 +193,7 @@ function Production() {
 						<Theatre>
 							<div className="theatreName">
 								<ChevronLeftGray onClick={goBack} />
-								<h3 className="production">{playData?.result.performerName}</h3>
+								<h3 className="production">{performerName}</h3>
 							</div>
 							{roleToken == 'PERFORMER' && activeTab === 'plays' && (
 								<Button>공연 등록</Button>
@@ -162,9 +220,9 @@ function Production() {
 						<ContentArea>
 							{activeTab === 'plays' && (
 								<>
-									<SubText>{playData?.result.totalCount}개의 연극</SubText>
+									<SubText>{playTotalCount}개의 연극</SubText>
 									<CardArea>
-										{playData?.result.shows.map((data) => (
+										{playList.map((data) => (
 											<ProdPlayCard
 												detailAddress={data.detailAddress}
 												posterImageUrl={data.posterImageUrl}
@@ -174,6 +232,7 @@ function Production() {
 											/>
 										))}
 									</CardArea>
+									<div ref={observerRef} style={{ height: '20px' }} />
 								</>
 							)}
 							{activeTab === 'gallery' && (
