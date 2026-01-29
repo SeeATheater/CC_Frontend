@@ -92,7 +92,7 @@ function Production() {
 		error: picError,
 		loading: picLoading,
 	} = useCustomFetch(`/photoAlbums/member/${prodId}`);
-	console.log(picData);
+	//console.log(picData);
 
 	const navigateToDetail = () => {
 		navigate(`/production/${prodId}/detail`);

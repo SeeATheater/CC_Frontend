@@ -11,8 +11,11 @@ function LikedButton({ prodId }) {
 	const { data: likeData, loading: initialLoading } = useCustomFetch(
 		`/member-like/like/${prodId}`,
 	);
+	//console.log('likeData', likeData);
 
-	const [liked, setLiked] = useState(false);
+	const [liked, setLiked] = useState(likeData?.result);
+
+	//console.log(liked);
 
 	useEffect(() => {
 		if (likeData?.result !== undefined) {
@@ -23,10 +26,10 @@ function LikedButton({ prodId }) {
 	const handleToggleLike = async () => {
 		if (!liked) {
 			const res = await fetchData(`/member-like/like/${prodId}`, 'POST');
-			if (res?.isSuccess) setLiked(true);
+			if (res?.data.isSuccess) setLiked(true);
 		} else {
 			const res = await fetchData(`/member-like/like/${prodId}`, 'DELETE');
-			if (res?.isSuccess) setLiked(false);
+			if (res?.data.isSuccess) setLiked(false);
 		}
 	};
 
