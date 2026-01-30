@@ -128,6 +128,12 @@ const QueryDetail = () => {
           )}
         </QueryDetailContainer>
       </ContentArea>
+      {isPC && (
+        <div style={{margin: '0px -70px -100px -70px'}}><Footer /></div>
+      )}
+      {!isPC && (
+        <div style={{margin: '0px 0px 0px 0px'}}><Footer /></div>
+      )}
     </Container>
   );
 };

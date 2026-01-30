@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import TopBar from '@/components/TopBar';
+import Modal from '@/pages/board/components/Modal';
+import useModal from '@/pages/board/hooks/useModal';
+import useNavigationBlocker from '@/pages/board/hooks/useNavigationBlocker';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 import Back from '@/pages/board/components/Icons/Back.svg';
@@ -16,25 +20,13 @@ const CreateQuery = () => {
     content: ''
   });
   
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isOpen: isExitModalOpen, openModal: openExitModal, closeModal: closeExitModal } = useModal();
 
-  useEffect(() => {
-    const hasContent = formData.title.trim() || formData.content.trim();
-    setHasUnsavedChanges(hasContent);
-  }, [formData]);
-
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  // 뒤로가기 차단
+  useNavigationBlocker(
+    !isExitModalOpen ? openExitModal : () => {}
+  );
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -56,7 +48,7 @@ const CreateQuery = () => {
       });
 
       if (response?.status === 200 || response?.data) {
-        navigate('/mypage/query/success');
+        navigate('/mypage/query/success', { replace: true }); 
       } else {
         alert('문의 등록에 실패했습니다.');
       }
@@ -68,13 +60,30 @@ const CreateQuery = () => {
     }
   };
 
+  // 백버튼: 모달 오픈
   const handleBack = () => {
-    if (hasUnsavedChanges) {
-      const confirmed = window.confirm('작성 중인 내용이 있습니다. 나가시겠습니까?');
-      if (!confirmed) return;
-    }
-    navigate(-1);
+    openExitModal();
   };
+
+  // 모달 액션
+  const exitModalActions = [
+    {
+      label: '취소',
+      type: 'cancel',
+      onClick: () => {
+        closeExitModal();
+        window.history.pushState(null, '', window.location.href);
+      }
+    },
+    {
+      label: '나가기',
+      type: 'confirm',
+      onClick: () => {
+        closeExitModal();
+        navigate('/mypage/query', { replace: true });
+      }
+    }
+  ];
 
   return (
     <Container>
@@ -124,6 +133,16 @@ const CreateQuery = () => {
           </FormField>
         </FormContainer>
       </ContentArea>
+
+      <Modal
+        isOpen={isExitModalOpen}
+        onClose={() => {
+          closeExitModal();
+          window.history.pushState(null, '', window.location.href);
+        }}
+        title="작성을 취소하시겠어요?"
+        actions={exitModalActions}
+      />
     </Container>
   );
 };

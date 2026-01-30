@@ -137,6 +137,12 @@ const MyPost = () => {
           </MobileList>
         )}
       </Wrapper>
+      {isPC && (
+        <div style={{margin: '0px -70px -100px -70px'}}><Footer /></div>
+      )}
+      {!isPC && (
+        <div style={{margin: '0px 0px 0px 0px'}}><Footer /></div>
+      )}
     </MyPostWrapper>
   );
 };
@@ -232,7 +238,7 @@ const MobileList = styled.div`
 
 const PostCard = styled.div`
   padding: 16px;
-  border: 1px solid ${({ theme }) => theme.colors.gray200};
+  border: 1px solid ${({ theme }) => theme.colors.gray300};
   border-radius: 8px;
   background: ${({ theme }) => theme.colors.grayWhite};
   cursor: pointer;
