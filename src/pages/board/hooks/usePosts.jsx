@@ -193,7 +193,8 @@ const loadPosts = useCallback(async (category = 'general', pageNum = 0, reset = 
       const boardData = responseData.isSuccess ? responseData.result : responseData;
       
       incomingPosts = boardData.content.map(transformBoardData);
-      setHasMore(!boardData.last);
+
+      setHasMore(boardData.hasNext || false);
     }
 
     if (reset) {
