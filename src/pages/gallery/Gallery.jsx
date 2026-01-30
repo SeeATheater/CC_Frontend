@@ -8,6 +8,7 @@ import Hamburger from '@/components/Hamburger';
 import SearchPC from '@/pages/search/SearchPC';
 import HomeIconMenu from '@/components/HomeIconMenu';
 import GalleryIcon from '@/assets/icons/Gallery.svg?react';
+import Footer from '@/components/Footer';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
@@ -90,13 +91,16 @@ function Gallery() {
 	return (
 		<>
 			<Mobile>
-				<Hamburger title={'사진첩'} />
-				<Masonry imageData={photoList} />
+				<Padding>
+					<Hamburger title={'사진첩'} />
+					<Masonry imageData={photoList} />
 
-				<div ref={mobileObserverRef} />
+					<div ref={mobileObserverRef} />
 
-				{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
-				{!hasNext && <ExtraMessage>마지막 사진입니다.</ExtraMessage>}
+					{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
+				</Padding>
+
+				{!hasNext && <Footer />}
 
 				{roleToken === 'PERFORMER' && (
 					<FixedProdButton>
@@ -114,20 +118,23 @@ function Gallery() {
 				</SideMenuWrapper>
 
 				<Container>
-					<SearchPC />
-					<TitleArea>
-						<h3>사진첩</h3>
-						{roleToken === 'PERFORMER' && (
-							<Button onClick={navigateToUpload}>사진 등록</Button>
-						)}
-					</TitleArea>
+					<Padding>
+						<SearchPC />
+						<TitleArea>
+							<h3>사진첩</h3>
+							{roleToken === 'PERFORMER' && (
+								<Button onClick={navigateToUpload}>사진 등록</Button>
+							)}
+						</TitleArea>
 
-					<MasonryWeb imageData={photoList} />
+						<MasonryWeb imageData={photoList} />
 
-					<div ref={webObserverRef} />
+						<div ref={webObserverRef} />
 
-					{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
-					{!hasNext && <ExtraMessage>마지막 사진입니다.</ExtraMessage>}
+						{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
+					</Padding>
+
+					{!hasNext && <Footer />}
 				</Container>
 			</Web>
 		</>
@@ -158,7 +165,6 @@ const Web = styled.div`
 	}
 `;
 const Mobile = styled.div`
-	padding: 0px 20px;
 	@media (min-width: 768px) {
 		display: none;
 	}
@@ -166,7 +172,6 @@ const Mobile = styled.div`
 
 const Container = styled.div`
 	width: 100%;
-	padding: 60px 100px 100px 60px;
 	margin-left: 100px;
 	display: flex;
 	flex-direction: column;
@@ -176,6 +181,17 @@ const Container = styled.div`
 		font-size: ${({ theme }) => theme.font.fontSize.headline24};
 		font-weight: ${({ theme }) => theme.font.fontWeight.extraBold};
 		color: ${({ theme }) => theme.colors.grayMain};
+	}
+`;
+
+const Padding = styled.div`
+	padding: 0px 20px;
+
+	@media (min-width: 768px) {
+		padding: 60px 100px 100px 60px;
+		display: flex;
+		flex-direction: column;
+		gap: 40px;
 	}
 `;
 const TitleArea = styled.div`

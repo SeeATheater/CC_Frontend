@@ -7,6 +7,7 @@ import useCustomFetch from '@/utils/hooks/useCustomFetch';
 import Hamburger from '@/components/Hamburger';
 import Carousel from '@/components/Carousel';
 import ConfirmDeleteModal from '@/components/Production/ConfirmDeleteModal';
+import Footer from '@/components/Footer';
 
 import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 import ChevronRight from '@/assets/icons/chevronRight.svg?react';
@@ -77,40 +78,48 @@ function ProdDetail() {
 	return (
 		<>
 			<Mobile>
-				<Hamburger back={true} title={picData?.result.performerName} />
+				<Padding>
+					<Hamburger back={true} title={picData?.result.performerName} />
 
-				<Content>
-					<Carousel
-						CarouselData={AlbumData?.result.imageResultWithPresignedUrlDTOs}
-					/>
+					<Content>
+						<Carousel
+							CarouselData={AlbumData?.result.imageResultWithPresignedUrlDTOs}
+						/>
 
-					<TextArea>
-						<h3 className="title">{AlbumData?.result.amateurShowName}</h3>
+						<TextArea>
+							<h3 className="title">{AlbumData?.result.amateurShowName}</h3>
 
-						<p className="subInfo">{AlbumData?.result.schedule}</p>
-						<p className="subInfo">{AlbumData?.result.detailAddress}</p>
-						<Hr />
-						<p className="message">{AlbumData?.result.content}</p>
-					</TextArea>
-				</Content>
-				<Divide />
-				<MorePic>
-					<p className="galleryTitle">
-						'{picData?.result.performerName}'의 사진첩 더보기
-					</p>
-					<ImgList>
-						{picData?.result.singlePhotoAlbumDTOs.map((data) => (
-							<ImgCard
-								onClick={() => {
-									navigate(`/production/album/${prodId}/${data.photoAlbumId}`);
-								}}
-							>
-								<img src={data?.imageResultWithPresignedUrlDTO?.presignedUrl} />
-								<p>{data.amateurShowName}</p>
-							</ImgCard>
-						))}
-					</ImgList>
-				</MorePic>
+							<p className="subInfo">{AlbumData?.result.schedule}</p>
+							<p className="subInfo">{AlbumData?.result.detailAddress}</p>
+							<Hr />
+							<p className="message">{AlbumData?.result.content}</p>
+						</TextArea>
+					</Content>
+					<Divide />
+					<MorePic>
+						<p className="galleryTitle">
+							'{AlbumData?.result.performerName}'의 사진첩 더보기
+						</p>
+						<ImgList>
+							{picData?.result?.content.map((data) => (
+								<ImgCard
+									onClick={() => {
+										navigate(
+											`/production/album/${prodId}/${data.photoAlbumId}`,
+										);
+									}}
+								>
+									<img
+										src={data?.imageResultWithPresignedUrlDTO?.presignedUrl}
+									/>
+									<p>{data.amateurShowName}</p>
+								</ImgCard>
+							))}
+						</ImgList>
+					</MorePic>
+				</Padding>
+
+				<Footer />
 			</Mobile>
 
 			<Web>
@@ -122,86 +131,96 @@ function ProdDetail() {
 					/>
 				)}
 				<SideBar />
+
 				<Container>
-					<Production>
-						<ChevronLeftGray onClick={goBack} />
-						<h3 className="productionName">{picData?.result.performerName}</h3>
-					</Production>
-					<Intro>
-						<div className="photoArea">
-							<Carousel
-								CarouselData={AlbumData?.result.imageResultWithPresignedUrlDTOs}
-							/>
-						</div>
-
-						<TextArea>
-							<div className="titleBar">
-								<div className="titleArea">
-									<h3 className="title">{AlbumData?.result.amateurShowName}</h3>
-									<ChevronRightGray />
-								</div>
-								<MenuWrapper ref={menuRef}>
-									<ThreeDots onClick={toggleMenu} />
-
-									{isMenuOpen && (
-										<Menu>
-											<MenuItem
-												onClick={() => {
-													setIsMenuOpen(false);
-													// 수정 로직
-												}}
-												className="editText"
-											>
-												<StyledPen width={16} height={16} />
-												<span>수정하기 </span>
-											</MenuItem>
-
-											<MenuItem
-												className="deleteText"
-												onClick={() => {
-													setIsMenuOpen(false);
-													setIsDeleteModalOpen(true);
-												}}
-											>
-												<StyledTrash width={16} height={16} />
-												<span>삭제하기</span>
-											</MenuItem>
-										</Menu>
-									)}
-								</MenuWrapper>
+					<Padding>
+						<Production>
+							<ChevronLeftGray onClick={goBack} />
+							<h3 className="productionName">
+								{picData?.result.performerName}
+							</h3>
+						</Production>
+						<Intro>
+							<div className="photoArea">
+								<Carousel
+									CarouselData={
+										AlbumData?.result.imageResultWithPresignedUrlDTOs
+									}
+								/>
 							</div>
-							<p className="subInfo">{AlbumData?.result.schedule}</p>
-							<p className="subInfo">{AlbumData?.result.detailAddress}</p>
-							<Hr />
-							<p className="message">{AlbumData?.result.content}</p>
-						</TextArea>
-					</Intro>
 
-					<Hr />
-					<MorePic>
-						<p className="galleryTitle">
-							'{picData?.result.performerName}'의 사진첩 더보기
-						</p>
-						<ImgList>
-							{picData?.result.singlePhotoAlbumDTOs.map((data) => (
-								<ImgCard
-									onClick={() => {
-										navigate(
-											`/production/album/${prodId}/${data.photoAlbumId}`,
-										);
-									}}
-								>
-									<img
-										src={data?.imageResultWithPresignedUrlDTO?.presignedUrl}
-									/>
-									<div className="textArea">
-										<p className="title">{data.amateurShowName}</p>
-										<p className="theatre">{data.detailAddress}</p>
+							<TextArea>
+								<div className="titleBar">
+									<div className="titleArea">
+										<h3 className="title">
+											{AlbumData?.result.amateurShowName}
+										</h3>
+										<ChevronRightGray />
 									</div>
-								</ImgCard>
-							))}
-						</ImgList>
-					</MorePic>
+									<MenuWrapper ref={menuRef}>
+										<ThreeDots onClick={toggleMenu} />
+
+										{isMenuOpen && (
+											<Menu>
+												<MenuItem
+													onClick={() => {
+														setIsMenuOpen(false);
+														// 수정 로직
+													}}
+													className="editText"
+												>
+													<StyledPen width={16} height={16} />
+													<span>수정하기 </span>
+												</MenuItem>
+
+												<MenuItem
+													className="deleteText"
+													onClick={() => {
+														setIsMenuOpen(false);
+														setIsDeleteModalOpen(true);
+													}}
+												>
+													<StyledTrash width={16} height={16} />
+													<span>삭제하기</span>
+												</MenuItem>
+											</Menu>
+										)}
+									</MenuWrapper>
+								</div>
+								<p className="subInfo">{AlbumData?.result.schedule}</p>
+								<p className="subInfo">{AlbumData?.result.detailAddress}</p>
+								<Hr />
+								<p className="message">{AlbumData?.result.content}</p>
+							</TextArea>
+						</Intro>
+
+						<Hr />
+						<MorePic>
+							<p className="galleryTitle">
+								'{AlbumData?.result.performerName}'의 사진첩 더보기
+							</p>
+							<ImgList>
+								{picData?.result.content.map((data) => (
+									<ImgCard
+										onClick={() => {
+											navigate(
+												`/production/album/${prodId}/${data.photoAlbumId}`,
+											);
+										}}
+									>
+										<img
+											src={data?.imageResultWithPresignedUrlDTO?.presignedUrl}
+										/>
+										<div className="textArea">
+											<p className="title">{data.amateurShowName}</p>
+											<p className="theatre">{data.detailAddress}</p>
+										</div>
+									</ImgCard>
+								))}
+							</ImgList>
+						</MorePic>
+					</Padding>
+					<Footer />
 				</Container>
 			</Web>
 		</>
@@ -224,8 +243,6 @@ const StyledPen = styled(EditPen)`
 `;
 
 const Mobile = styled.div`
-	padding: 0 20px 20px 20px;
-
 	@media (min-width: 768px) {
 		display: none;
 	}
@@ -242,8 +259,19 @@ const Container = styled.div`
 	width: 100%;
 
 	@media (min-width: 768px) {
-		//margin-left: 100px;
-		padding: 100px 100px 60px 160px;
+		margin-left: 100px;
+	}
+`;
+
+const Padding = styled.div`
+	padding: 0px 20px;
+	margin-bottom: 40px;
+
+	@media (min-width: 768px) {
+		padding: 60px 100px 100px 60px;
+		display: flex;
+		flex-direction: column;
+		gap: 40px;
 	}
 `;
 
@@ -261,6 +289,8 @@ const Content = styled.div`
 	margin-bottom: 40px;
 `;
 const TextArea = styled.div`
+	flex: 1;
+
 	.title {
 		font-size: ${({ theme }) => theme.font.fontSize.headline20};
 		font-weight: ${({ theme }) => theme.font.fontWeight.extraBold};
@@ -297,8 +327,6 @@ const TextArea = styled.div`
 	}
 
 	@media (min-width: 768px) {
-		//width: 700px;
-
 		.titleArea {
 			display: flex;
 			gap: 15px;

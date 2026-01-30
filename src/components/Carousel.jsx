@@ -8,10 +8,19 @@ function Carousel({ CarouselData }) {
 		return <p>이미지가 없습니다.</p>;
 	}
 
+	const getImageUrl = (item) => {
+		if (item.presignedUrl) {
+			return item.presignedUrl;
+		}
+		if (item.keyName) {
+			return `https://ccbucket-0528.s3.ap-northeast-2.amazonaws.com/${item.keyName}`;
+		}
+	};
+
 	return (
 		<Container>
 			<ImageArea>
-				<img src={CarouselData[currentIndex].presignedUrl} />
+				<img src={getImageUrl(CarouselData[currentIndex])} />
 			</ImageArea>
 
 			<DotWrapper>

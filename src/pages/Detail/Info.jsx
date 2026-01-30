@@ -2,10 +2,11 @@ import styled from 'styled-components';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { useAuth } from '@/context/AuthContext';
+
 import Location from '@/assets/icons/location.svg?react';
 import Time from '@/assets/icons/time.svg?react';
 import Price from '@/assets/icons/price.svg?react';
-
 import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 
 import Cast from './InfoArea/Cast';
@@ -13,6 +14,7 @@ import Perform from './InfoArea/Perform';
 import Gallery from './InfoArea/Gallery';
 
 function Info({ playData }) {
+	const { isLoggedIn } = useAuth();
 	const [activeTab, setActiveTab] = useState('perform');
 
 	//console.log('InfoData:', playData);
@@ -45,15 +47,16 @@ function Info({ playData }) {
 	const { playId } = useParams();
 	// 예매 버튼 클릭 핸들러
 	const handleBookClick = () => {
+		if (!isLoggedIn) {
+			navigate('/login');
+			return null;
+		}
 		if (playId) {
-			// /ticketing/:playId 경로로 이동
-			navigate(`/ticketing/${playId}`); 
+			navigate(`/ticketing/${playId}`);
 		} else {
 			console.error('Play ID is missing for ticketing.');
-			// 임시 - playId가 없는 경우, 필요하다면 적절한 에러 페이지나 홈으로 이동하도록 설정
 		}
 	};
-
 
 	return (
 		<Container>

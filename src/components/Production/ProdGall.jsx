@@ -2,8 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 function ProdGall({ imageData }) {
-	const hasImages = imageData?.result?.singlePhotoAlbumDTOs.length > 0;
-	const productionId = imageData?.result.number;
+	const hasImages = imageData?.result?.content.length > 0;
 
 	const navigate = useNavigate();
 
@@ -11,14 +10,18 @@ function ProdGall({ imageData }) {
 		<>
 			{hasImages ? (
 				<ImageArea>
-					{imageData?.result?.singlePhotoAlbumDTOs.map((data, idx) => (
+					{imageData?.result?.content.map((data, idx) => (
 						<Item
 							key={idx}
 							onClick={() => {
 								navigate(`/production/album/${data.photoAlbumId}`);
 							}}
 						>
-							<img src={data?.imageUrl} alt="공연사진" className="pic" />
+							<img
+								src={data?.imageResultWithPresignedUrlDTO?.presignedUrl}
+								alt="공연사진"
+								className="pic"
+							/>
 							<Text>
 								<p className="title">{data?.amateurShowName}</p>
 								{data.detailAddress && (

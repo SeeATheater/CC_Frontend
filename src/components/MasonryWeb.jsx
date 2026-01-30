@@ -9,11 +9,6 @@ function MasonryWeb({ imageData }) {
 		navigate(`/production/album/${prodId}/${photoAlbumId}`);
 	};
 
-	console.log(
-		'중복 체크:',
-		imageData.map((d) => d.photoAlbumId),
-	);
-
 	return (
 		<>
 			{hasImages ? (

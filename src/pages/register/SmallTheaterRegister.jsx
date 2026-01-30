@@ -8,6 +8,15 @@ import Footer from '@/components/Footer';
 
 function SmallTheaterRegister() {
 	const navigate = useNavigate();
+	
+	useEffect(() => {
+		const token = sessionStorage.getItem('accessToken');
+		const role = sessionStorage.getItem('role'); // 예: 'USER', 'PRODUCER'
+
+		if (!token || role === 'USER') {
+			navigate('/login', { replace: true });
+		}
+	}, [navigate]);
 	const location = useLocation();
 
 	const currentStep = Number(

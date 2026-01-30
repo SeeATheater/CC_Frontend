@@ -12,6 +12,7 @@ const UserTable = ({
 	visibleColumns,
 	isLast,
 	isFirst,
+	hasNext,
 	loading,
 	searchLoading,
 }) => {
@@ -90,7 +91,7 @@ const UserTable = ({
 
 				<PageBtn
 					onClick={() => setCurrentPage(currentPage + 1)}
-					disabled={isLast}
+					disabled={isLast === true || hasNext === false}
 				>
 					<ChevronRightGray />
 				</PageBtn>

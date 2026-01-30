@@ -14,6 +14,7 @@ import UploadCarousel from '@/components/Production/UploadCarousel';
 import TopBar from '@/components/TopBar';
 import Modal from '@/components/Production/Modal';
 import CalendarPeriod from '@/components/CalendarPeriod';
+import Footer from '@/components/Footer';
 
 import ChevronDown from '@/assets/icons/chevronDown.svg?react';
 
@@ -297,6 +298,7 @@ function UploadPic() {
 						onChange={(e) => setTextContent(e.target.value)}
 					/>
 				</Content>
+				<Footer />
 				{showModal && (
 					<Modal
 						onClose={() => setShowModal(false)}
@@ -348,10 +350,11 @@ function UploadPic() {
 													</LabelWrapper>
 												</OptionItem>
 											))}
+											{/* 수정된 부분: 클릭 시 지정된 경로로 이동 */}
 											<OptionItem
 												isNew
 												onClick={() => {
-													setShowCalendar(true);
+													navigate('/small-theater/register/step1'); // 경로 이동
 													setMenuOpen(false);
 												}}
 											>
@@ -391,6 +394,7 @@ function UploadPic() {
 						/>
 					</Content>
 
+					<Footer />
 					{showCalendar && (
 						<CalendarWrapper>
 							<CalendarPeriod onChange={handleCalendarSubmit} />
@@ -420,7 +424,6 @@ const Web = styled.div`
 	@media (min-width: 768px) {
 		width: 100vw;
 		display: flex;
-		padding: 100px 100px 100px 160px;
 	}
 `;
 const Container = styled.div`
@@ -458,6 +461,7 @@ const Content = styled.div`
 	}
 
 	@media (min-width: 768px) {
+		padding: 100px 100px 100px 160px;
 		.add {
 			font-size: ${({ theme }) => theme.font.fontSize.title16};
 			font-weight: ${({ theme }) => theme.font.fontWeight.bold};
