@@ -46,11 +46,12 @@ const SearchMobile = () => {
       try {
         setIsInitialLoading(true);
         const response = await searchAPI.getShowIncoming(fetchData);
-        const showData = response.data.isSuccess ? response.data.result : response.data;
+        const responseData = response.data.isSuccess ? response.data.result : response.data;
         
-        if (showData && Array.isArray(showData)) {
+        // content 배열 접근
+        if (responseData && responseData.content && Array.isArray(responseData.content)) {
           // API 응답을 임박한 공연 형태로 변환 (상위 4개만)
-          const formattedShows = showData.slice(0, 4).map((show, index) => ({
+          const formattedShows = responseData.content.slice(0, 4).map((show, index) => ({
             id: show.amateurShowId,
             rank: index + 1,
             title: show.name,
@@ -112,16 +113,17 @@ const SearchMobile = () => {
       const response = await searchAPI.searchShows(fetchData, keyword.trim());
       const searchData = response.data.isSuccess ? response.data.result : response.data;
       
-      if (searchData && searchData.content && Array.isArray(searchData.content)) {
+      // searchShowDTOs
+      if (searchData && searchData.searchShowDTOs && Array.isArray(searchData.searchShowDTOs)) {
         // API 응답을 기존 형태로 변환
-        const formattedResults = searchData.content.map(item => ({
+        const formattedResults = searchData.searchShowDTOs.map(item => ({
           id: item.showId,
           title: item.title,
           company: item.performerName,
-          venue: item.hallName,
+          venue: item.hallName || '정보없음', // null 처리
           date: item.schedule,
-          status: getStatusText(item.status),
-          isActive: item.status === 'ONGOING',
+          status: item.status, // 한글로 옴 ("판매 중", "공연 종료", etc)
+          isActive: item.status === '판매 중',
           posterImageUrl: item.posterImageUrl
         }));
         
@@ -162,17 +164,17 @@ const SearchMobile = () => {
     performSearch(search);
   };
 
-  // API 상태 텍스트 변환 함수
-  const getStatusText = (status) => {
-    const statusMap = {
-      'ONGOING': '판매중',
-      'YET': '판매예정',
-      'ENDED': '공연종료',
-      'WAITING_APPROVAL': '승인대기',
-      'REJECTED': '반려'
-    };
-    return statusMap[status] || '정보없음';
-  };
+  // API 상태 텍스트 변환 함수 -> 제거 (API가 한글로 보내줌)
+  // const getStatusText = (status) => {
+  //   const statusMap = {
+  //     'ONGOING': '판매중',
+  //     'YET': '판매예정',
+  //     'ENDED': '공연종료',
+  //     'WAITING_APPROVAL': '승인대기',
+  //     'REJECTED': '반려'
+  //   };
+  //   return statusMap[status] || '정보없음';
+  // };
 
   const displayResults = hasSearched ? searchResults : [];
 
@@ -520,7 +522,7 @@ const ResultInfo = styled.div`
 `;
 
 const ResultStatus = styled.div`
-  width: ${props => props.$isActive ? '43px' : '52px'};
+  width: fit-content;
   padding: 4px 8px;
   border-radius: 3px;
   color: ${props => props.$isActive ? '#F67676' : '#929292'};

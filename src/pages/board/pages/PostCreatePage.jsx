@@ -23,6 +23,7 @@ import Header from '@/pages/board/components/BoardHeader';
 import Modal from '@/pages/board/components/Modal';
 import useModal from '@/pages/board/hooks/useModal';
 import usePosts from '@/pages/board/hooks/usePosts';
+import useNavigationBlocker from '@/pages/board/hooks/useNavigationBlocker'; 
 import { validateImageFiles, extractKeyNameFromUrl } from '@/pages/board/api/imageApi';
 import Camera from '@/pages/board/components/Icons/Camera.svg';
 import useResponsive from '@/pages/board/hooks/useResponsive';
@@ -49,11 +50,14 @@ const PostCreatePage = () => {
     images: []
   });
 
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [historyPushed, setHistoryPushed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [originalData, setOriginalData] = useState(null);
   const { isOpen: isExitModalOpen, openModal: openExitModal, closeModal: closeExitModal } = useModal();
+
+  // 모달을 통해서만 Back
+  useNavigationBlocker(
+    !isExitModalOpen ? openExitModal : () => {}
+  );
 
   // 수정 모드일 때 기존 게시글 데이터 로드
   useEffect(() => {
@@ -74,7 +78,6 @@ const PostCreatePage = () => {
           ? (Array.isArray(existingPost.image) 
               ? existingPost.image.map((url, index) => {
                   const keyName = extractKeyNameFromUrl(url);
-                  console.log(`기존 이미지 ${index} URL:`, url, '-> keyName:', keyName);
                   return {
                     id: `existing_${index}`,
                     url: url,
@@ -84,7 +87,6 @@ const PostCreatePage = () => {
                 })
               : (() => {
                   const keyName = extractKeyNameFromUrl(existingPost.image);
-                  console.log('기존 이미지 URL:', existingPost.image, '-> keyName:', keyName);
                   return [{
                     id: 'existing_0',
                     url: existingPost.image,
@@ -113,57 +115,6 @@ const PostCreatePage = () => {
       setIsLoading(false);
     }
   };
-
-  // hasUnsavedChanges 계산
-  useEffect(() => {
-    if (isEditMode && originalData) {
-      const hasChanges = 
-        formData.title !== originalData.title ||
-        formData.content !== originalData.content ||
-        formData.images.length !== originalData.images.length ||
-        formData.images.some((img, index) => {
-          const originalImg = originalData.images[index];
-          return !originalImg || img.url !== originalImg.url;
-        });
-      setHasUnsavedChanges(hasChanges);
-    } else {
-      const hasContent = formData.title.trim() || formData.content.trim() || formData.images.length > 0;
-      setHasUnsavedChanges(hasContent);
-    }
-  }, [formData, originalData, isEditMode]);
-
-  // 브라우저 이벤트 처리
-  useEffect(() => {
-    if (!historyPushed) {
-      window.history.pushState(null, '', window.location.href);
-      setHistoryPushed(true);
-    }
-
-    const handleBeforeUnload = (e) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-
-    const handlePopState = (e) => {
-      e.preventDefault();
-      
-      if (hasUnsavedChanges) {
-        openExitModal();
-      } else {
-        navigate('/board');
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [hasUnsavedChanges, openExitModal, navigate, historyPushed]);
 
   const getCategoryDisplayName = (cat) => {
     switch(cat) {
@@ -201,8 +152,8 @@ const PostCreatePage = () => {
             reader.onload = (e) => {
               resolve({
                 id: Date.now() + Math.random(),
-                file: file, // File 객체 저장
-                url: e.target.result // 미리보기용 DataURL
+                file: file,
+                url: e.target.result
               });
             };
             reader.readAsDataURL(file);
@@ -220,7 +171,6 @@ const PostCreatePage = () => {
       console.error('이미지 추가 실패:', error);
     }
 
-    // 파일 input 초기화
     event.target.value = '';
   };
 
@@ -231,6 +181,7 @@ const PostCreatePage = () => {
     }));
   };
 
+  // 완료 버튼 활성화: 제목과 내용이 둘 다 있을 때만
   const isFormValid = formData.title.trim() && formData.content.trim();
 
   // 게시글 작성/수정 완료
@@ -239,7 +190,6 @@ const PostCreatePage = () => {
 
     try {
       setIsLoading(true);
-      console.log('게시글 제출 시작:', formData);
 
       if (isEditMode) {
         // 수정 모드
@@ -251,7 +201,7 @@ const PostCreatePage = () => {
         };
 
         await updatePost(id, updateData);
-        navigate(`/board/post/${id}`);
+        navigate(`/board/post/${id}`, { replace: true }); 
         
       } else {
         // 작성 모드
@@ -263,7 +213,7 @@ const PostCreatePage = () => {
         };
 
         const createdPost = await addPost(newPost);
-        navigate(`/board/create/success?postId=${createdPost.id}`);
+        navigate(`/board/create/success?postId=${createdPost.id}`, { replace: true }); 
       }
     } catch (error) {
       console.error(`게시글 ${isEditMode ? '수정' : '작성'} 실패:`, error);
@@ -273,23 +223,21 @@ const PostCreatePage = () => {
     }
   };
 
+  // 백버튼: 모달 오픈
   const handleBack = () => {
-    if (hasUnsavedChanges) {
-      openExitModal();
-    } else {
-      if (isEditMode) {
-        navigate(`/board/post/${id}`);
-      } else {
-        navigate('/board');
-      }
-    }
+    openExitModal();
   };
 
+  // 모달 액션
   const exitModalActions = [
     {
       label: '취소',
       type: 'cancel',
-      onClick: closeExitModal
+      onClick: () => {
+        closeExitModal();
+        // 모달 닫을 때 더미 히스토리 다시 추가
+        window.history.pushState(null, '', window.location.href);
+      }
     },
     {
       label: '나가기',
@@ -297,9 +245,9 @@ const PostCreatePage = () => {
       onClick: () => {
         closeExitModal();
         if (isEditMode) {
-          navigate(`/board/post/${id}`);
+          navigate(`/board/post/${id}`, { replace: true });
         } else {
-          navigate('/board');
+          navigate('/board', { replace: true });
         }
       }
     }
@@ -438,7 +386,10 @@ const PostCreatePage = () => {
 
       <Modal
         isOpen={isExitModalOpen}
-        onClose={closeExitModal}
+        onClose={() => {
+          closeExitModal();
+          window.history.pushState(null, '', window.location.href);
+        }}
         title={isEditMode ? "수정을 취소하시겠어요?" : "작성을 취소하시겠어요?"}
         actions={exitModalActions}
       />

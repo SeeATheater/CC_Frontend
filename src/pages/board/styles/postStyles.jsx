@@ -41,7 +41,7 @@ export const PostTitle = styled.h3`
 
   ${media.pc} {
     font-size: 16px;
-    width: 800px;
+    // width: 800px;
     margin-bottom: 8px;
   }
 `;
@@ -58,7 +58,7 @@ export const PostContent = styled.p`
 
   ${media.pc} {
     font-size: 14px;
-    width: 800px;
+    // width: 800px;
     margin-bottom: 16px;
   }
 `;

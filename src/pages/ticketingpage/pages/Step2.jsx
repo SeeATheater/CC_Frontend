@@ -181,7 +181,7 @@ const Step2 = ({
                   onChange={handleDiscountChange} 
                   additionalContent={discountAdditionalContent}
                 />
-                {isPC && selectedTicket && selectedTicket.discountName.includes('홍대생') && (
+                {/* isPC && selectedTicket && selectedTicket.discountName.includes('홍대생') && (
                   <>
                     <label style={{fontSize: '20px', fontWeight: 'bold', color: '#000000', marginTop: '32px'}}>할인 인증</label>
                     <SelectionSection>
@@ -202,7 +202,7 @@ const Step2 = ({
                       </div>
                     </SelectionSection>
                   </>
-                )}
+                ) */}
             </SelectionSection>
           </FormSection2>
         )}
