@@ -287,7 +287,7 @@ const useTicketing = (amateurShowId) => {
       // 결제 데이터 저장 (결제 완료 후 사용)
       setReservationData({
         ...ticketData,
-        memberTicketId
+        tempTicketId
       });
 
       // 3단계: 카카오페이 결제 페이지로 리디렉션
