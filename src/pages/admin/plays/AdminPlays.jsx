@@ -83,7 +83,7 @@ function AdminPlays() {
 
 					<UserTable
 						data={paginatedData}
-						currentPage={currentPage + 1}
+						currentPage={currentPage}
 						setCurrentPage={setCurrentPage}
 						totalPages={totalPages}
 						isLast={isLast}
