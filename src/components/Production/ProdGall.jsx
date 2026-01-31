@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 function ProdGall({ imageData }) {
-	const hasImages = imageData?.result?.content.length > 0;
+	const hasImages = imageData?.length > 0;
 
 	const navigate = useNavigate();
 
@@ -10,7 +10,7 @@ function ProdGall({ imageData }) {
 		<>
 			{hasImages ? (
 				<ImageArea>
-					{imageData?.result?.content.map((data, idx) => (
+					{imageData.map((data, idx) => (
 						<Item
 							key={idx}
 							onClick={() => {
