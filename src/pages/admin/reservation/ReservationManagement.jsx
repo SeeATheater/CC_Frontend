@@ -100,7 +100,7 @@ function ReservationManagement() {
 				<Pagination
 					activePage={page + 1}
 					itemsCountPerPage={size}
-					totalItemsCount={data?.result?.numberOfElements}
+					totalItemsCount={data?.result?.totalPages}
 					className="pagination"
 					pageRangeDisplayed={5}
 					onChange={changePageHandler}
