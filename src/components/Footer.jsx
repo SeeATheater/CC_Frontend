@@ -4,8 +4,10 @@ import CClogoBlack from '@/assets/icons/CClogoBlack.svg?react';
 import Github from '@/assets/icons/github.png';
 import Kakao from '@/assets/icons/kakaotalk.png';
 import Instagram from '@/assets/icons/instagram.svg?react';
+import { useNavigate } from 'react-router-dom';
 
 function Footer() {
+	const navigate = useNavigate();
 	return (
 		<FooterWrapper>
 			<Info>
@@ -27,7 +29,7 @@ function Footer() {
 						<div>이메일: seeatheater@gmail.com</div>
 						<div>전화번호: 010-4490-7174</div>
 					</div>
-					<div className="service">서비스 이용 약관</div>
+					<div className="service" onClick={()=>navigate('/service')}>서비스 이용 약관</div>
 					<div className="copyright">ⓒ 2025. CC All Rights Reserved.</div>
 				</div>
 			</Info>
