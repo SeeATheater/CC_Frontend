@@ -15,14 +15,6 @@ function MyPageMenu() {
 		// loading, error
 	} = useCustomFetch('/member/myPage', 'GET');
 
-	const {
-		data: image,
-		// loading: imgloading,
-		// error: imgerror,
-	} = useCustomFetch('/images/2');
-
-	console.log('image', image?.result?.imageUrl);
-
 	const { name } = data?.result || {};
 	if (data) {
 		console.log(data?.result);

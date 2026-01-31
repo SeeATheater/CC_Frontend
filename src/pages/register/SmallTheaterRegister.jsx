@@ -4,6 +4,7 @@ import TopBar from '@/components/TopBar';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import Footer from '@/components/Footer';
+import { useEffect } from 'react';
 /* 현재 step 번호 계산*/
 
 function SmallTheaterRegister() {

@@ -3,6 +3,7 @@ import HomeIconMenu from '@/components/HomeIconMenu';
 import Footer from '@/components/Footer';
 import { Outlet } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 function MyPage() {
 	const navigate = useNavigate();
  
