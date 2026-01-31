@@ -16,6 +16,7 @@ import Gallery from './InfoArea/Gallery';
 function Info({ playData }) {
 	const { isLoggedIn } = useAuth();
 	const [activeTab, setActiveTab] = useState('perform');
+	const roleToken = sessionStorage.getItem('selectedRole');
 
 	//console.log('InfoData:', playData);
 
@@ -151,7 +152,9 @@ function Info({ playData }) {
 					{activeTab === 'gallery' && <Gallery data={playData} />}
 				</ContentArea>
 
-				<BookBtn onClick={handleBookClick}>예매하러 가기</BookBtn>
+				<BookBtn onClick={handleBookClick} disabled={roleToken === 'PERFORMER'}>
+					예매하러 가기
+				</BookBtn>
 			</Mobile>
 
 			<Web>
@@ -247,7 +250,12 @@ function Info({ playData }) {
 						</ContentArea>
 					</WebLeft>
 
-					<BookBtn onClick={handleBookClick}>예매하러 가기</BookBtn>
+					<BookBtn
+						onClick={handleBookClick}
+						disabled={roleToken === 'PERFORMER'}
+					>
+						예매하러 가기
+					</BookBtn>
 				</WebContent>
 			</Web>
 		</Container>
@@ -443,6 +451,10 @@ const BookBtn = styled.button`
 		padding: 4px 12px;
 		width: 300px;
 		height: 40px;
+	}
+	&:disabled {
+		background: ${({ theme }) => theme.colors.gray300};
+		cursor: not-allowed;
 	}
 `;
 const Web = styled.div`
