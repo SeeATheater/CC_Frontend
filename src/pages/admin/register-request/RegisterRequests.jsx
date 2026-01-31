@@ -89,7 +89,7 @@ function RegisterRequests() {
 				<Pagination
 					activePage={page + 1}
 					itemsCountPerPage={size}
-					totalItemsCount={data?.result?.numberOfElements}
+					totalItemsCount={data?.result?.totalPages}
 					pageRangeDisplayed={5}
 					onChange={changePageHandler}
 				/>
