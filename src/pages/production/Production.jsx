@@ -20,29 +20,34 @@ function Production() {
 	const { prodId } = useParams();
 	const SIZE = 10;
 	const roleToken = sessionStorage.getItem('selectedRole');
-
-	const [activeTab, setActiveTab] = useState('plays');
 	const navigate = useNavigate();
 
-	const [playTotalCount, setPlayTotalCount] = useState(0);
+	const [activeTab, setActiveTab] = useState('plays');
 	const [performerName, setPerformerName] = useState(null);
 
+	const [playTotalCount, setPlayTotalCount] = useState(0);
 	const [playList, setPlayList] = useState([]);
 	const [currentPage, setCurrentPage] = useState(0);
+	const isRequestingPlays = useRef(false);
+
+	const [albumTotalCount, setAlbumTotalCount] = useState(0);
+	const [albums, setAlbums] = useState([]);
+	const [picCurrentPage, setPicCurrentPage] = useState(0);
+	const isRequestingAlbum = useRef(false);
+
 	const [isFetching, setIsFetching] = useState(false);
 
-	const isRequesting = useRef(false);
 	const observerRef = useRef(null);
 	const { fetchData } = useCustomFetch();
 
 	const loadMorePlays = useCallback(async () => {
 		if (
-			isRequesting.current ||
+			isRequestingPlays.current ||
 			(playTotalCount > 0 && playList.length >= playTotalCount)
 		)
 			return;
 
-		isRequesting.current = true;
+		isRequestingPlays.current = true;
 		setIsFetching(true);
 
 		const url = `/photoAlbums/member/${prodId}/shows?page=${currentPage}&size=${SIZE}`;
@@ -60,7 +65,7 @@ function Production() {
 		} catch (error) {
 			console.error('공연 목록 로드 실패:', error);
 		} finally {
-			isRequesting.current = false;
+			isRequestingPlays.current = false;
 			setIsFetching(false);
 		}
 	}, [prodId, currentPage, playList.length, playTotalCount, fetchData]);
@@ -75,7 +80,7 @@ function Production() {
 				if (
 					entry.isIntersecting &&
 					playList.length < playTotalCount &&
-					!isRequesting.current
+					!isRequestingPlays.current
 				) {
 					loadMorePlays();
 				}
@@ -87,12 +92,65 @@ function Production() {
 		return () => observer.disconnect();
 	}, [loadMorePlays, playList.length, playTotalCount]);
 
-	const {
+	{
+		/*	const {
 		data: picData,
 		error: picError,
 		loading: picLoading,
 	} = useCustomFetch(`/photoAlbums/member/${prodId}`);
-	//console.log(picData);
+	//console.log(picData);*/
+	}
+
+	const loadMorePics = useCallback(async () => {
+		if (
+			isRequestingAlbum.current ||
+			(albumTotalCount > 0 && albums.length >= albumTotalCount)
+		)
+			return;
+
+		isRequestingAlbum.current = true;
+		setIsFetching(true);
+
+		const url = `/photoAlbums/member/${prodId}?page=${picCurrentPage}&size=${SIZE}`;
+
+		try {
+			const res = await fetchData(url, 'GET');
+			const result = res?.data?.result;
+
+			if (result) {
+				setAlbums((prev) => [...prev, ...(result.content || [])]);
+				setAlbumTotalCount(result.totalElements);
+				setPicCurrentPage(() => result.pageNumber + 1);
+			}
+		} catch (error) {
+			console.error('앨범 목록 로드 실패:', error);
+		} finally {
+			isRequestingAlbum.current = false;
+			setIsFetching(false);
+		}
+	}, [prodId, picCurrentPage, albums.length, albumTotalCount, fetchData]);
+
+	useEffect(() => {
+		loadMorePics();
+	}, []);
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (
+					entry.isIntersecting &&
+					albums.length < albumTotalCount &&
+					!isRequestingAlbum.current
+				) {
+					loadMorePics();
+				}
+			},
+			{ threshold: 0.1 },
+		);
+
+		if (observerRef.current) observer.observe(observerRef.current);
+		return () => observer.disconnect();
+	}, [loadMorePics, albums.length, albumTotalCount]);
 
 	const navigateToDetail = () => {
 		navigate(`/production/${prodId}/detail`);
@@ -107,7 +165,7 @@ function Production() {
 		window.scrollTo(0, 0);
 	};
 
-	//console.log('playList:', playList);
+	console.log('albums:', albums);
 
 	return (
 		<>
@@ -165,11 +223,7 @@ function Production() {
 						)}
 						{activeTab === 'gallery' && (
 							<>
-								<SubText>
-									{picLoading
-										? '로딩 중...'
-										: `${picData?.result?.content?.length || 0}개의 사진첩`}
-								</SubText>
+								<SubText>{albumTotalCount}개의 사진첩</SubText>
 								{roleToken == 'PERFORMER' && (
 									<FixedProdButton>
 										<ProdButton onClick={navigateToUpload}>
@@ -178,7 +232,7 @@ function Production() {
 										</ProdButton>
 									</FixedProdButton>
 								)}
-								<ProdGall imageData={picData} />
+								<ProdGall imageData={albums} />
 							</>
 						)}
 					</ContentArea>
@@ -237,12 +291,9 @@ function Production() {
 							)}
 							{activeTab === 'gallery' && (
 								<>
-									<SubText>
-										{picLoading
-											? '로딩 중...'
-											: `${picData?.result?.content?.length || 0}개의 사진첩`}
-									</SubText>
-									<ProdGall imageData={picData} />
+									<SubText>{albumTotalCount}개의 사진첩</SubText>
+									<ProdGall imageData={albums} />
+									<div ref={observerRef} style={{ height: '20px' }} />
 								</>
 							)}
 						</ContentArea>
