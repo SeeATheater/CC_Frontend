@@ -131,6 +131,7 @@ function MyPageMenu() {
 						<ul>
 							<li onClick={() => navigate('/mypage/query')}>1:1 문의</li>
 							<li onClick={() => navigate('/mypage/about-cc')}>CC 정보</li>
+							<li onClick={() => navigate('/service')}>서비스 이용약관</li>
 							<li className="color-warning" onClick={confirmDeactivate}>
 								회원 탈퇴
 							</li>

@@ -3,13 +3,14 @@ import HomeIconMenu from '@/components/HomeIconMenu';
 import Footer from '@/components/Footer';
 import { Outlet } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 function MyPage() {
 	const navigate = useNavigate();
  
 	useEffect(() => {
-		const token = sessionStorage.getItem('accessToken');
-		const role = sessionStorage.getItem('role'); 
-		if (!token || role === 'USER') {
+		
+		const role = sessionStorage.getItem('selectedRole'); 
+		if (role === 'USER') {
 			navigate('/login', { replace: true });
 		}
 	}, [navigate]);
