@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Camera from '@/assets/icons/Camera.svg';
 import styled from 'styled-components';
-import axios from 'axios';
+import axios from 'axios'; 
+import { axiosInstance } from '@/utils/apis/axiosInstance';
 
 function ImageUploadBox({
 	width,
@@ -14,8 +15,6 @@ function ImageUploadBox({
 }) {
 	const [imageSrc, setImageSrc] = useState(null);
 
-	const accessToken = localStorage.getItem('accessToken');
-	console.log('액세스토큰', accessToken);
 	const handleImageChange = async (e) => {
 		const file = e.target.files[0];
 		if (!file) return;
@@ -28,18 +27,10 @@ function ImageUploadBox({
 		reader.readAsDataURL(file);
 
 		try {
-			const res = await axios.post(
-				import.meta.env.VITE_APP_API_URL+`/s3/uploadUrls?filePath=${filePath}`,
-				[file.type.split('/')[1]],
-				{
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
-				},
-			);
-			console.log(res.config.url);
-			console.log(res.config.method);
-			console.log('요청한 url', res.data);
+			const res = await axiosInstance.post(
+  			 `/s3/uploadUrls?filePath=${filePath}`,
+   				[file.type.split('/')[1]],
+ 			);
 
 			const { imageUrl, keyName, uploadUrl } = res.data[0];
 

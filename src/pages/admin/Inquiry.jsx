@@ -9,7 +9,7 @@ import UserTable from '@/components/Admin/UserTable';
 function Inquiry() {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [currentPage, setCurrentPage] = useState(0);
-	const itemsPerPage = 10;
+	const itemsPerPage = 15;
 
 	const apiUrl = searchTerm
 		? `/admin/inquiry?keyword=${searchTerm}&page=${currentPage}&size=${itemsPerPage}`
@@ -51,7 +51,7 @@ function Inquiry() {
 
 	const apiRows = useMemo(() => {
 		if (!inquiryData || !inquiryData.result) return [];
-		return inquiryData.result.inquiryList.map((item) => ({
+		return inquiryData.result?.content.map((item) => ({
 			content: item.title,
 			userId: item.userName,
 			email: item.email,

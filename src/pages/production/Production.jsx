@@ -1,11 +1,12 @@
 import styled from 'styled-components';
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import Hamburger from '@/components/Hamburger';
 import ProdGall from '@/components/Production/ProdGall';
 import ProdPlayCard from '@/components/ProdPlayCard';
 import LikedButton from '@/components/Production/LikedButton';
+import Footer from '@/components/Footer';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
@@ -17,25 +18,139 @@ import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 
 function Production() {
 	const { prodId } = useParams();
+	const SIZE = 10;
 	const roleToken = sessionStorage.getItem('selectedRole');
-	//console.log(roleToken);
+	const navigate = useNavigate();
 
-	const {
-		data: playData,
-		error: playError,
-		loading: playLoading,
-	} = useCustomFetch(`/photoAlbums/member/${prodId}/shows?page=0&size=20`);
-	console.log('playData:', playData);
+	const [activeTab, setActiveTab] = useState('plays');
+	const [performerName, setPerformerName] = useState(null);
 
-	const {
+	const [playTotalCount, setPlayTotalCount] = useState(0);
+	const [playList, setPlayList] = useState([]);
+	const [currentPage, setCurrentPage] = useState(0);
+	const isRequestingPlays = useRef(false);
+
+	const [albumTotalCount, setAlbumTotalCount] = useState(0);
+	const [albums, setAlbums] = useState([]);
+	const [picCurrentPage, setPicCurrentPage] = useState(0);
+	const isRequestingAlbum = useRef(false);
+
+	const [isFetching, setIsFetching] = useState(false);
+
+	const observerRef = useRef(null);
+	const { fetchData } = useCustomFetch();
+
+	const loadMorePlays = useCallback(async () => {
+		if (
+			isRequestingPlays.current ||
+			(playTotalCount > 0 && playList.length >= playTotalCount)
+		)
+			return;
+
+		isRequestingPlays.current = true;
+		setIsFetching(true);
+
+		const url = `/photoAlbums/member/${prodId}/shows?page=${currentPage}&size=${SIZE}`;
+
+		try {
+			const res = await fetchData(url, 'GET');
+			const result = res?.data?.result;
+
+			if (result) {
+				setPlayList((prev) => [...prev, ...(result.shows || [])]);
+				setPlayTotalCount(result.totalCount);
+				setPerformerName(result.performerName);
+				setCurrentPage((prev) => prev + 1);
+			}
+		} catch (error) {
+			console.error('공연 목록 로드 실패:', error);
+		} finally {
+			isRequestingPlays.current = false;
+			setIsFetching(false);
+		}
+	}, [prodId, currentPage, playList.length, playTotalCount, fetchData]);
+
+	useEffect(() => {
+		loadMorePlays();
+	}, []);
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (
+					entry.isIntersecting &&
+					playList.length < playTotalCount &&
+					!isRequestingPlays.current
+				) {
+					loadMorePlays();
+				}
+			},
+			{ threshold: 0.1 },
+		);
+
+		if (observerRef.current) observer.observe(observerRef.current);
+		return () => observer.disconnect();
+	}, [loadMorePlays, playList.length, playTotalCount]);
+
+	{
+		/*	const {
 		data: picData,
 		error: picError,
 		loading: picLoading,
 	} = useCustomFetch(`/photoAlbums/member/${prodId}`);
-	console.log('picData:', picData);
+	//console.log(picData);*/
+	}
 
-	const [activeTab, setActiveTab] = useState('plays');
-	const navigate = useNavigate();
+	const loadMorePics = useCallback(async () => {
+		if (
+			isRequestingAlbum.current ||
+			(albumTotalCount > 0 && albums.length >= albumTotalCount)
+		)
+			return;
+
+		isRequestingAlbum.current = true;
+		setIsFetching(true);
+
+		const url = `/photoAlbums/member/${prodId}?page=${picCurrentPage}&size=${SIZE}`;
+
+		try {
+			const res = await fetchData(url, 'GET');
+			const result = res?.data?.result;
+
+			if (result) {
+				setAlbums((prev) => [...prev, ...(result.content || [])]);
+				setAlbumTotalCount(result.totalElements);
+				setPicCurrentPage(() => result.pageNumber + 1);
+			}
+		} catch (error) {
+			console.error('앨범 목록 로드 실패:', error);
+		} finally {
+			isRequestingAlbum.current = false;
+			setIsFetching(false);
+		}
+	}, [prodId, picCurrentPage, albums.length, albumTotalCount, fetchData]);
+
+	useEffect(() => {
+		loadMorePics();
+	}, []);
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (
+					entry.isIntersecting &&
+					albums.length < albumTotalCount &&
+					!isRequestingAlbum.current
+				) {
+					loadMorePics();
+				}
+			},
+			{ threshold: 0.1 },
+		);
+
+		if (observerRef.current) observer.observe(observerRef.current);
+		return () => observer.disconnect();
+	}, [loadMorePics, albums.length, albumTotalCount]);
 
 	const navigateToDetail = () => {
 		navigate(`/production/${prodId}/detail`);
@@ -50,112 +165,51 @@ function Production() {
 		window.scrollTo(0, 0);
 	};
 
+	console.log('albums:', albums);
+
 	return (
 		<>
 			<Mobile>
-				<Hamburger back={true} />
+				<Padding>
+					<Hamburger back={true} />
 
-				<Theatre>
-					<h3 className="production" onClick={navigateToDetail}>
-						{picData?.result.performerName}
-					</h3>
-					<LikedButton prodId={prodId} />
-				</Theatre>
-				<TabBar>
-					<TabItem
-						className={activeTab === 'plays' ? 'active' : ''}
-						onClick={() => setActiveTab('plays')}
-					>
-						연극
-					</TabItem>
-					<TabItem
-						className={activeTab === 'gallery' ? 'active' : ''}
-						onClick={() => setActiveTab('gallery')}
-					>
-						사진첩
-					</TabItem>
-				</TabBar>
-
-				<ContentArea>
-					{activeTab === 'plays' && (
-						<>
-							<SubText>{playData?.result.totalCount}개의 연극</SubText>
-							{roleToken == 'PERFORMER' && (
-								<FixedProdButton>
-									<ProdButton>
-										<Ticket height={28} />
-										<p>공연등록</p>
-									</ProdButton>
-								</FixedProdButton>
-							)}
-							<CardArea>
-								{playData?.result.shows.map((data) => (
-									<ProdPlayCard
-										detailAddress={data.detailAddress}
-										posterImageUrl={data.posterImageUrl}
-										showId={data.showId}
-										status={data.status}
-										title={data.title}
-									/>
-								))}
-							</CardArea>
-						</>
-					)}
-					{activeTab === 'gallery' && (
-						<>
-							<SubText>
-								{picData.result.singlePhotoAlbumDTOs.length}개의 사진첩
-							</SubText>
-							{roleToken == 'PERFORMER' && (
-								<FixedProdButton>
-									<ProdButton onClick={navigateToUpload}>
-										<Gallery height={28} />
-										<p>사진등록</p>
-									</ProdButton>
-								</FixedProdButton>
-							)}
-							<ProdGall imageData={picData} />
-						</>
-					)}
-				</ContentArea>
-			</Mobile>
-
-			<Web>
-				<SideBar />
-				<Container>
 					<Theatre>
-						<div className="theatreName">
-							<ChevronLeftGray onClick={goBack} />
-							<h3 className="production">{picData?.result.performerName}</h3>
-						</div>
-						{roleToken == 'PERFORMER' && activeTab === 'plays' && (
-							<Button>공연 등록</Button>
-						)}
-						{roleToken == 'PERFORMER' && activeTab === 'gallery' && (
-							<Button onClick={navigateToUpload}>사진 등록</Button>
-						)}
+						<h3 className="production" onClick={navigateToDetail}>
+							{performerName}
+						</h3>
+						<LikedButton prodId={prodId} />
 					</Theatre>
-					<AreaSelect>
-						<TabItemWeb
+					<TabBar>
+						<TabItem
 							className={activeTab === 'plays' ? 'active' : ''}
 							onClick={() => setActiveTab('plays')}
 						>
 							연극
-						</TabItemWeb>
-						<TabItemWeb
+						</TabItem>
+						<TabItem
 							className={activeTab === 'gallery' ? 'active' : ''}
 							onClick={() => setActiveTab('gallery')}
 						>
 							사진첩
-						</TabItemWeb>
-					</AreaSelect>
+						</TabItem>
+					</TabBar>
 
 					<ContentArea>
 						{activeTab === 'plays' && (
 							<>
-								<SubText>{playData?.result.totalCount}개의 연극</SubText>
+								<SubText>{playTotalCount}개의 연극</SubText>
+								{roleToken == 'PERFORMER' && (
+									<FixedProdButton>
+										<ProdButton
+											onClick={() => navigate('/small-theater/register/step1')}
+										>
+											<Ticket height={28} />
+											<p>공연등록</p>
+										</ProdButton>
+									</FixedProdButton>
+								)}
 								<CardArea>
-									{playData?.result.shows.map((data) => (
+									{playList.map((data) => (
 										<ProdPlayCard
 											detailAddress={data.detailAddress}
 											posterImageUrl={data.posterImageUrl}
@@ -169,13 +223,83 @@ function Production() {
 						)}
 						{activeTab === 'gallery' && (
 							<>
-								<SubText>
-									{picData.result.singlePhotoAlbumDTOs.length}개의 사진첩
-								</SubText>
-								<ProdGall imageData={picData} />
+								<SubText>{albumTotalCount}개의 사진첩</SubText>
+								{roleToken == 'PERFORMER' && (
+									<FixedProdButton>
+										<ProdButton onClick={navigateToUpload}>
+											<Gallery height={28} />
+											<p>사진등록</p>
+										</ProdButton>
+									</FixedProdButton>
+								)}
+								<ProdGall imageData={albums} />
 							</>
 						)}
 					</ContentArea>
+				</Padding>
+				<Footer />
+			</Mobile>
+
+			<Web>
+				<SideBar />
+				<Container>
+					<Padding>
+						<Theatre>
+							<div className="theatreName">
+								<ChevronLeftGray onClick={goBack} />
+								<h3 className="production">{performerName}</h3>
+							</div>
+							{roleToken == 'PERFORMER' && activeTab === 'plays' && (
+								<Button>공연 등록</Button>
+							)}
+							{roleToken == 'PERFORMER' && activeTab === 'gallery' && (
+								<Button onClick={navigateToUpload}>사진 등록</Button>
+							)}
+						</Theatre>
+						<AreaSelect>
+							<TabItemWeb
+								className={activeTab === 'plays' ? 'active' : ''}
+								onClick={() => setActiveTab('plays')}
+							>
+								연극
+							</TabItemWeb>
+							<TabItemWeb
+								className={activeTab === 'gallery' ? 'active' : ''}
+								onClick={() => setActiveTab('gallery')}
+							>
+								사진첩
+							</TabItemWeb>
+						</AreaSelect>
+
+						<ContentArea>
+							{activeTab === 'plays' && (
+								<>
+									<SubText>{playTotalCount}개의 연극</SubText>
+									<CardArea>
+										{playList.map((data) => (
+											<ProdPlayCard
+												detailAddress={data.detailAddress}
+												posterImageUrl={data.posterImageUrl}
+												showId={data.showId}
+												status={data.status}
+												title={data.title}
+											/>
+										))}
+									</CardArea>
+									<div ref={observerRef} style={{ height: '20px' }} />
+								</>
+							)}
+							{activeTab === 'gallery' && (
+								<>
+									<SubText>{albumTotalCount}개의 사진첩</SubText>
+									<ProdGall imageData={albums} />
+									<div ref={observerRef} style={{ height: '20px' }} />
+								</>
+							)}
+						</ContentArea>
+					</Padding>
+
+					<Footer />
 				</Container>
 			</Web>
 		</>
@@ -188,8 +312,6 @@ const ChevronLeftGray = styled(ChevronLeft)`
 	color: ${({ theme }) => theme.colors.gray400};
 `;
 const Mobile = styled.div`
-	padding: 0 20px;
-
 	@media (min-width: 768px) {
 		display: none;
 	}
@@ -204,7 +326,6 @@ const Web = styled.div`
 const Container = styled.div`
 	width: 100%;
 	margin-left: 100px;
-	padding: 100px 100px 60px 60px;
 `;
 
 const Theatre = styled.div`
@@ -293,6 +414,17 @@ const CardArea = styled.div`
 
 	@media (min-width: 768px) {
 		gap: 80px;
+	}
+`;
+const Padding = styled.div`
+	padding: 0px 20px;
+	margin-bottom: 40px;
+
+	@media (min-width: 768px) {
+		padding: 60px 100px 100px 60px;
+		display: flex;
+		flex-direction: column;
+		gap: 40px;
 	}
 `;
 const ContentArea = styled.div`

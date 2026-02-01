@@ -97,7 +97,7 @@ function RefundManagement() {
 				<Pagination
 					activePage={page + 1 || 1}
 					itemsCountPerPage={size}
-					totalItemsCount={data?.result?.numberOfElements}
+					totalItemsCount={data?.result?.totalPages}
 					pageRangeDisplayed={5}
 					onChange={changePageHandler}
 				/>

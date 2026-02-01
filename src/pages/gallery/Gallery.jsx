@@ -8,6 +8,7 @@ import Hamburger from '@/components/Hamburger';
 import SearchPC from '@/pages/search/SearchPC';
 import HomeIconMenu from '@/components/HomeIconMenu';
 import GalleryIcon from '@/assets/icons/Gallery.svg?react';
+import Footer from '@/components/Footer';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
@@ -18,11 +19,13 @@ function Gallery() {
 
 	const mobileObserverRef = useRef(null);
 	const webObserverRef = useRef(null);
+	const isRequesting = useRef(false);
 
 	const { fetchData } = useCustomFetch();
 
 	const [photoList, setPhotoList] = useState([]);
 	const [cursorId, setCursorId] = useState(null);
+	const [cursorUpdate, setCursorUpdate] = useState(null);
 	const [hasNext, setHasNext] = useState(true);
 	const [isFetching, setIsFetching] = useState(false);
 
@@ -32,27 +35,31 @@ function Gallery() {
 	};
 
 	const fetchPhotos = async () => {
-		if (isFetching || !hasNext) return;
-		if (cursorId === null && photoList.length > 0) return;
+		if (isRequesting.current || !hasNext) return;
+		//if (cursorId === null && photoList.length > 0) return;
 
+		isRequesting.current = true;
 		setIsFetching(true);
 
 		const url =
 			cursorId === null
 				? `/photoAlbums?size=${SIZE}`
-				: `/photoAlbums?cursorId=${cursorId}&size=${SIZE}`;
+				: `/photoAlbums?cursorId=${cursorId}&cursorUpdatedAt=${cursorUpdate}&size=${SIZE}`;
 
 		try {
 			const res = await fetchData(url, 'GET');
 			const result = res?.data?.result;
-			console.log(result);
+			console.log(url);
+			console.log(res?.data?.result);
 
 			if (result) {
 				setPhotoList((prev) => [...prev, ...(result.photoAlbumDTOs || [])]);
 				setHasNext(result.hasNext);
-				setCursorId(result.nextCursor);
+				setCursorId(result.nextCursorId);
+				setCursorUpdate(result.nextCursorUpdatedAt);
 			}
 		} finally {
+			isRequesting.current = false;
 			setIsFetching(false);
 		}
 	};
@@ -65,7 +72,7 @@ function Gallery() {
 	useEffect(() => {
 		const observer = new IntersectionObserver(
 			([entry]) => {
-				if (entry.isIntersecting && hasNext && !isFetching) {
+				if (entry.isIntersecting && hasNext && !isRequesting.current) {
 					fetchPhotos();
 				}
 			},
@@ -76,27 +83,32 @@ function Gallery() {
 		);
 
 		const isMobile = window.innerWidth < 768;
+		const target = isMobile
+			? mobileObserverRef.current
+			: webObserverRef.current;
 
-		if (isMobile && mobileObserverRef.current) {
-			observer.observe(mobileObserverRef.current);
-		}
-		if (!isMobile && webObserverRef.current) {
-			observer.observe(webObserverRef.current);
+		if (target) {
+			observer.observe(target);
 		}
 
 		return () => observer.disconnect();
 	}, [hasNext, isFetching, cursorId]);
 
+	console.log('photoList', photoList);
+
 	return (
 		<>
 			<Mobile>
-				<Hamburger title={'사진첩'} />
-				<Masonry imageData={photoList} />
+				<Padding>
+					<Hamburger title={'사진첩'} />
+					<Masonry imageData={photoList} />
 
-				<div ref={mobileObserverRef} />
+					<div ref={mobileObserverRef} />
 
-				{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
-				{!hasNext && <ExtraMessage>마지막 사진입니다.</ExtraMessage>}
+					{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
+				</Padding>
+
+				{!hasNext && <Footer />}
 
 				{roleToken === 'PERFORMER' && (
 					<FixedProdButton>
@@ -114,20 +126,23 @@ function Gallery() {
 				</SideMenuWrapper>
 
 				<Container>
-					<SearchPC />
-					<TitleArea>
-						<h3>사진첩</h3>
-						{roleToken === 'PERFORMER' && (
-							<Button onClick={navigateToUpload}>사진 등록</Button>
-						)}
-					</TitleArea>
+					<Padding>
+						<SearchPC />
+						<TitleArea>
+							<h3>사진첩</h3>
+							{roleToken === 'PERFORMER' && (
+								<Button onClick={navigateToUpload}>사진 등록</Button>
+							)}
+						</TitleArea>
 
-					<MasonryWeb imageData={photoList} />
+						<MasonryWeb imageData={photoList} />
 
-					<div ref={webObserverRef} />
+						<div ref={webObserverRef} />
 
-					{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
-					{!hasNext && <ExtraMessage>마지막 사진입니다.</ExtraMessage>}
+						{isFetching && <ExtraMessage>불러오는 중...</ExtraMessage>}
+					</Padding>
+
+					{!hasNext && <Footer />}
 				</Container>
 			</Web>
 		</>
@@ -158,7 +173,6 @@ const Web = styled.div`
 	}
 `;
 const Mobile = styled.div`
-	padding: 0px 20px;
 	@media (min-width: 768px) {
 		display: none;
 	}
@@ -166,7 +180,6 @@ const Mobile = styled.div`
 
 const Container = styled.div`
 	width: 100%;
-	padding: 60px 100px 100px 60px;
 	margin-left: 100px;
 	display: flex;
 	flex-direction: column;
@@ -176,6 +189,17 @@ const Container = styled.div`
 		font-size: ${({ theme }) => theme.font.fontSize.headline24};
 		font-weight: ${({ theme }) => theme.font.fontWeight.extraBold};
 		color: ${({ theme }) => theme.colors.grayMain};
+	}
+`;
+
+const Padding = styled.div`
+	padding: 0px 20px;
+
+	@media (min-width: 768px) {
+		padding: 60px 100px 100px 60px;
+		display: flex;
+		flex-direction: column;
+		gap: 40px;
 	}
 `;
 const TitleArea = styled.div`

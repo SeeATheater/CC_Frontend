@@ -14,56 +14,47 @@ import UploadCarousel from '@/components/Production/UploadCarousel';
 import TopBar from '@/components/TopBar';
 import Modal from '@/components/Production/Modal';
 import CalendarPeriod from '@/components/CalendarPeriod';
+import Footer from '@/components/Footer';
 
 import ChevronDown from '@/assets/icons/chevronDown.svg?react';
 
 function UploadPic() {
 	const navigate = useNavigate();
 
-	const [images, setImages] = useState([]); // File + previewUrl
-
+	const [images, setImages] = useState([]);
 	const [selected, setSelected] = useState(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [showModal, setShowModal] = useState(false);
-	const [showCalendar, setShowCalendar] = useState(false);
-	const [customOptions, setCustomOptions] = useState([]);
-	const [inputValue, setInputValue] = useState('');
 	const [textContent, setTextContent] = useState('');
 
 	const isFormValid = Boolean(
-		selected?.title &&
+		selected?.amateurShowName &&
 			selected?.date &&
 			selected?.value &&
 			images.length > 0 &&
 			textContent.trim().length > 0,
 	);
-	const searchInput = encodeURIComponent(inputValue);
+
 	const {
 		data: searchData,
 		error: searchError,
 		loading: searchLoading,
-	} = useCustomFetch(`/search?keyword=${searchInput}&page=0&size=10`);
+	} = useCustomFetch(`photoAlbums/getMyShows`);
+	console.log(searchData);
 
 	console.log('선택됨', selected);
-	console.log('images:', images);
-	console.log('images.length:', images.length);
-	console.log('isFormValid:', isFormValid);
+	//console.log('images:', images);
+	//console.log('images.length:', images.length);
+	//console.log('isFormValid:', isFormValid);
 
-	const searchOptions = (searchData?.result?.content || []).map((item) => ({
-		value: item.showId,
-		title: item.title,
+	const searchOptions = (searchData?.result || []).map((item) => ({
+		value: item.amateurShowId,
+		amateurShowName: item.amateurShowName,
 		date: item.schedule,
 		label: (
 			<LabelWrapper>
-				{item.posterImageUrl && (
-					<img
-						src={item.posterImageUrl}
-						alt={item.title}
-						style={{ width: 30, height: 40, marginRight: 8, borderRadius: 4 }}
-					/>
-				)}
 				<div>
-					<Title>{item.title}</Title>
+					<Title>{item.amateurShowName}</Title>
 					<Date>{item.schedule}</Date>
 				</div>
 			</LabelWrapper>
@@ -74,6 +65,7 @@ function UploadPic() {
 		...searchOptions,
 		{
 			value: 'custom',
+			amateurShowName: '직접 입력',
 			label: <Title>직접 입력</Title>,
 		},
 	];
@@ -87,51 +79,23 @@ function UploadPic() {
 		setSelected(option);
 	};
 
-	const handleModalSubmit = (title, range) => {
+	const handleModalSubmit = (amateurShowName, range) => {
 		const [start, end] = range;
 		const formattedRange = `${start.toLocaleDateString()} ~ ${end.toLocaleDateString()}`;
 		const newOption = {
 			value: Date.now(),
-			title,
+			amateurShowName,
 			date: formattedRange,
 			label: (
 				<LabelWrapper>
-					<Title>{title}</Title>
+					<Title>{amateurShowName}</Title>
 					<Date>{formattedRange}</Date>
 				</LabelWrapper>
 			),
 		};
-		setCustomOptions((prev) => [...prev, newOption]);
+		//setCustomOptions((prev) => [...prev, newOption]);
 		setSelected(newOption);
 		setShowModal(false);
-	};
-
-	const handleCalendarSubmit = (range) => {
-		if (!inputValue || !range || !range[0] || !range[1]) return;
-
-		const [start, end] = range;
-		const formattedRange = `${start.toLocaleDateString()} ~ ${end.toLocaleDateString()}`;
-
-		const newOption = {
-			value: `${inputValue}-${formattedRange}`,
-			title: inputValue,
-			date: formattedRange,
-			label: (
-				<LabelWrapper>
-					<Title>{inputValue}</Title>
-					<Date>{formattedRange}</Date>
-				</LabelWrapper>
-			),
-		};
-
-		setCustomOptions((prev) => [...prev, newOption]);
-		setSelected(newOption);
-		setShowCalendar(false);
-		setInputValue('');
-	};
-
-	const handleFileChange = (selectedFiles) => {
-		setImages(selectedFiles);
 	};
 
 	const axiosClient = useAxios();
@@ -143,7 +107,7 @@ function UploadPic() {
 		return (
 			<div {...props.innerProps} style={{ padding: '8px 4px' }}>
 				<LabelWrapper>
-					<Title>{data.title}</Title>
+					<Title>{data.amateurShowName}</Title>
 					<Date>{data.date}</Date>
 				</LabelWrapper>
 			</div>
@@ -153,13 +117,13 @@ function UploadPic() {
 	const MobileSingleValue = ({ data }) => {
 		return (
 			<LabelWrapper>
-				<Title>{data.title}</Title>
+				<Title>{data.amateurShowName}</Title>
 				<Date>{data.date}</Date>
 			</LabelWrapper>
 		);
 	};
 
-	const MAX_IMAGES = 4;
+	const MAX_IMAGES = 10;
 
 	const handleAddImage = (file) => {
 		if (!file) return;
@@ -297,6 +261,7 @@ function UploadPic() {
 						onChange={(e) => setTextContent(e.target.value)}
 					/>
 				</Content>
+				<Footer />
 				{showModal && (
 					<Modal
 						onClose={() => setShowModal(false)}
@@ -312,38 +277,37 @@ function UploadPic() {
 							{selected ? (
 								<SelectedInfo>
 									<SelectedInfoWrapper>
-										<Title>{selected.title}</Title>
-										<ChevronDownGray
-											onClick={() => {
-												setSelected(null);
-												setInputValue('');
-											}}
-										/>
+										<Title>{selected.amateurShowName}</Title>
+										<ChevronDownGray onClick={() => setSelected(null)} />
 									</SelectedInfoWrapper>
 									<Date>{selected.date}</Date>
 								</SelectedInfo>
 							) : (
 								<SearchWrapper>
-									<input
-										type="text"
-										value={inputValue}
-										onChange={(e) => setInputValue(e.target.value)}
-										onFocus={() => setMenuOpen(true)}
-										placeholder="공연을 입력하세요"
-									/>
+									<div
+										className="dropdown-trigger"
+										onClick={() => setMenuOpen(!menuOpen)}
+									>
+										{searchLoading ? '로딩 중...' : '공연을 선택하세요'}
+										<ChevronDownGray />
+									</div>
+
 									{menuOpen && (
 										<Dropdown>
 											{options.map((option, idx) => (
 												<OptionItem
 													key={idx}
 													onClick={() => {
-														setSelected(option);
+														if (option.value === 'custom') {
+															setShowModal(true);
+														} else {
+															setSelected(option);
+														}
 														setMenuOpen(false);
-														setInputValue('');
 													}}
 												>
 													<LabelWrapper>
-														<Title>{option.title}</Title>
+														<Title>{option.amateurShowName}</Title>
 														<Date>{option.date}</Date>
 													</LabelWrapper>
 												</OptionItem>
@@ -351,7 +315,7 @@ function UploadPic() {
 											<OptionItem
 												isNew
 												onClick={() => {
-													setShowCalendar(true);
+													navigate('/small-theater/register/step1');
 													setMenuOpen(false);
 												}}
 											>
@@ -391,11 +355,7 @@ function UploadPic() {
 						/>
 					</Content>
 
-					{showCalendar && (
-						<CalendarWrapper>
-							<CalendarPeriod onChange={handleCalendarSubmit} />
-						</CalendarWrapper>
-					)}
+					<Footer />
 				</Container>
 			</Web>
 		</>
@@ -420,7 +380,6 @@ const Web = styled.div`
 	@media (min-width: 768px) {
 		width: 100vw;
 		display: flex;
-		padding: 100px 100px 100px 160px;
 	}
 `;
 const Container = styled.div`
@@ -458,6 +417,7 @@ const Content = styled.div`
 	}
 
 	@media (min-width: 768px) {
+		padding: 100px 100px 100px 160px;
 		.add {
 			font-size: ${({ theme }) => theme.font.fontSize.title16};
 			font-weight: ${({ theme }) => theme.font.fontWeight.bold};
@@ -549,21 +509,19 @@ const SearchWrapper = styled.div`
 	position: relative;
 	width: 100%;
 
-	input {
+	.dropdown-trigger {
+		width: 300px;
+		padding: 10px;
+
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		font-size: ${({ theme }) => theme.font.fontSize.headline24};
 		font-weight: ${({ theme }) => theme.font.fontWeight.extraBold};
 		color: ${({ theme }) => theme.colors.grayMain};
-
-		width: 300px;
 		padding: 10px;
-		border: none;
-		border-radius: 5px;
-	}
-	input::placeholder {
-		color: ${({ theme }) => theme.colors.gray400};
-	}
-	input:focus {
-		outline: none;
+		cursor: pointer;
+		border-bottom: 2px solid ${({ theme }) => theme.colors.gray300};
 	}
 `;
 

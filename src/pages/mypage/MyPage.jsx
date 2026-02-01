@@ -2,8 +2,19 @@ import styled from 'styled-components';
 import HomeIconMenu from '@/components/HomeIconMenu';
 import Footer from '@/components/Footer';
 import { Outlet } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 function MyPage() {
+	const navigate = useNavigate();
+ 
+	useEffect(() => {
+		
+		const role = sessionStorage.getItem('selectedRole'); 
+		if (role === 'USER') {
+			navigate('/login', { replace: true });
+		}
+	}, [navigate]);
+
 	return (
 		<MypageWrapper>
 			<SideMenuWrapper>

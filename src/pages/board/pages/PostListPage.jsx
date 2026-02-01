@@ -21,6 +21,7 @@ import usePosts from '@/pages/board/hooks/usePosts';
 import useInfiniteScroll from '@/pages/board/hooks/useInfiniteScroll';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 import useAxios from '@/utils/hooks/useAxios';
+import Footer from '@/components/Footer';
 
 const PostListPage = () => {
   const [activeTab, setActiveTab] = useState('general');
@@ -126,7 +127,9 @@ const PostListPage = () => {
   const displayLoading = isSearchMode ? searchLoading : loading;
   const displayHasMore = isSearchMode ? false : hasMore;
 
-  const showFloatingButton = canCreatePost(activeTab);
+  const showFloatingButton = activeTab === 'promotion' 
+    ? canCreatePost(activeTab) // performer만
+    : true; // 일반 게시판은 모두 표시
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   if (isMenuOpen) {
@@ -236,6 +239,7 @@ const PostListPage = () => {
               )}
             </>
           )}
+          <Footer />
         </ContentArea>
         
         {!isPC && (

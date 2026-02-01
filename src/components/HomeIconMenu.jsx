@@ -16,12 +16,16 @@ import NotificationFilled from '@/assets/icons/notification-filled.svg?react';
 
 import NotiWebModal from '@/components/Notification/NotiWebModal';
 
+import { useAuth } from '@/context/AuthContext';
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 
 function HomeIconMenu({ isWeb, selectedMenu }) {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { isLoggedIn } = useAuth();
+
 	const isAboutCC = location.pathname === '/mypage/about-cc';
 
 	const [isNotiModalOpen, setIsNotiModalOpen] = useState(false);
@@ -67,7 +71,13 @@ function HomeIconMenu({ isWeb, selectedMenu }) {
 
 					<div
 						className="only-web"
-						onClick={() => setIsNotiModalOpen((prev) => !prev)}
+						onClick={() => {
+							if (!isLoggedIn) {
+								navigate('/login');
+							} else {
+								setIsNotiModalOpen((prev) => !prev);
+							}
+						}}
 					>
 						{isNotiModalOpen ? <NotificationFilled /> : <Notification />}
 						<span>알림</span>

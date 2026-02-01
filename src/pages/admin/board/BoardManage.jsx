@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import UserTable from '@/components/Admin/UserTable';
+import BoardTable from '@/components/Admin/BoardTable';
 import Search from '@/assets/icons/searchBlack.svg?react';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 import { formatDateTime } from './BoardManageApi';
@@ -31,12 +31,18 @@ function BoardManage() {
 
 	// API 데이터 변환
 	const apiRows = useMemo(() => {
-		// boardData.content에 직접 배열이 있음 
-		if (!boardData || !boardData.content || !Array.isArray(boardData.content)) {
+		if (!boardData) {
 			return [];
 		}
 		
-		return boardData.content.map((board) => ({
+		// useCustomFetch가 response.data를 반환하므로, result 추출
+		const actualData = boardData.isSuccess ? boardData.result : boardData;
+		
+		if (!actualData || !actualData.content || !Array.isArray(actualData.content)) {
+			return [];
+		}
+		
+		return actualData.content.map((board) => ({
 			authorNickname: board.authorNickname || '익명',
 			title: board.title || '',
 			createdAt: formatDateTime(board.createdAt),
@@ -49,13 +55,12 @@ function BoardManage() {
 		return [headerRow, ...apiRows];
 	}, [apiRows]);
 
-	// 페이지네이션 정보 - 수정필요 (미완)
-	const isLast = boardData?.last ?? false;
-	const isFirst = boardData?.first ?? true;
-	const pageNumber = boardData?.number ?? 0;
-	// totalPages가 없어서 동적으로 계산
-	// 마지막 페이지면 현재 페이지 + 1, 아니면 현재 + 5로 설정 (임시)
-	const totalPages = isLast ? pageNumber + 1 : pageNumber + 5;
+	// 페이지네이션 정보
+	const actualData = boardData?.isSuccess ? boardData.result : boardData;
+	const isLast = (actualData?.pageNumber ?? 0) >= ((actualData?.totalPages ?? 1) - 1);
+	const isFirst = (actualData?.pageNumber ?? 0) === 0;
+	const pageNumber = actualData?.pageNumber ?? 0;
+	const totalPages = actualData?.totalPages ?? 1;
 
 	// 컬럼 표시 설정
 	const visibleColumns = ['authorNickname', 'title', 'createdAt', 'manage'];
@@ -88,13 +93,11 @@ function BoardManage() {
 					) : apiRows.length === 0 ? (
 						<EmptyMessage>게시글이 없습니다.</EmptyMessage>
 					) : (
-						<UserTable
+						<BoardTable
 							data={paginatedData}
 							currentPage={currentPage}
 							setCurrentPage={setCurrentPage}
 							totalPages={totalPages}
-							isLast={isLast}
-							isFirst={isFirst}
 							visibleColumns={visibleColumns}
 							loading={loading}
 						/>

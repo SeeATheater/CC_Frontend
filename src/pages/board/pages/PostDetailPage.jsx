@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, SideMenuWrapper } from '@/pages/board/styles/commonStyles';
+import { Container, SideMenuWrapper, HeaderIcons, HeaderIcon, EmptyHeaderIcon } from '@/pages/board/styles/commonStyles';
 import {
   ContentArea, PostDetailContainer, PostHeader, PostTitle,
   PostContent, PostMeta, PostAuthor, PostDate,
@@ -26,8 +26,10 @@ import Edit from '@/pages/board/components/Icons/Edit.svg';
 import Delete from '@/pages/board/components/Icons/Delete.svg';
 import Tab from '@/pages/board/components/Icons/Tab.svg';
 import Lock from '@/pages/board/components/Icons/Lock.svg';
+import Dots from '@/pages/board/components/Icons/Dots.svg';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 import useAxios from '@/utils/hooks/useAxios';
+import Footer from '@/components/Footer';
 
 const PostDetailPage = () => {
   const { id } = useParams();
@@ -381,11 +383,20 @@ const PostDetailPage = () => {
           {/* 게시글 헤더 */}
           <PostHeader>
             {isPC && ( 
-              <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
-                <PostTitle>{post.title}</PostTitle>
-                <div style={{marginBottom: '12px', fontSize: '16px', fontWeight: 'bold', color: '#F67676'}}>
-                  {post.category === 'general' ? '일반' : '홍보' }
+              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
+                  <PostTitle>{post.title}</PostTitle>
+                  <div style={{marginBottom: '12px', fontSize: '16px', fontWeight: 'bold', color: '#F67676'}}>
+                    {post.category === 'general' ? '일반' : '홍보' }
+                  </div>
                 </div>
+                <HeaderIcons>
+                  {isPostOwner ? (
+                    <HeaderIcon onClick={openActionSheet} src={Dots} />
+                  ) : (
+                    <EmptyHeaderIcon />
+                  )}
+                </HeaderIcons>
               </div>
             )}
             <PostMeta>
@@ -647,6 +658,9 @@ const PostDetailPage = () => {
             ))}
           </CommentsSection>
         </PostDetailContainer>
+        {!isPC && (
+          <div style={{margin: '100px 0px 0px 0px'}}><Footer /></div>
+        )}
       </ContentArea>
 
       {/* 모바일 댓글 입력 */}
@@ -718,6 +732,9 @@ const PostDetailPage = () => {
         title="댓글을 수정하시겠어요?"
         actions={editModalActions}
       />
+      {isPC && (
+        <div style={{margin: '300px 0px 0px 0px'}}><Footer /></div>
+      )}
     </Container>
   );
 };

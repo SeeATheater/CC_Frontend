@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import TopBar from '@/components/TopBar';
 import TopBarWeb from '@/components/TopBarWeb';
+import Footer from '@/components/Footer';
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 import useResponsive from '@/pages/board/hooks/useResponsive';
 
@@ -88,7 +89,7 @@ const QueryDetail = () => {
               <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '12px' }}>
                 <QueryTitle>{query.inquiryTitle}</QueryTitle>
                 <StatusBadge status={query.inquiryStatus}>
-                  {query.inquiryStatus === 'ANSWERED' ? '답변 완료' : '답변 대기'}
+                  {query.inquiryStatus === 'REPLIED' ? '답변 완료' : '답변 대기'}
                 </StatusBadge>
               </div>
             )}
@@ -127,6 +128,12 @@ const QueryDetail = () => {
           )}
         </QueryDetailContainer>
       </ContentArea>
+      {isPC && (
+        <div style={{margin: '0px -70px -100px -70px'}}><Footer /></div>
+      )}
+      {!isPC && (
+        <div style={{margin: '0px 0px 0px 0px'}}><Footer /></div>
+      )}
     </Container>
   );
 };

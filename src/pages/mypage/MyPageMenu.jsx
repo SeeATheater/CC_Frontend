@@ -15,14 +15,6 @@ function MyPageMenu() {
 		// loading, error
 	} = useCustomFetch('/member/myPage', 'GET');
 
-	const {
-		data: image,
-		// loading: imgloading,
-		// error: imgerror,
-	} = useCustomFetch('/images/2');
-
-	console.log('image', image?.result?.imageUrl);
-
 	const { name } = data?.result || {};
 	if (data) {
 		console.log(data?.result);
@@ -131,6 +123,7 @@ function MyPageMenu() {
 						<ul>
 							<li onClick={() => navigate('/mypage/query')}>1:1 문의</li>
 							<li onClick={() => navigate('/mypage/about-cc')}>CC 정보</li>
+							<li onClick={() => navigate('/service')}>서비스 이용약관</li>
 							<li className="color-warning" onClick={confirmDeactivate}>
 								회원 탈퇴
 							</li>

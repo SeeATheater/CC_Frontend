@@ -196,7 +196,7 @@ export const Divider = styled.div`
 // 추가 입력 필드 (학번, 입금자명)
 export const AdditionalInputField = styled.div`
   padding: 4px 12px;
-  width: 230px;
+  // width: 230px;
   height: 34px;
   background: #F8F8F8;
   border-radius: 3px;

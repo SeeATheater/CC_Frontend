@@ -4,21 +4,51 @@ import { useNavigate } from 'react-router-dom';
 import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 import ChevronRight from '@/assets/icons/chevronRight.svg?react';
 
-const UserTable = ({
+const BoardTable = ({
 	data,
 	currentPage,
 	setCurrentPage,
 	totalPages,
 	visibleColumns,
-	isLast,
-	isFirst,
-	hasNext,
 	loading,
-	searchLoading,
 }) => {
 	const navigate = useNavigate();
+	const BLOCK_SIZE = 5; // 한 블록에 표시할 페이지 수
 
 	const allHeaders = Object.keys(data[0] ?? {});
+
+	// 현재 페이지가 속한 블록 계산
+	const currentBlock = Math.floor(currentPage / BLOCK_SIZE);
+	
+	// 현재 블록의 시작/끝 페이지
+	const blockStartPage = currentBlock * BLOCK_SIZE;
+	const blockEndPage = Math.min(blockStartPage + BLOCK_SIZE - 1, totalPages - 1);
+	
+	// 표시할 페이지 번호 배열 생성
+	const pageNumbers = [];
+	for (let i = blockStartPage; i <= blockEndPage; i++) {
+		pageNumbers.push(i);
+	}
+	
+	// 이전/다음 블록 존재 여부
+	const hasPrevBlock = currentBlock > 0;
+	const hasNextBlock = blockEndPage < totalPages - 1;
+	
+	// 이전 블록의 첫 페이지로 이동
+	const goToPrevBlock = () => {
+		if (hasPrevBlock) {
+			const prevBlockStart = (currentBlock - 1) * BLOCK_SIZE;
+			setCurrentPage(prevBlockStart);
+		}
+	};
+	
+	// 다음 블록의 첫 페이지로 이동
+	const goToNextBlock = () => {
+		if (hasNextBlock) {
+			const nextBlockStart = (currentBlock + 1) * BLOCK_SIZE;
+			setCurrentPage(nextBlockStart);
+		}
+	};
 
 	return (
 		<Wrapper>
@@ -50,7 +80,7 @@ const UserTable = ({
 								}
 								if (key === 'amateurShowStatus') {
 									return (
-										<StyledTd>
+										<StyledTd key={key}>
 											{row.amateurShowStatus === 'ONGOING' && (
 												<p className="black-txt">공연중</p>
 											)}
@@ -71,49 +101,43 @@ const UserTable = ({
 				</tbody>
 			</StyledTable>
 
+			{/* 블록 단위 페이지네이션 */}
 			<Pagination>
+				{/* 이전 블록 버튼 */}
 				<PageBtn
-					onClick={() => setCurrentPage(currentPage - 1)}
-					disabled={isFirst || currentPage === 0}
+					onClick={goToPrevBlock}
+					disabled={!hasPrevBlock}
+					isArrow
 				>
-					<ChevronLeftGray />
+					<ChevronLeftIcon />
 				</PageBtn>
 
-				{Array.from({ length: totalPages }, (_, i) => (
+				{/* 페이지 번호들 */}
+				{pageNumbers.map((pageNum) => (
 					<PageBtn
-						key={i}
-						onClick={() => setCurrentPage(i)}
-						active={currentPage === i}
+						key={pageNum}
+						onClick={() => setCurrentPage(pageNum)}
+						active={currentPage === pageNum}
 					>
-						{i + 1}
+						{pageNum + 1}
 					</PageBtn>
 				))}
 
+				{/* 다음 블록 버튼 */}
 				<PageBtn
-					onClick={() => setCurrentPage(currentPage + 1)}
-					disabled={
-						isLast === true ||
-						hasNext === false ||
-						currentPage + 1 === totalPages
-					}
+					onClick={goToNextBlock}
+					disabled={!hasNextBlock}
+					isArrow
 				>
-					<ChevronRightGray />
+					<ChevronRightIcon />
 				</PageBtn>
 			</Pagination>
 		</Wrapper>
 	);
 };
 
-export default UserTable;
+export default BoardTable;
 
-const ChevronLeftGray = styled(ChevronLeft)`
-	color: ${({ theme }) => theme.colors.gray400};
-	height: 16px;
-`;
-const ChevronRightGray = styled(ChevronRight)`
-	color: ${({ theme }) => theme.colors.gray400};
-	height: 16px;
-`;
 const Wrapper = styled.div`
 	font-family: Pretendard;
 `;
@@ -152,6 +176,7 @@ const StyledTd = styled.td`
 		color: ${({ theme }) => theme.colors.pink600};
 	}
 `;
+
 const DetailButton = styled.button`
 	width: 39px;
 	height: 20px;
@@ -160,6 +185,10 @@ const DetailButton = styled.button`
 	background-color: #d9d9d9;
 	color: #555;
 	cursor: pointer;
+	
+	&:hover {
+		background-color: #bbb;
+	}
 `;
 
 const Pagination = styled.div`
@@ -171,11 +200,35 @@ const Pagination = styled.div`
 `;
 
 const PageBtn = styled.button`
-	padding: 6px 10px;
+	padding: ${({ isArrow }) => (isArrow ? '6px 12px' : '6px 10px')};
 	border-radius: 4px;
 	border: none;
 	font-size: ${({ theme, active }) =>
 		active ? theme.font.fontSize.title16 : theme.font.fontSize.body14};
-	color: ${({ active }) => (active ? '#000' : '#989898')};
-	cursor: pointer;
+	font-weight: ${({ active }) => (active ? '700' : '400')};
+	color: ${({ active, disabled }) => 
+		disabled ? '#ccc' : active ? '#000' : '#989898'};
+	cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
+	transition: all 0.2s;
+	
+	&:hover:not(:disabled) {
+		background-color: ${({ active, theme }) => 
+			active ? theme.colors.pink100 || '#FFF1EF' : '#f8f8f8'};
+	}
+	
+	&:disabled {
+		opacity: 0.3;
+	}
+`;
+
+const ChevronLeftIcon = styled(ChevronLeft)`
+  color: ${({ theme }) => theme.colors.gray400};
+  height: 16px;
+  width: 16px;
+`;
+
+const ChevronRightIcon = styled(ChevronRight)`
+  color: ${({ theme }) => theme.colors.gray400};
+  height: 16px;
+  width: 16px;
 `;
