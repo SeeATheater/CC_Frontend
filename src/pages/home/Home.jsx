@@ -98,7 +98,7 @@ const role = sessionStorage.getItem('selectedRole');
 				<Wrapper>
 					<div
 						className="only-web"
-						style={{ marginBottom: '40px', maxWidth: '1180px' }}
+						style={{ marginBottom: '40px' }}
 					>
 						<SearchPC />
 					</div>
@@ -166,11 +166,12 @@ const role = sessionStorage.getItem('selectedRole');
 						<BoardPreviewCardList data={dataHotBoard} />
 					</div>
 					<div className="only-web" style={{ paddingRight: '60px' }}>
+					
 						<BoardPreviewCardWeb data={dataHotBoard} />
 					</div>
 
 					<div style={{ paddingRight: '20px' }}>
-						<BoardPreviewList data={dataBoard?.content} />
+						<BoardPreviewList data={dataBoard?.result?.content} />
 					</div>
 					<div style={{ paddingRight: '20px', marginTop: '28px' }}>
 						<button className="light only-mobile">게시판 보러가기</button>
@@ -269,7 +270,7 @@ const RegisterButton = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex: 1;
-	max-width: 1180px;
+	
 	background: ${({ theme }) => theme.colors.pink200};
 	height: 92px;
 	margin: 30px 60px 0px 60px;
@@ -288,7 +289,8 @@ const RegisterButtonMobile = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex: 1;
-	max-width: 1180px;
+	
+
 	background: ${({ theme }) => theme.colors.pink200};
 	padding: 8px;
 	margin: 30px 20px 0px 20px;

@@ -18,7 +18,7 @@ function CarouselWeb({ banners }) {
 	};*/
 	const settings = {
 		dots: true,
-		infinite: true,
+		infinite: banners?.length > 1,
 		speed: 500,
 		slidesToShow: 1,
 		slidesToScroll: 1,
@@ -51,10 +51,8 @@ export default CarouselWeb;
 
 const Wrapper = styled.div`
 	.slider-container {
-		height: 280px;
-		max-width: 1180px;
-		display: flex;
-		flex-direction: column;
+
+		
 		justify-content: space-between;
 		border-radius: 5px;
 	}
