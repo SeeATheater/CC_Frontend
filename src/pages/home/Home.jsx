@@ -153,14 +153,18 @@ const role = sessionStorage.getItem('selectedRole');
 				{/*게시판 섹선*/}
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
-					<Bar>
-						<h1
-							style={{ fontSize: '14px', marginBottom: '12px' }}
-							onClick={() => navigate('/board')}
+					<Bar >
+						<div style={{display: 'flex', flexDirection: 'row', gap: '10px', alignItems:'center'}} onClick={() => navigate('/board')}>
+<h1
+							style={{ fontSize: '14px', textAlign:'center' }}
+							
 						>
-							🔥지금 HOT 게시판
+							🔥지금 HOT 게시판 
 						</h1>
+						<p>(오른쪽 화살표 정렬 수정 예정)</p>
 						<ChevronRight />
+						</div>
+						
 					</Bar>
 					<div className="only-mobile">
 						<BoardPreviewCardList data={dataHotBoard} />

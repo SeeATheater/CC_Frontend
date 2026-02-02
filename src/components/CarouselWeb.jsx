@@ -4,10 +4,12 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styled from 'styled-components';
 import Poster from '@/assets/images/test-poster2.png';
+import { useNavigate } from 'react-router-dom';
 
 /*배너 넘어갈 때 border-radius 깜빡거리는 오류 있음 */
 
 function CarouselWeb({ banners }) {
+	const navigate = useNavigate();
 	let sliderRef = useRef(null);
 	/*
 	const play = () => {
@@ -33,7 +35,7 @@ function CarouselWeb({ banners }) {
 				<Slider ref={sliderRef} {...settings}>
 					{banners &&
 						banners.map((banner) => (
-							<Banner key={banner.amateurShowId}>
+							<Banner key={banner.amateurShowId} onClick={() => navigate(`/plays/detail/${banner.amateurShowId}`)}>
 								<img src={banner.posterImageUrl} alt={banner.name} />
 								<Text>
 									<p className="title">{banner.name}</p>

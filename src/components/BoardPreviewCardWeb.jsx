@@ -32,6 +32,7 @@ export default BoardPreviewCardWeb;
 const Wrapper = styled.div`
 	display: flex;
 	flex-direction: row;
+	justify-content: space-between;
 	max-width: 1146px;
 	height: 140px;
 	background: ${({ theme }) => theme.colors.gray200};
