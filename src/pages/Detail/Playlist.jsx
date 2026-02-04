@@ -94,63 +94,65 @@ function Playlist() {
 				<TopWrap>
 					<Hamburger />
 				</TopWrap>
+				<MobileContent>
+					<Today>
+						<MobileCarousel>
+							<h3 className="Todays">오늘 진행하는 소극장 공연</h3>
 
-				<Today>
-					<MobileCarousel>
-						<h3 className="Todays">오늘 진행하는 소극장 공연</h3>
-
-						<CarouselWrapper>
-							<CarouselTrack $current={current}>
+							<CarouselWrapper>
+								<CarouselTrack $current={current}>
+									{todayData &&
+										todayData?.result.content.map((data, idx) => (
+											<Slide key={data.amateurShowId}>
+												<PlayCard
+													key={data.amateurShowId}
+													name={data.name}
+													place={data.place}
+													posterImageUrl={data.posterImageUrl}
+													schedule={data.schedule}
+													amateurShowId={data.amateurShowId}
+												/>
+											</Slide>
+										))}
+								</CarouselTrack>
+							</CarouselWrapper>
+							<IndicatorWrapper>
 								{todayData &&
-									todayData?.result.content.map((data, idx) => (
-										<Slide key={data.amateurShowId}>
-											<PlayCard
-												key={data.amateurShowId}
-												name={data.name}
-												place={data.place}
-												posterImageUrl={data.posterImageUrl}
-												schedule={data.schedule}
-												amateurShowId={data.amateurShowId}
-											/>
-										</Slide>
+									todayData?.result.content.map((_, idx) => (
+										<Dot
+											key={idx}
+											className={idx === current ? 'active' : ''}
+											onClick={() => setCurrent(idx)}
+										/>
 									))}
-							</CarouselTrack>
-						</CarouselWrapper>
-						<IndicatorWrapper>
-							{todayData &&
-								todayData?.result.content.map((_, idx) => (
-									<Dot
-										key={idx}
-										className={idx === current ? 'active' : ''}
-										onClick={() => setCurrent(idx)}
-									/>
-								))}
-						</IndicatorWrapper>
-					</MobileCarousel>
-				</Today>
-				<Now>
-					<h3 className="onGoing"> 현재 진행중 </h3>
-					<MappingArea>
-						{ongoingData?.result.content.map((data) => (
-							<NowShowing
-								key={data.amateurShowId}
-								name={data.name}
-								place={data.place}
-								posterImageUrl={data.posterImageUrl}
-								schedule={data.schedule}
-								amateurShowId={data.amateurShowId}
-							/>
-						))}
-					</MappingArea>
-				</Now>
-				{roleToken == 'PERFORMER' && (
-					<FixedProdButton>
-						<ProdButton onClick={toRegist}>
-							<Ticket height={28} />
-							<p>공연등록</p>
-						</ProdButton>
-					</FixedProdButton>
-				)}
+							</IndicatorWrapper>
+						</MobileCarousel>
+					</Today>
+					<Now>
+						<h3 className="onGoing"> 현재 진행중 </h3>
+						<MappingArea>
+							{ongoingData?.result.content.map((data) => (
+								<NowShowing
+									key={data.amateurShowId}
+									name={data.name}
+									place={data.place}
+									posterImageUrl={data.posterImageUrl}
+									schedule={data.schedule}
+									amateurShowId={data.amateurShowId}
+								/>
+							))}
+						</MappingArea>
+					</Now>
+					{roleToken == 'PERFORMER' && (
+						<FixedProdButton>
+							<ProdButton onClick={toRegist}>
+								<Ticket height={28} />
+								<p>공연등록</p>
+							</ProdButton>
+						</FixedProdButton>
+					)}
+				</MobileContent>
+				<Footer />
 			</Mobile>
 		</Container>
 	);
@@ -172,12 +174,15 @@ const Web = styled.div`
 
 		flex-direction: column;
 		width: 100%;
+		margin-left: 100px;
 	}
+`;
+const MobileContent = styled.div`
+	padding: 20px;
 `;
 const WebContent = styled.div`
 	display: flex;
 	padding: 60px 100px 100px 60px;
-	margin-left: 100px;
 	flex-direction: column;
 	gap: 40px;
 
@@ -219,7 +224,7 @@ const SideMenuWrapper = styled.div`
 
 const Mobile = styled.div`
 	display: flex;
-	padding: 20px;
+
 	flex-direction: column;
 	@media (min-width: 768px) {
 		display: none;
