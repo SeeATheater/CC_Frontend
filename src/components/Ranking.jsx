@@ -1,13 +1,15 @@
 import styled from 'styled-components';
 import { useEffect, useRef, useState } from 'react';
 import Poster from '@/assets/images/test-poster1.png';
+import { useNavigate } from 'react-router-dom';
 
 function Ranking({ data }) {
 	const listRef = useRef(null);
 	const [isDragging, setIsDragging] = useState(false);
 	const [startX, setStartX] = useState(0);
 	const [scrollLeft, setScrollLeft] = useState(0);
-
+const [hasMoved, setHasMoved] = useState(false);
+const navigate = useNavigate();
 	// 자동 스크롤
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -26,19 +28,27 @@ function Ranking({ data }) {
 	}, [isDragging]);
 
 	// 드래그 이벤트
-	const handleMouseDown = (e) => {
-		setIsDragging(true);
-		setStartX(e.pageX - listRef.current.offsetLeft);
-		setScrollLeft(listRef.current.scrollLeft);
-	};
+const handleMouseDown = (e) => {
+	setIsDragging(true);
+	setHasMoved(false);
+	setStartX(e.pageX - listRef.current.offsetLeft);
+	setScrollLeft(listRef.current.scrollLeft);
+};
 	const handleMouseMove = (e) => {
-		if (!isDragging) return;
-		e.preventDefault();
-		const x = e.pageX - listRef.current.offsetLeft; // 현재 위치
-		const walk = x - startX; // 이동거리
-		listRef.current.scrollLeft = scrollLeft - walk;
-	};
-	const handleMouseUp = () => setIsDragging(false);
+	if (!isDragging) return;
+
+	const x = e.pageX - listRef.current.offsetLeft;
+	const walk = x - startX;
+
+	if (Math.abs(walk) > 5) {
+		setHasMoved(true);
+	}
+
+	listRef.current.scrollLeft = scrollLeft - walk;
+};
+	const handleMouseUp = () => {
+	setIsDragging(false);
+};
 	const handleMouseLeave = () => setIsDragging(false);
 
 	return (
@@ -54,7 +64,11 @@ function Ranking({ data }) {
 				onTouchEnd={handleMouseUp}
 			>
 				{[...data, ...data].map((item, index) => (
-					<Card key={index}>
+					<Card key={item.roundId}
+					onClick={() => {
+						if (hasMoved) return; // 드래그였으면 클릭 무시
+						navigate(`/plays/detail/${item.amateurShowId}`);
+					}}>
 						<Img background={item.posterImageUrl}>
 							<IndexLabel>{(index % data.length) + 1}</IndexLabel>
 						</Img>
@@ -76,7 +90,17 @@ const Card = styled.div`
 	@media (min-width: 768px) {
 		width: 200px;
 	}
+		transition: transform 0.05s ease, box-shadow 0.05s ease;
+&:hover {
+		transform: scale(1.05);
+	}
 
+	/* 드래그 중엔 커지지 않게 (선택) */
+	${({ isDragging }) =>
+		isDragging &&
+		`
+		transform: scale(1);
+	`}
 	h3 {
 		color: ${({ theme }) => theme.colors.grayMain};
 		font-size: ${({ theme }) => theme.font.fontSize.body14};
@@ -137,6 +161,8 @@ const CardList = styled.div`
 	flex-direction: row;
 	gap: 20px;
 	overflow-x: auto;
+	padding-top: 10px;
+	padding-bottom:10px;
 	padding-bottom: 8px; /* 스크롤 안 보이게 여유 */
 	scrollbar-width: none; /* Firefox */
 	-ms-overflow-style: none; /* IE/Edge */

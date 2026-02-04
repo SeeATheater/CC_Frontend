@@ -11,10 +11,10 @@ function SmallTheaterRegister() {
 	const navigate = useNavigate();
 	
 	useEffect(() => {
-		const token = sessionStorage.getItem('accessToken');
-		const role = sessionStorage.getItem('role'); // 예: 'USER', 'PRODUCER'
+		const token = localStorage.getItem('accessToken');
+		const role = sessionStorage.getItem('selectedRole'); // 예: 'USER', 'PRODUCER'
 
-		if (!token || role === 'USER') {
+		if (!token || role !== 'PERFORMER') {
 			navigate('/login', { replace: true });
 		}
 	}, [navigate]);

@@ -98,7 +98,7 @@ const role = sessionStorage.getItem('selectedRole');
 				<Wrapper>
 					<div
 						className="only-web"
-						style={{ marginBottom: '40px', maxWidth: '1180px' }}
+						style={{ marginBottom: '40px' }}
 					>
 						<SearchPC />
 					</div>
@@ -153,24 +153,29 @@ const role = sessionStorage.getItem('selectedRole');
 				{/*게시판 섹선*/}
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
-					<Bar>
-						<h1
-							style={{ fontSize: '14px', marginBottom: '12px' }}
-							onClick={() => navigate('/board')}
+					<Bar >
+						<div style={{display: 'flex', flexDirection: 'row', gap: '10px', alignItems:'center'}} onClick={() => navigate('/board')}>
+<h1
+							style={{ fontSize: '14px', textAlign:'center' }}
+							
 						>
-							🔥지금 HOT 게시판
+							🔥지금 HOT 게시판 
 						</h1>
+						<p>(오른쪽 화살표 정렬 수정 예정)</p>
 						<ChevronRight />
+						</div>
+						
 					</Bar>
 					<div className="only-mobile">
 						<BoardPreviewCardList data={dataHotBoard} />
 					</div>
 					<div className="only-web" style={{ paddingRight: '60px' }}>
+					
 						<BoardPreviewCardWeb data={dataHotBoard} />
 					</div>
 
 					<div style={{ paddingRight: '20px' }}>
-						<BoardPreviewList data={dataBoard?.content} />
+						<BoardPreviewList data={dataBoard?.result?.content} />
 					</div>
 					<div style={{ paddingRight: '20px', marginTop: '28px' }}>
 						<button className="light only-mobile">게시판 보러가기</button>
@@ -269,7 +274,7 @@ const RegisterButton = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex: 1;
-	max-width: 1180px;
+	
 	background: ${({ theme }) => theme.colors.pink200};
 	height: 92px;
 	margin: 30px 60px 0px 60px;
@@ -288,7 +293,8 @@ const RegisterButtonMobile = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex: 1;
-	max-width: 1180px;
+	
+
 	background: ${({ theme }) => theme.colors.pink200};
 	padding: 8px;
 	margin: 30px 20px 0px 20px;
