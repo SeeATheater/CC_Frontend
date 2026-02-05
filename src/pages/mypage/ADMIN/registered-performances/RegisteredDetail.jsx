@@ -7,69 +7,84 @@ import Select from 'react-select';
 import ChevronRight from '@/assets/icons/chevronRight.svg?react';
 import useCustomFetch from '@/utils/hooks/useCustomFetch.js';
 import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useMemo } from 'react';
 function RegisteredDetail() {
 	const navigate = useNavigate();
 	const { showId } = useParams();
-	// 모달창 관련 함수
-	/*
-	const [showAlert, setShowAlert] = useState(false);
-	const handleCancelClick = () => setShowAlert(true);
-	const handleCloseAlert = () => setShowAlert(false);
-	const handleConfirmCancel = () => {
-		console.log('예매 취소 완료');
-		setShowAlert(false);
-		navigate('cancel/complete');
-	};
-	*/
+
 	function onPrev() {
 		navigate(-1);
 	}
-	/*
-	const onCancelClick = () => {
-		navigate('cancel', {
-			state: { backgroundLocation: location }, // ✅ 중요!
-		});
-	};
-*/
 	
+// 1️⃣ roundId 상태 (최초엔 null)
+const [currentRoundId, setCurrentRoundId] = useState(null);
 
-	const {
-			data ,
-			loading,
-			error,
-		} = useCustomFetch(`performer-page/${showId}`);
-	//
-	console.log(data);
+// 2️⃣ API 호출 (roundId 의존)
+const { data, loading, error } = useCustomFetch(
+  currentRoundId
+    ? `performer-page/${showId}?roundId=${currentRoundId}`
+    : `performer-page/${showId}`
+);
 
-	const {
-		detailAddress,
-		posterImageUrl,
-		reservations,
-		roundSummaries,
-		schedule,
-		selectedPerformance,
-		selectedRoundId,
-		showTitle,
-	} = data?.result || {};
+// 3️⃣ API 결과 구조분해
+const {
+  detailAddress,
+  posterImageUrl,
+  reservations,
+  roundSummaries,
+  schedule,
+  selectedRoundId,
+  showTitle,
+} = data?.result || {};
+
+useEffect(() => {
+  if (!currentRoundId && selectedRoundId) {
+    setCurrentRoundId(selectedRoundId);
+  }
+}, [selectedRoundId]);
+
+const roundOptions = useMemo(
+  () =>
+    roundSummaries?.map((round) => ({
+      value: round.roundId,
+      label: `${round.roundNumber}회차 | ${round.performanceDateTime
+        .slice(0, 10)
+        .replaceAll('-', '.')}`,
+    })) ?? [],
+  [roundSummaries]
+);
+
+const selectedOption = roundOptions.find(
+  (opt) => opt.value === currentRoundId
+);
+
 	return (
 		<>
 			<MyTicketsWrapper>
 				{/*모바일 상단바*/}
 				<div className="only-mobile">
-					<TopBar onPrev={onPrev}>예매 내역</TopBar>
+					<TopBar onPrev={onPrev}>등록한 공연</TopBar>
+					
 				</div>
 				{/*웹 상단바 */}
 				<div className="only-web-flex">
-					<TopBarWeb>예매 내역</TopBarWeb>
+					<TopBarWeb>등록한 공연</TopBarWeb>
 				</div>
 				{/*본문*/}
 				<Wrapper>
 					{/*웹 포스터*/}
-					<div className="only-web">
-						<img />
+					<div className="only-web nofocus">
+						<img src={posterImageUrl}/>
+					</div>
+					{/*웹 포스터*/}
+					<div className="only-mobile-flex nofocus" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+						<img src={posterImageUrl}/>
 					</div>
 					{/*티켓 정보 */}
 					<DetailWrapper>
+						
 						<div
 							style={{
 								display: 'flex',
@@ -79,8 +94,15 @@ function RegisteredDetail() {
 								marginBottom: '32px',
 							}}
 						>
-							<h1>{showTitle?? 'null'}</h1>
-							<ChevronRightGray />
+							<div className='only-web-flex' style={{display:'flex', flexDirection:'row', alignItems:'center', gap:'10px'}}>
+								<h1 onClick={()=>navigate(`/plays/detail/${showId}`)}>{showTitle?? 'null'}</h1>
+								<ChevronRightGray />
+							</div>	
+							<div className='only-mobile-flex' style={{display:'flex', flex:'1', flexDirection:'row', justifyContent:'center', alignItems:'center', gap:'10px'}}>
+								<h1 onClick={()=>navigate(`/plays/detail/${showId}`)}>{showTitle?? 'null'}</h1>
+								<ChevronRightGray />
+							</div>
+							
 						</div>
 						<p style={{ marginBottom: '10px' }}>
 							{detailAddress ?? 'null'}
@@ -108,8 +130,14 @@ function RegisteredDetail() {
 								
 							</tbody>
 						</Table>
-						셀렉트박스 스타일링 필요
-						<Select />
+					
+					<Select
+					options={roundOptions}
+					value={selectedOption}
+					placeholder="회차 선택"
+					onChange={(option) => setCurrentRoundId(option.value)}
+					/>
+
 						<Table>
 							<tbody>
 								<tr>
@@ -150,6 +178,7 @@ const Wrapper = styled.div`
 		gap: clamp(40px, 15vw, 100px);
 		padding: 30px 110px;
 	}
+	
 
 	h1 {
 		color: ${({ theme }) => theme.colors.grayMain};
@@ -202,6 +231,13 @@ const Wrapper = styled.div`
 			border-radius: 5px;
 		}
 	}
+
+	.nofocus  {
+  outline: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
 `;
 
 const Table = styled.table`
