@@ -29,18 +29,17 @@ import AdminRoutes from './routes/AdminRoutes.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import TestUploadPic from './pages/TEST/TestUploadPic';
 import SearchMobile from './pages/search/SearchMobile.jsx';
-import ServiceTerms from './pages/mypage/service-terms/ServiceTerms'
+import ServiceTerms from './pages/mypage/service-terms/ServiceTerms';
 function App() {
 	return (
 		<Routes>
-			<Route path="/" element={<Onboarding />} />
-
-			<Route path="/login" element={<Login />} />
+			<Route path="/login" element={<Onboarding />} />
+			<Route path="/login/auth" element={<Login />} />
 			<Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 			<Route path="/logout" element={<Logout />} />
 			<Route path="/withdrawal" element={<Withdrawal />} />
 
-			<Route path="/home" element={<Home />} />
+			<Route path="/" element={<Home />} />
 			<Route path="/menu" element={<FullScreenMenu />} />
 
 			<Route path="/small-theater/*" element={<SmallTheaterRoutes />} />

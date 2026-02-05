@@ -114,7 +114,7 @@ function AboutCC() {
 								<br />
 								저희 씨씨 이용하러 가실까요?
 							</Quote>
-							<button className="btn-primary" onClick={() => navigate('/home')}>
+							<button className="btn-primary" onClick={() => navigate('/')}>
 								홈 화면으로 가기
 							</button>
 						</ContentWrapper>

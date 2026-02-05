@@ -53,7 +53,7 @@ function HomeIconMenu({ isWeb, selectedMenu }) {
 		<>
 			<Wrapper $isWeb={isWeb} $bgBlack={isAboutCC}>
 				<MenuWrapper $isWeb={isWeb}>
-					<div className="logo" onClick={() => navigate('/home')}>
+					<div className="logo" onClick={() => navigate('/')}>
 						<Logo />
 					</div>
 					<div onClick={() => navigate('/plays')}>
@@ -83,7 +83,15 @@ function HomeIconMenu({ isWeb, selectedMenu }) {
 						<span>알림</span>
 					</div>
 
-					<div onClick={() => navigate('/mypage')}>
+					<div
+						onClick={() => {
+							if (!isLoggedIn) {
+								navigate('/login');
+							} else {
+								navigate('/mypage');
+							}
+						}}
+					>
 						{selectedMenu === 'mypage' ? <ProfileFilled /> : <Profile />}
 						<span>프로필</span>
 					</div>

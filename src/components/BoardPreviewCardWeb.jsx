@@ -1,9 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 function BoardPreviewCardWeb({ data }) {
+	console.log('data', data);
+
+	const realData = data?.result?.content;
+	console.log(realData);
 	const navigate = useNavigate();
 
-		if (!Array.isArray(data) || data.length === 0) {
+
+	if (!Array.isArray(realData) || realData.length === 0) {
 		return null; // or 로딩 UI
 	}
 
@@ -13,12 +18,12 @@ function BoardPreviewCardWeb({ data }) {
 	return (
 		<Wrapper>
 			{ (
-				<div onClick={() => navigate(`/board/post/${data[0].boardId}`)}>
-					<h1>{data[0]?.title}</h1>
-					<p>{data[0]?.content}</p>
+				<div onClick={() => navigate(`/board/post/${realData[0].boardId}`)}>
+					<h1>{realData[0]?.title}</h1>
+					<p>{realData[0]?.content}</p>
 				</div>
 			)}
-			{data[0].imgUrl &&<img src={data[0]?.imgUrl} />}
+			{realData[0].imgUrl &&<img src={realData[0]?.imgUrl} />}
 		</Wrapper>
 	);
 }
@@ -27,7 +32,8 @@ export default BoardPreviewCardWeb;
 const Wrapper = styled.div`
 	display: flex;
 	flex-direction: row;
-	max-width: 1146px;
+	justify-content: space-between;
+	
 	height: 140px;
 	background: ${({ theme }) => theme.colors.gray200};
 	padding: 20px;

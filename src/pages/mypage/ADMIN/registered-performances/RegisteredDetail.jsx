@@ -5,93 +5,86 @@ import Poster from '@/assets/images/test-poster2.png';
 import TopBarWeb from '@/components/TopBarWeb';
 import Select from 'react-select';
 import ChevronRight from '@/assets/icons/chevronRight.svg?react';
-
-const details = {
-	title: '실종',
-	imgSrc: Poster,
-	count: 2,
-	bookingDate: '2025-01-15',
-	place: '홍익대학교 학생회관 3층 소극장',
-	performanceDate: '2025-03-21 (금) 14:30 1회',
-	status: '예매 진행중',
-	cancelDeadline: {
-		deadline: '2025-03-20 (목) 17:00 까지',
-		extra: [
-			{ date: '2025.01.15 ~ 2025.01.22', fee: '없음' },
-			{ date: '2025.01.22 ~ 2025.03.11', fee: '장당 5000원' },
-			{ date: '2025.03.12 ~ 2025.03.14', fee: '티켓금액의 10%' },
-			{ date: '2025.03.15 ~ 2025.03.18', fee: '티켓금액의 20%' },
-			{ date: '2025.03.19 ~ 2025.03.20', fee: '티켓 금액의 30%' },
-		],
-	},
-};
-
+import useCustomFetch from '@/utils/hooks/useCustomFetch.js';
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useMemo } from 'react';
 function RegisteredDetail() {
 	const navigate = useNavigate();
-	// 모달창 관련 함수
-	/*
-	const [showAlert, setShowAlert] = useState(false);
-	const handleCancelClick = () => setShowAlert(true);
-	const handleCloseAlert = () => setShowAlert(false);
-	const handleConfirmCancel = () => {
-		console.log('예매 취소 완료');
-		setShowAlert(false);
-		navigate('cancel/complete');
-	};
-	*/
+	const { showId } = useParams();
+
 	function onPrev() {
 		navigate(-1);
 	}
-	/*
-	const onCancelClick = () => {
-		navigate('cancel', {
-			state: { backgroundLocation: location }, // ✅ 중요!
-		});
-	};
-*/
-	const { imgSrc } = details;
+	
+// 1️⃣ roundId 상태 (최초엔 null)
+const [currentRoundId, setCurrentRoundId] = useState(null);
 
-	const options = [
-		{
-			value: '2025.10.03 (목) 17:00',
-			label: (
-				<div style={{ display: 'flex', flexDirection: 'column' }}>
-					<span style={{ fontWeight: 'bold' }}>1회차</span>
-					<span>2025.10.03 (목) 17:00</span>
-				</div>
-			),
-		},
-		{
-			value: '2025.10.04 (금) 17:00',
-			label: (
-				<div style={{ display: 'flex', flexDirection: 'column' }}>
-					<span style={{ fontWeight: 'bold' }}>2회차</span>
-					<span>2025.10.04 (금) 17:00</span>
-				</div>
-			),
-		},
-	];
+// 2️⃣ API 호출 (roundId 의존)
+const { data, loading, error } = useCustomFetch(
+  currentRoundId
+    ? `performer-page/${showId}?roundId=${currentRoundId}`
+    : `performer-page/${showId}`
+);
 
-	//
+// 3️⃣ API 결과 구조분해
+const {
+  detailAddress,
+  posterImageUrl,
+  reservations,
+  roundSummaries,
+  schedule,
+  selectedRoundId,
+  showTitle,
+} = data?.result || {};
+
+useEffect(() => {
+  if (!currentRoundId && selectedRoundId) {
+    setCurrentRoundId(selectedRoundId);
+  }
+}, [selectedRoundId]);
+
+const roundOptions = useMemo(
+  () =>
+    roundSummaries?.map((round) => ({
+      value: round.roundId,
+      label: `${round.roundNumber}회차 | ${round.performanceDateTime
+        .slice(0, 10)
+        .replaceAll('-', '.')}`,
+    })) ?? [],
+  [roundSummaries]
+);
+
+const selectedOption = roundOptions.find(
+  (opt) => opt.value === currentRoundId
+);
+
 	return (
 		<>
 			<MyTicketsWrapper>
 				{/*모바일 상단바*/}
 				<div className="only-mobile">
-					<TopBar onPrev={onPrev}>예매 내역</TopBar>
+					<TopBar onPrev={onPrev}>등록한 공연</TopBar>
+					
 				</div>
 				{/*웹 상단바 */}
 				<div className="only-web-flex">
-					<TopBarWeb>예매 내역</TopBarWeb>
+					<TopBarWeb>등록한 공연</TopBarWeb>
 				</div>
 				{/*본문*/}
 				<Wrapper>
 					{/*웹 포스터*/}
-					<div className="only-web">
-						<img src={imgSrc} />
+					<div className="only-web nofocus">
+						<img src={posterImageUrl}/>
+					</div>
+					{/*웹 포스터*/}
+					<div className="only-mobile-flex nofocus" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+						<img src={posterImageUrl}/>
 					</div>
 					{/*티켓 정보 */}
 					<DetailWrapper>
+						
 						<div
 							style={{
 								display: 'flex',
@@ -101,14 +94,21 @@ function RegisteredDetail() {
 								marginBottom: '32px',
 							}}
 						>
-							<h1>실종</h1>
-							<ChevronRightGray />
+							<div className='only-web-flex' style={{display:'flex', flexDirection:'row', alignItems:'center', gap:'10px'}}>
+								<h1 onClick={()=>navigate(`/plays/detail/${showId}`)}>{showTitle?? 'null'}</h1>
+								<ChevronRightGray />
+							</div>	
+							<div className='only-mobile-flex' style={{display:'flex', flex:'1', flexDirection:'row', justifyContent:'center', alignItems:'center', gap:'10px'}}>
+								<h1 onClick={()=>navigate(`/plays/detail/${showId}`)}>{showTitle?? 'null'}</h1>
+								<ChevronRightGray />
+							</div>
+							
 						</div>
 						<p style={{ marginBottom: '10px' }}>
-							홍익대학교 학생회관 3층 소극장
+							{detailAddress ?? 'null'}
 						</p>
 						<p className="color-gray400" style={{ marginBottom: '16px' }}>
-							2024.10.03 ~ 2024.10.05
+							{schedule ?? 'null'}
 						</p>
 						<Hr />
 						<Table>
@@ -118,20 +118,26 @@ function RegisteredDetail() {
 									<th>인원누적</th>
 									<th>누적수익</th>
 								</tr>
+								{roundSummaries?.map((d) => (
 								<tr>
-									<td>1회차ㅣ2025.10.03</td>
-									<td>2</td>
-									<td>2,000</td>
+									<td>{d.roundNumber}회차ㅣ{d.performanceDateTime.slice(0, 10).replaceAll('-', '.')}
+</td>
+									<td>{d.sumQuantity}</td>
+									<td>{d.sumAmount.toLocaleString()}</td>
 								</tr>
-								<tr>
-									<td>1회차ㅣ2025.10.03</td>
-									<td>2</td>
-									<td>2,000</td>
-								</tr>
+								))}
+								
+								
 							</tbody>
 						</Table>
-						셀렉트박스 스타일링 필요
-						<Select options={options} />
+					
+					<Select
+					options={roundOptions}
+					value={selectedOption}
+					placeholder="회차 선택"
+					onChange={(option) => setCurrentRoundId(option.value)}
+					/>
+
 						<Table>
 							<tbody>
 								<tr>
@@ -139,16 +145,15 @@ function RegisteredDetail() {
 									<th>인원수</th>
 									<th>결제상태</th>
 								</tr>
-								<tr>
-									<td>홍길동</td>
-									<td>2</td>
-									<td>완료</td>
+								{reservations?.map((r) => (
+		<tr>
+									<td>{r.reserverName ?? 'null'}</td>
+									<td>{r.quantity ?? 'null'}</td>
+									<td>{r.reservationStatus ?? 'null'}</td>
 								</tr>
-								<tr>
-									<td>홍길동</td>
-									<td>2</td>
-									<td>완료</td>
-								</tr>
+								))}
+						
+								
 							</tbody>
 						</Table>
 					</DetailWrapper>
@@ -173,6 +178,7 @@ const Wrapper = styled.div`
 		gap: clamp(40px, 15vw, 100px);
 		padding: 30px 110px;
 	}
+	
 
 	h1 {
 		color: ${({ theme }) => theme.colors.grayMain};
@@ -225,6 +231,13 @@ const Wrapper = styled.div`
 			border-radius: 5px;
 		}
 	}
+
+	.nofocus  {
+  outline: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
 `;
 
 const Table = styled.table`

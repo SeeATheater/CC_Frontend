@@ -9,7 +9,7 @@ function Onboarding() {
 	const navigate = useNavigate();
 
 	const handleLoginClick = (roleType) => {
-		navigate(`/login?role=${roleType}`);
+		navigate(`/login/auth?role=${roleType}`);
 	};
 
 	return (

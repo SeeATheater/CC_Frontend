@@ -34,7 +34,7 @@ function MyPageRoutes() {
 					element={<RegisteredPerformances />}
 				/>
 				<Route
-					path="registered-performances/1"
+					path="registered-performances/:showId"
 					element={<RegisteredDetail />}
 				/>
 				<Route path="booking-history" element={<BookingHistory />} />

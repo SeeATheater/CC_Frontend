@@ -16,48 +16,9 @@ import useCustomFetch from '@/utils/hooks/useCustomFetch.js';
 import { useNavigate } from 'react-router-dom';
 import Footer from '@/components/Footer';
 
-/* 코드 가독성 이슈로 추후 리팩토링 해야할듯 */
-const banners = [
-	{
-		amateurShowId: 1,
-		posterImageUrl: Poster, // 이미지 경로 (필요하면 각각 다른 이미지도 넣으세요)
-		name: '실종',
-		place: '홍익대학교 학생회관 3층 소극장',
-		schedule: '2024.10.03 (목) 19:00',
-	},
-	{
-		amateurShowId: 2,
-		posterImageUrl: Poster,
-		name: '공연2',
-		place: '장소2',
-		schedule: '2024.11.15 (금) 20:00',
-	},
-	{
-		amateurShowId: 3,
-		posterImageUrl: Poster,
-		name: '공연3',
-		place: '장소3',
-		schedule: '2024.12.01 (일) 18:30',
-	},
-	{
-		amateurShowId: 4,
-		posterImageUrl: Poster,
-		name: '공연4',
-		place: '장소4',
-		schedule: '2024.12.01 (일) 18:30',
-	},
-	{
-		amateurShowId: 5,
-		posterImageUrl: Poster,
-		name: '공연5',
-		place: '장소5',
-		schedule: '2024.12.01 (일) 18:30',
-	},
-];
-
 function Home() {
 	const navigate = useNavigate();
-const role = sessionStorage.getItem('selectedRole');
+	const role = sessionStorage.getItem('selectedRole');
 
 	const {
 		data: dataClosing,
@@ -98,18 +59,18 @@ const role = sessionStorage.getItem('selectedRole');
 				<Wrapper>
 					<div
 						className="only-web"
-						style={{ marginBottom: '40px', maxWidth: '1180px' }}
+						style={{ marginBottom: '40px' }}
 					>
 						<SearchPC />
 					</div>
-					<h1>오늘 마감인 공연 (데이터 없음)</h1>
+					<h1>오늘 마감인 공연</h1>
 					<div className="only-web">
 						{dataClosing?.result && (
 							<CarouselWeb banners={dataClosing?.result} />
 						)}
 					</div>
 					<div className="only-mobile">
-						{dataClosing?.result && <CarouselMobile banners={banners} />}
+						{dataClosing?.result && <CarouselMobile banners={dataClosing?.result}  />}
 					</div>
 					<div className="only-mobile">
 						<HomeIconMenu />
@@ -119,16 +80,23 @@ const role = sessionStorage.getItem('selectedRole');
 					<Hr />
 				</div>
 				<Wrapper style={{ paddingRight: '0px' }}>
-					<h1>
-						<span className="only-web-inline">✨</span>소극장 공연 랭킹
-					</h1>
+					<Bar >
+					<div style={{display: 'flex', flexDirection: 'row', gap: '12px', alignItems:'center'}} onClick={() => navigate('/board')}>
+					<h1 style={{ margin: 0, lineHeight: 1 }}>
+						✨소극장 공연
+					</h1> <ChevronRight />
+					</div>
+					</Bar>
 					{dataRanking?.result && <Ranking data={dataRanking.result} />}
-
+				{role == 'AUDIENCE' && <>
 					<div style={{ paddingRight: '20px' }}>
-						<button className="light only-mobile" style={{ marginTop: '26px' }}>
+						<button className="light only-mobile" onClick={() => navigate('/plays')} style={{ marginTop: '26px' }}>
 							소극장 공연 보러가기
 						</button>
+						
 					</div>
+				</>}
+				
 				</Wrapper>
 				{role == 'PERFORMER' && <>
 				<div className='only-web'>
@@ -153,27 +121,29 @@ const role = sessionStorage.getItem('selectedRole');
 				{/*게시판 섹선*/}
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
-					<Bar>
-						<h1
-							style={{ fontSize: '14px', marginBottom: '12px' }}
-							onClick={() => navigate('/board')}
-						>
-							🔥지금 HOT 게시판
+					<Bar >
+						<div style={{display: 'flex', flexDirection: 'row', gap: '12px', alignItems:'center',}} onClick={() => navigate('/board')}>
+						<h1 style={{ margin: 0, lineHeight: 1 }}>
+							🔥지금 HOT 게시판 
 						</h1>
+						{/*TODO: 오른쪽 화살표 정렬 수정 예정)*/}
 						<ChevronRight />
+						</div>
+						
 					</Bar>
 					<div className="only-mobile">
 						<BoardPreviewCardList data={dataHotBoard} />
 					</div>
 					<div className="only-web" style={{ paddingRight: '60px' }}>
+					
 						<BoardPreviewCardWeb data={dataHotBoard} />
 					</div>
 
 					<div style={{ paddingRight: '20px' }}>
-						<BoardPreviewList data={dataBoard?.content} />
+						<BoardPreviewList data={dataBoard?.result?.content} />
 					</div>
 					<div style={{ paddingRight: '20px', marginTop: '28px' }}>
-						<button className="light only-mobile">게시판 보러가기</button>
+						<button className="light only-mobile" onClick={()=>navigate('/board')}>게시판 보러가기</button>
 					</div>
 				</Wrapper>
 				<Footer />
@@ -255,7 +225,7 @@ const Bar = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	height: 24px;
-	margin-bottom: 8px;
+	margin-bottom: 24px;
 	padding-right: 20px;
 	@media (min-width: 768px) {
 		justify-content: flex-start;
@@ -269,7 +239,7 @@ const RegisterButton = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex: 1;
-	max-width: 1180px;
+	
 	background: ${({ theme }) => theme.colors.pink200};
 	height: 92px;
 	margin: 30px 60px 0px 60px;
@@ -288,7 +258,8 @@ const RegisterButtonMobile = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex: 1;
-	max-width: 1180px;
+	
+
 	background: ${({ theme }) => theme.colors.pink200};
 	padding: 8px;
 	margin: 30px 20px 0px 20px;

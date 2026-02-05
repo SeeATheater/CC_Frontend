@@ -30,6 +30,13 @@ const ResponsiveView = createGlobalStyle`
       display: flex !important;
     }
 }
+      .only-mobile-flex {
+    display: flex !important;
+
+    @media (min-width: 768px) {
+      display: none !important;
+    }
+}
   .only-web {
     display: none !important;
 

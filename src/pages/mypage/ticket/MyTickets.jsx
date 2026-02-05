@@ -7,8 +7,8 @@ import TopBarWeb from '@/components/TopBarWeb';
 import PillToggleGroup from '@/components/PillToggleGroup';
 import useCustomFetch from '@/utils/hooks/useCustomFetch.js';
 function MyTickets() {
-	const role = localStorage.getItem('role');
-
+	const role = sessionStorage.getItem('selectedRole');
+console.log('롤', role);
 	const [selected, setSelected] = useState('전체');
 	const navigate = useNavigate();
 
@@ -48,48 +48,38 @@ function MyTickets() {
 		data: dataAllTicket,
 		loading: loadingAllTicket,
 		error: errorAllTicket,
-	} = useCustomFetch(`/myTickets/list?status=ALL`);
-	// 공연 등록자
-	const {
-		data: dataEndedTicket,
-		loading: loadingEndedTicket,
-		error: errorEndedTicket,
-	} = useCustomFetch(
-		`/member/myPage/reserveList?page=0&size=20&status=APPROVED_ENDED`,
-	);
-	console.log('공연 종료', dataEndedTicket);
-	const {
-		data: dataOngoingTicket,
-		loading: loadingOngoingTicket,
-		error: errorOngoingTicket,
-	} = useCustomFetch(
-		`/member/myPage/reserveList?page=0&size=20&status=APPROVED_ONGOING`,
-	);
-	console.log('예매 진행', dataOngoingTicket);
+	} = useCustomFetch(`myTickets/list?status=ALL&page=0&size=20`);
+	console.log('전체티켓', dataAllTicket);
 	// 유저
 	const {
 		data: dataReservedTicket,
 		loading: loadingReservedTicket,
 		error: errorReservedTicket,
-	} = useCustomFetch(`/myTickets/list?status=RESERVED`);
+	} = useCustomFetch(`myTickets/list?status=RESERVED&page=0&size=20`);
 	console.log('예약티켓', dataReservedTicket);
 	const {
 		data: dataCancelledTicket,
 		loading: loadingCancelledTicket,
 		error: errorCancelledTicket,
-	} = useCustomFetch(`/myTickets/list?status=CANCELLED`);
+	} = useCustomFetch(`myTickets/list?status=CANCELLED&page=0&size=20`);
+	console.log('취소티켓', dataCancelledTicket);
 	return (
 		<MyTicketsWrapper>
 			<div className="only-mobile">
 				<TopBar onPrev={onPrev}>
-					{role === 'admin' ? '등록한 공연' : '내 티켓'}
+					{role === 'PERFORMER' ? '등록한 공연' : '내 티켓'}
 				</TopBar>
 			</div>
-			<div className="only-web-flex">
-				<TopBarWeb>내 티켓</TopBarWeb>
-			</div>
+			{role && (
+  <div className="only-web-flex">
+    <TopBarWeb>
+      {role === 'PERFORMER' ? '등록한 공연' : '내 티켓'}
+    </TopBarWeb>
+  </div>
+)}
+
 			<Wrapper>
-				{role === 'admin' ? (
+				{role === 'PERFORMER' ? (
 					<PillToggleGroup
 						options={['전체', '예매 진행', '공연 종료']}
 						onSelect={(option) => setSelected(option)}
@@ -108,8 +98,8 @@ function MyTickets() {
 							<p>로딩 중...</p>
 						) : errorAllTicket ? (
 							<p>데이터를 불러오지 못했습니다.</p>
-						) : dataAllTicket?.result?.length > 0 ? (
-							dataAllTicket.result.map((detail, idx) => (
+						) : dataAllTicket?.result?.content?.length > 0 ? (
+							dataAllTicket.result.content?.map((detail, idx) => (
 								<TicketContainer
 									key={idx}
 									details={detail}
@@ -128,8 +118,8 @@ function MyTickets() {
 							<p>로딩 중...</p>
 						) : errorReservedTicket ? (
 							<p>데이터를 불러오지 못했습니다.</p>
-						) : dataReservedTicket?.result?.length > 0 ? (
-							dataReservedTicket.result.map((detail, idx) => (
+						) : dataReservedTicket?.result?.content?.length > 0 ? (
+							dataReservedTicket.result.content?.map((detail, idx) => (
 								<TicketContainer
 									key={idx}
 									details={detail}
@@ -148,8 +138,8 @@ function MyTickets() {
 							<p>로딩 중...</p>
 						) : errorCancelledTicket ? (
 							<p>데이터를 불러오지 못했습니다.</p>
-						) : dataCancelledTicket?.result?.length > 0 ? (
-							dataCancelledTicket.result.map((detail, idx) => (
+						) : dataCancelledTicket?.result?.content?.length > 0 ? (
+							dataCancelledTicket?.result?.content?.map((detail, idx) => (
 								<TicketContainer
 									key={idx}
 									details={detail}
