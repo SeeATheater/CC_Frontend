@@ -221,7 +221,8 @@ function RegisterStep1() {
 					{errors.name && <Err style={{ color: 'red' }}>{errors.name}</Err>}
 				</div>
 				<div>
-					<label>등록 기관 (api에 관련 변수명x) </label>
+					{/* <label>등록 기관 (api에 관련 변수명x) </label> */}
+					<label>등록 기관</label>
 					<input
 						className="input-text"
 						type="text"
