@@ -48,7 +48,12 @@ function RegisterRequests() {
 		<>
 			<AdminListPage>
 				<SectionTitle>등록 요청 관리</SectionTitle>
-				<SearchOptionBar onSearch={setSearchKeyword} />
+				<SearchOptionBar
+					onSearch={(keyword) => {
+						setSearchKeyword(keyword);
+						setPage(0);
+					}}
+				/>
 				<table>
 					<thead>
 						<tr>
@@ -89,7 +94,7 @@ function RegisterRequests() {
 				<Pagination
 					activePage={page + 1}
 					itemsCountPerPage={size}
-					totalItemsCount={data?.result?.totalPages}
+					totalItemsCount={data?.result?.totalElements}
 					pageRangeDisplayed={5}
 					onChange={changePageHandler}
 				/>
