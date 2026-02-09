@@ -102,7 +102,7 @@ function ProdDetail() {
 					<Divide />
 					<MorePic>
 						<p className="galleryTitle">
-							'{picData?.result?.content[0]?.performerName}'의 사진첩 더보기
+							'{picData?.result?.content[0]?.performerName}'의 사진첩
 						</p>
 						<ImgList>
 							{picData?.result?.content.map((data) => (
@@ -203,7 +203,7 @@ function ProdDetail() {
 						<Hr />
 						<MorePic>
 							<p className="galleryTitle">
-								'{picData?.result?.content[0]?.performerName}'의 사진첩 더보기
+								'{picData?.result?.content[0]?.performerName}'의 사진첩
 							</p>
 							<ImgList>
 								{picData?.result.content.map((data) => (
