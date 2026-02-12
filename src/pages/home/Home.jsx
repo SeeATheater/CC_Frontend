@@ -57,10 +57,7 @@ function Home() {
 					<Hamburger hasLogo={true} />
 				</div>
 				<Wrapper>
-					<div
-						className="only-web"
-						style={{ marginBottom: '40px' }}
-					>
+					<div className="only-web" style={{ marginBottom: '40px' }}>
 						<SearchPC />
 					</div>
 					<h1>오늘 마감인 공연</h1>
@@ -70,7 +67,9 @@ function Home() {
 						)}
 					</div>
 					<div className="only-mobile">
-						{dataClosing?.result && <CarouselMobile banners={dataClosing?.result}  />}
+						{dataClosing?.result && (
+							<CarouselMobile banners={dataClosing?.result} />
+						)}
 					</div>
 					<div className="only-mobile">
 						<HomeIconMenu />
@@ -80,62 +79,78 @@ function Home() {
 					<Hr />
 				</div>
 				<Wrapper style={{ paddingRight: '0px' }}>
-					<Bar >
-					<div style={{display: 'flex', flexDirection: 'row', gap: '12px', alignItems:'center'}} onClick={() => navigate('/board')}>
-					<h1 style={{ margin: 0, lineHeight: 1 }}>
-						✨소극장 공연
-					</h1> <ChevronRight />
-					</div>
+					<Bar>
+						<div
+							style={{
+								display: 'flex',
+								flexDirection: 'row',
+								gap: '12px',
+								alignItems: 'center',
+							}}
+							onClick={() => navigate('/plays')}
+						>
+							<h1 style={{ margin: 0, lineHeight: 1 }}>✨소극장 공연</h1>{' '}
+							<ChevronRight />
+						</div>
 					</Bar>
 					{dataRanking?.result && <Ranking data={dataRanking.result} />}
-				{role == 'AUDIENCE' && <>
-					<div style={{ paddingRight: '20px' }}>
-						<button className="light only-mobile" onClick={() => navigate('/plays')} style={{ marginTop: '26px' }}>
-							소극장 공연 보러가기
-						</button>
-						
-					</div>
-				</>}
-				
+					{role == 'AUDIENCE' && (
+						<>
+							<div style={{ paddingRight: '20px' }}>
+								<button
+									className="light only-mobile"
+									onClick={() => navigate('/plays')}
+									style={{ marginTop: '26px' }}
+								>
+									소극장 공연 보러가기
+								</button>
+							</div>
+						</>
+					)}
 				</Wrapper>
-				{role == 'PERFORMER' && <>
-				<div className='only-web'>
-				<RegisterButton
-					onClick={() => navigate('/small-theater/register/step1')}
-				>
-					<p>공연을 준비하고 있다면?</p>
-					<h1>공연 등록하러가기</h1>
-				</RegisterButton>
-				</div>
-				<div className='only-mobile'>
-				<RegisterButtonMobile
-					onClick={() => navigate('/small-theater/register/step1')}
-				>
-					<p>공연을 준비하고 있다면?</p>
-					<h1>공연 등록하러가기</h1>
-				</RegisterButtonMobile>
-				</div>
-				</>}
+				{role == 'PERFORMER' && (
+					<>
+						<div className="only-web">
+							<RegisterButton
+								onClick={() => navigate('/small-theater/register/step1')}
+							>
+								<p>공연을 준비하고 있다면?</p>
+								<h1>공연 등록하러가기</h1>
+							</RegisterButton>
+						</div>
+						<div className="only-mobile">
+							<RegisterButtonMobile
+								onClick={() => navigate('/small-theater/register/step1')}
+							>
+								<p>공연을 준비하고 있다면?</p>
+								<h1>공연 등록하러가기</h1>
+							</RegisterButtonMobile>
+						</div>
+					</>
+				)}
 
-				
 				{/*게시판 섹선*/}
 				<Wrapper style={{ paddingRight: '0px' }}>
 					<h1 className="only-mobile">게시판</h1>
-					<Bar >
-						<div style={{display: 'flex', flexDirection: 'row', gap: '12px', alignItems:'center',}} onClick={() => navigate('/board')}>
-						<h1 style={{ margin: 0, lineHeight: 1 }}>
-							🔥지금 HOT 게시판 
-						</h1>
-						{/*TODO: 오른쪽 화살표 정렬 수정 예정)*/}
-						<ChevronRight />
+					<Bar>
+						<div
+							style={{
+								display: 'flex',
+								flexDirection: 'row',
+								gap: '12px',
+								alignItems: 'center',
+							}}
+							onClick={() => navigate('/board')}
+						>
+							<h1 style={{ margin: 0, lineHeight: 1 }}>🔥지금 HOT 게시판</h1>
+							{/*TODO: 오른쪽 화살표 정렬 수정 예정)*/}
+							<ChevronRight />
 						</div>
-						
 					</Bar>
 					<div className="only-mobile">
 						<BoardPreviewCardList data={dataHotBoard} />
 					</div>
 					<div className="only-web" style={{ paddingRight: '60px' }}>
-					
 						<BoardPreviewCardWeb data={dataHotBoard} />
 					</div>
 
@@ -143,7 +158,12 @@ function Home() {
 						<BoardPreviewList data={dataBoard?.result?.content} />
 					</div>
 					<div style={{ paddingRight: '20px', marginTop: '28px' }}>
-						<button className="light only-mobile" onClick={()=>navigate('/board')}>게시판 보러가기</button>
+						<button
+							className="light only-mobile"
+							onClick={() => navigate('/board')}
+						>
+							게시판 보러가기
+						</button>
 					</div>
 				</Wrapper>
 				<Footer />
@@ -239,7 +259,7 @@ const RegisterButton = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex: 1;
-	
+
 	background: ${({ theme }) => theme.colors.pink200};
 	height: 92px;
 	margin: 30px 60px 0px 60px;
@@ -258,14 +278,13 @@ const RegisterButtonMobile = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex: 1;
-	
 
 	background: ${({ theme }) => theme.colors.pink200};
 	padding: 8px;
 	margin: 30px 20px 0px 20px;
 
 	p {
-	font-size: 14px;	
+		font-size: 14px;
 		color: ${({ theme }) => theme.colors.pink600};
 	}
 	h1 {
