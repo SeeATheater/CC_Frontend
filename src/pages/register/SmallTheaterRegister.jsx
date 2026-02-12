@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import TopBar from '@/components/TopBar';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -8,7 +8,6 @@ import Footer from '@/components/Footer';
 
 function SmallTheaterRegister() {
 	const navigate = useNavigate();
-	
 	useEffect(() => {
 		const token = sessionStorage.getItem('accessToken');
 		const role = sessionStorage.getItem('role'); // 예: 'USER', 'PRODUCER'
