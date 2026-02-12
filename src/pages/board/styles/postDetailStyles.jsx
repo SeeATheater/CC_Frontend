@@ -13,6 +13,7 @@ export const ContentArea = styled.div`
     height: 100vh;
     overflow-y: auto;
     background: white;
+    padding-bottom: 80px;
   }
   ${media.pc} {
     margin-left: 60px;
@@ -341,6 +342,12 @@ export const CommentLikeInfo = styled.div`
 export const CommentInputContainer = styled.div`
   ${media.mobile} {
     padding: 12px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 100;
   }
   ${media.pc} {
     margin-bottom: 40px;
