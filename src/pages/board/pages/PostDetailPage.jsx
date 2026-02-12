@@ -64,6 +64,8 @@ const PostDetailPage = () => {
   const [selectedComment, setSelectedComment] = useState(null);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [replyingToComment, setReplyingToComment] = useState(null); // PC 대댓글 작성창용
+  const [replyText, setReplyText] = useState(''); // PC 대댓글 작성 텍스트
 
 
   const isPC = useResponsive();
@@ -183,6 +185,32 @@ const PostDetailPage = () => {
     }
   };
 
+  // PC 대댓글 작성 제출
+  const handleReplySubmit = async (parentComment) => {
+    if (!replyText.trim()) return;
+
+    try {
+      const newCommentData = {
+        content: replyText,
+        parentId: parentComment.id,
+        replyLevel: 1
+      };
+
+      await addComment(post.id, newCommentData);
+      
+      // 댓글 목록 새로고침
+      const updatedComments = await getComments(post.id);
+      setComments(updatedComments);
+      
+      // 작성창 닫기
+      setReplyingToComment(null);
+      setReplyText('');
+    } catch (error) {
+      console.error('답글 작성 실패:', error);
+      alert('답글 작성에 실패했습니다.');
+    }
+  };
+
   // 게시글 좋아요 토글
   const handlePostLike = async () => {
     try {
@@ -282,9 +310,22 @@ const PostDetailPage = () => {
     }
   };
 
-  // 대댓글 시작
+  // 대댓글 시작 (PC는 인라인 작성창, 모바일은 기존 방식)
   const handleReply = (comment) => {
-    setReplyingTo(comment);
+    if (isPC) {
+      // PC: 인라인 답글 작성창 열기
+      setReplyingToComment(comment);
+      setReplyText('');
+    } else {
+      // 모바일: 기존 방식 유지
+      setReplyingTo(comment);
+    }
+  };
+
+  // PC 답글 작성 취소
+  const handleCancelReply = () => {
+    setReplyingToComment(null);
+    setReplyText('');
   };
 
   if (loading) {
@@ -483,7 +524,7 @@ const PostDetailPage = () => {
           <CommentsSection>
             <CommentsSectionTitle>댓글 {comments.length}개</CommentsSectionTitle>
 
-            {/* PC 댓글 입력 */}
+            {/* PC 댓글 입력 (상단 고정) */}
             {isPC && (
               <CommentInputContainer>
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}> 
@@ -495,29 +536,6 @@ const PostDetailPage = () => {
                       <div style={{ fontSize: '16px', fontWeight: '500', padding: '4px 0px' }}>
                         {currentUser?.name || '익명'}
                       </div>
-                      {replyingTo && (
-                        <div style={{ 
-                          fontSize: '13px', 
-                          color: '#999', 
-                          padding: '6px 8px',
-                          background: '#f5f5f5',
-                          borderRadius: '4px'
-                        }}>
-                          {replyingTo.author}님에게 답글 작성 중
-                          <button 
-                            onClick={() => setReplyingTo(null)}
-                            style={{ 
-                              marginLeft: '8px', 
-                              background: 'none', 
-                              border: 'none', 
-                              color: '#999',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      )}
                     </div>
                     <CommentInput
                       value={commentText}
@@ -548,114 +566,301 @@ const PostDetailPage = () => {
             )}
             
             {/* 개별 댓글 */}
-            {sortedComments.map((comment) => (
-              <CommentItem key={comment.id} replyLevel={comment.parentId ? 1 : 0}>
-                {comment.parentId && (
-                  <ReplyIndicator>
-                    {!isPC && ( <img src={Tab} alt="대댓글" width="20" height="20" /> )}
-                    {isPC && ( <img src={Tab} alt="대댓글" width="24" height="24" /> )}
-                  </ReplyIndicator>
-                )}
-                <div>
-                  {/* 삭제된 댓글 표시 처리 */}
-                  {comment.isDeleted ? (
-                    <div style={{
-                      padding: '12px 0',
-                      color: '#999',
-                      fontStyle: 'italic',
-                      fontSize: '13px'
-                    }}>
-                      삭제된 댓글입니다.
-                    </div>
-                  ) : (
-                    <>
-                      <CommentHeader>
-                        <div>
-                          <CommentAuthor>
-                            {isMyPost(post) && comment.userId === post.userId ? '작성자' : comment.author}
-                          </CommentAuthor>
-                          <CommentDate>{comment.date}</CommentDate>
-                        </div>
-                        
-                        <CommentHeaderActions>
-                          {!isMyComment(comment) && (
-                            <CommentButton onClick={() => handleCommentLike(comment.id)}>
-                              <CommentIcon 
-                                src={comment.isLiked ? LikePink : Like} 
-                                alt="좋아요" 
-                              />
-                            </CommentButton>
-                          )}
-                          
-                          {/* 대댓글 버튼 - 모든 댓글에 표시 */}
-                          <CommentButton onClick={() => handleReply(comment)}>
-                            <CommentIcon src={Comment} alt="대댓글" />
-                          </CommentButton>
+            {(() => {
+              // 부모 댓글만 추출
+              const parentComments = sortedComments.filter(c => c.parentId === null);
+              
+              return parentComments.map((parentComment) => {
+                // 이 부모 댓글의 모든 대댓글 추출
+                const replies = sortedComments.filter(c => c.parentId === parentComment.id);
+                // 현재 이 부모 댓글에 답글 작성창이 열려있는지
+                const isReplyingToThis = replyingToComment?.id === parentComment.id;
+                
+                return (
+                  <React.Fragment key={parentComment.id}>
+                    {/* 부모 댓글 */}
+                    <CommentItem replyLevel={0}>
+                      <div>
+                        {/* 삭제된 댓글 표시 처리 */}
+                        {parentComment.isDeleted ? (
+                          <div style={{
+                            padding: '12px 0',
+                            color: '#999',
+                            fontStyle: 'italic',
+                            fontSize: '13px'
+                          }}>
+                            삭제된 댓글입니다.
+                          </div>
+                        ) : (
+                          <>
+                            <CommentHeader>
+                              <div>
+                                <CommentAuthor>
+                                  {isMyPost(post) && parentComment.userId === post.userId ? '작성자' : parentComment.author}
+                                </CommentAuthor>
+                                <CommentDate>{parentComment.date}</CommentDate>
+                              </div>
+                              
+                              <CommentHeaderActions>
+                                {!isMyComment(parentComment) && (
+                                  <CommentButton onClick={() => handleCommentLike(parentComment.id)}>
+                                    <CommentIcon 
+                                      src={parentComment.isLiked ? LikePink : Like} 
+                                      alt="좋아요" 
+                                    />
+                                  </CommentButton>
+                                )}
+                                
+                                {/* 대댓글 버튼 - 부모 댓글에만 표시 */}
+                                <CommentButton onClick={() => handleReply(parentComment)}>
+                                  <CommentIcon src={Comment} alt="대댓글" />
+                                </CommentButton>
 
-                          {isMyComment(comment) && (
+                                {isMyComment(parentComment) && (
+                                  <>
+                                    <CommentActionButton onClick={() => handleEditComment(parentComment)}>
+                                      수정
+                                    </CommentActionButton>
+                                    <CommentActionButton 
+                                      onClick={() => {
+                                        setSelectedComment(parentComment);
+                                        openDeleteModal();
+                                      }}
+                                      className="delete"
+                                    >
+                                      삭제
+                                    </CommentActionButton>
+                                  </>
+                                )}
+                              </CommentHeaderActions>
+                            </CommentHeader>
+                            
+                            {/* 수정 중인 댓글은 입력창으로, 아니면 일반 텍스트로 표시 */}
+                            {editingComment && editingComment.id === parentComment.id ? (
+                              <div style={{ marginTop: '12px', marginBottom: '12px' }}>
+                                <CommentInput
+                                  value={editCommentText}
+                                  onChange={(e) => setEditCommentText(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                      e.preventDefault();
+                                      handleCommentUpdate(parentComment.id);
+                                    }
+                                  }}
+                                  style={{ 
+                                    height: isPC ? '80px' : '60px',
+                                    marginBottom: '8px',
+                                    width: '90%',
+                                    border: '1px solid #DDDDDD',
+                                    borderRadius: '5px',
+                                    padding: '6px'
+                                  }}
+                                />
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                  <CommentActionButton onClick={cancelEditingComment}>
+                                    취소
+                                  </CommentActionButton>
+                                  <CommentActionButton 
+                                    onClick={() => handleCommentUpdate(parentComment.id)}
+                                    style={{ color: '#F67676' }}
+                                  >
+                                    완료
+                                  </CommentActionButton>
+                                </div>
+                              </div>
+                            ) : (
+                              <CommentContent>{parentComment.content}</CommentContent>
+                            )}
+                            
+                            {parentComment.likes > 0 && (
+                              <CommentLikeInfo>
+                                <img src={isPC ? Like : LikePink } alt="좋아요" width={isPC ? '28px' : '20px' } height={isPC ? '28px' : '20px' } />
+                                <span>{parentComment.likes}</span>
+                              </CommentLikeInfo>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </CommentItem>
+
+                    {/* 이 부모 댓글의 모든 대댓글들 */}
+                    {replies.map((reply) => (
+                      <CommentItem key={reply.id} replyLevel={1}>
+                        <ReplyIndicator>
+                          {!isPC && ( <img src={Tab} alt="대댓글" width="20" height="20" /> )}
+                          {isPC && ( <img src={Tab} alt="대댓글" width="24" height="24" /> )}
+                        </ReplyIndicator>
+                        <div>
+                          {/* 삭제된 댓글 표시 처리 */}
+                          {reply.isDeleted ? (
+                            <div style={{
+                              padding: '12px 0',
+                              color: '#999',
+                              fontStyle: 'italic',
+                              fontSize: '13px'
+                            }}>
+                              삭제된 댓글입니다.
+                            </div>
+                          ) : (
                             <>
-                              <CommentActionButton onClick={() => handleEditComment(comment)}>
-                                수정
-                              </CommentActionButton>
-                              <CommentActionButton 
-                                onClick={() => {
-                                  setSelectedComment(comment);
-                                  openDeleteModal();
-                                }}
-                                className="delete"
-                              >
-                                삭제
-                              </CommentActionButton>
+                              <CommentHeader>
+                                <div>
+                                  <CommentAuthor>
+                                    {isMyPost(post) && reply.userId === post.userId ? '작성자' : reply.author}
+                                  </CommentAuthor>
+                                  <CommentDate>{reply.date}</CommentDate>
+                                </div>
+                                
+                                <CommentHeaderActions>
+                                  {!isMyComment(reply) && (
+                                    <CommentButton onClick={() => handleCommentLike(reply.id)}>
+                                      <CommentIcon 
+                                        src={reply.isLiked ? LikePink : Like} 
+                                        alt="좋아요" 
+                                      />
+                                    </CommentButton>
+                                  )}
+                                  
+                                  {/* 대댓글에는 대댓글 버튼 표시 안 함 (대댓글 레벨 1) */}
+
+                                  {isMyComment(reply) && (
+                                    <>
+                                      <CommentActionButton onClick={() => handleEditComment(reply)}>
+                                        수정
+                                      </CommentActionButton>
+                                      <CommentActionButton 
+                                        onClick={() => {
+                                          setSelectedComment(reply);
+                                          openDeleteModal();
+                                        }}
+                                        className="delete"
+                                      >
+                                        삭제
+                                      </CommentActionButton>
+                                    </>
+                                  )}
+                                </CommentHeaderActions>
+                              </CommentHeader>
+                              
+                              {/* 수정 중인 댓글은 입력창으로, 아니면 일반 텍스트로 표시 */}
+                              {editingComment && editingComment.id === reply.id ? (
+                                <div style={{ marginTop: '12px', marginBottom: '12px' }}>
+                                  <CommentInput
+                                    value={editCommentText}
+                                    onChange={(e) => setEditCommentText(e.target.value)}
+                                    onKeyPress={(e) => {
+                                      if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleCommentUpdate(reply.id);
+                                      }
+                                    }}
+                                    style={{ 
+                                      height: isPC ? '80px' : '60px',
+                                      marginBottom: '8px',
+                                      width: '90%',
+                                      border: '1px solid #DDDDDD',
+                                      borderRadius: '5px',
+                                      padding: '6px'
+                                    }}
+                                  />
+                                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                    <CommentActionButton onClick={cancelEditingComment}>
+                                      취소
+                                    </CommentActionButton>
+                                    <CommentActionButton 
+                                      onClick={() => handleCommentUpdate(reply.id)}
+                                      style={{ color: '#F67676' }}
+                                    >
+                                      완료
+                                    </CommentActionButton>
+                                  </div>
+                                </div>
+                              ) : (
+                                <CommentContent>{reply.content}</CommentContent>
+                              )}
+                              
+                              {reply.likes > 0 && (
+                                <CommentLikeInfo>
+                                  <img src={isPC ? Like : LikePink } alt="좋아요" width={isPC ? '28px' : '20px' } height={isPC ? '28px' : '20px' } />
+                                  <span>{reply.likes}</span>
+                                </CommentLikeInfo>
+                              )}
                             </>
                           )}
-                        </CommentHeaderActions>
-                      </CommentHeader>
-                      
-                      {/* 수정 중인 댓글은 입력창으로, 아니면 일반 텍스트로 표시 */}
-                      {editingComment && editingComment.id === comment.id ? (
-                        <div style={{ marginTop: '12px', marginBottom: '12px' }}>
-                          <CommentInput
-                            value={editCommentText}
-                            onChange={(e) => setEditCommentText(e.target.value)}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleCommentUpdate(comment.id);
-                              }
-                            }}
-                            style={{ 
-                              height: isPC ? '80px' : '60px',
-                              marginBottom: '8px',
-                              width: '90%'
-                            }}
-                          />
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                            <CommentActionButton onClick={cancelEditingComment}>
-                              취소
-                            </CommentActionButton>
-                            <CommentActionButton 
-                              onClick={() => handleCommentUpdate(comment.id)}
-                              style={{ color: '#F67676' }}
-                            >
-                              완료
-                            </CommentActionButton>
-                          </div>
                         </div>
-                      ) : (
-                        <CommentContent>{comment.content}</CommentContent>
-                      )}
-                      
-                      {comment.likes > 0 && (
-                        <CommentLikeInfo>
-                          <img src={isPC ? Like : LikePink } alt="좋아요" width={isPC ? '28px' : '20px' } height={isPC ? '28px' : '20px' } />
-                          <span>{comment.likes}</span>
-                        </CommentLikeInfo>
-                      )}
-                    </>
-                  )}
-                </div>
-              </CommentItem>
-            ))}
+                      </CommentItem>
+                    ))}
+
+                    {/* PC: 이 부모 댓글의 모든 대댓글이 끝난 후, 답글 작성창 표시 */}
+                    {isPC && isReplyingToThis && (
+                      <div style={{ position: 'relative', paddingLeft: '28px', marginTop: '20px', marginBottom: '20px' }}>
+                        <ReplyIndicator style={{ position: 'absolute', left: '0', top: '20px' }}>
+                          <img src={Tab} alt="대댓글" width="24" height="24" />
+                        </ReplyIndicator>
+                        
+                        <CommentInputContainer style={{ position: 'relative' }}>
+                          {/* X 버튼 */}
+                          <button
+                            onClick={handleCancelReply}
+                            style={{
+                              position: 'absolute',
+                              top: '16px',
+                              right: '16px',
+                              background: 'none',
+                              border: 'none',
+                              fontSize: '20px',
+                              color: '#929292',
+                              cursor: 'pointer',
+                              padding: '4px 8px',
+                              lineHeight: '1',
+                              zIndex: 10
+                            }}
+                          >
+                            ✕
+                          </button>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}> 
+                            <div style={{ 
+                              display: 'flex', flexDirection: 'column', height: '67%', 
+                              padding: '20px 16px 8px 16px', gap: '10px', borderBottom: '1px solid #DDDDDD'
+                            }}>
+                              <div style={{ display: 'flex', gap: '12px' }}>
+                                <div style={{ fontSize: '16px', fontWeight: '500', padding: '4px 0px' }}>
+                                  {currentUser?.name || '익명'}
+                                </div>
+                              </div>
+                              <CommentInput
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                placeholder="댓글을 입력하세요..."
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleReplySubmit(parentComment);
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div style={{ 
+                              display: 'flex', flexDirection: 'row', height: '33%', justifyContent: 'space-between', 
+                              padding: '16px 20px', alignItems: 'center'
+                            }}>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <img src={Lock} alt="lock" width="24" height="24" />
+                                <div style={{ fontSize: '16px', fontWeight: '500', color: '#929292' }}>익명</div>
+                              </div>
+                              <CommentSubmitButton onClick={() => handleReplySubmit(parentComment)}>
+                                등록
+                              </CommentSubmitButton>
+                            </div>
+                          </div>
+                        </CommentInputContainer>
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              });
+            })()}
           </CommentsSection>
         </PostDetailContainer>
         {!isPC && (
