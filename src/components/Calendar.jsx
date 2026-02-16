@@ -139,6 +139,7 @@ export const StyledCalendarWrapper = styled.div`
 		font-style: normal;
 		font-weight: 500;
 		line-height: normal;
+		
 	}
 
 	.react-calendar__tile:disabled {
@@ -196,4 +197,7 @@ export const StyledCalendarWrapper = styled.div`
 	.react-calendar__month-view__days__day--neighboringMonth {
 		color: #ddd;
 	}
+		.react-calendar__year-view__months__month {
+		padding: 20px 30px;
+		}
 `;

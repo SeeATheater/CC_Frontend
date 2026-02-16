@@ -56,7 +56,14 @@ function Playlist() {
 				<WebContent>
 					<SearchPC />
 					<WebHot>
-						<h3 className="Todays">요즘 🔥HOT한 소극장 연극</h3>
+						<TitleArea>
+							<h3 className="Todays">요즘 🔥HOT한 소극장 연극</h3>
+
+							{roleToken === 'PERFORMER' && (
+								<Button onClick={toRegist}>사진 등록</Button>
+							)}
+						</TitleArea>
+
 						<CardWrapper>
 							{rankData?.result.map((data) => (
 								<WebPlayCard
@@ -171,20 +178,21 @@ const Web = styled.div`
 
 	@media (min-width: 768px) {
 		display: flex;
-
 		flex-direction: column;
 		width: 100%;
-		margin-left: 100px;
 	}
 `;
 const MobileContent = styled.div`
 	padding: 20px;
 `;
 const WebContent = styled.div`
-	display: flex;
+	flex-grow: 1;
+	margin-left: 100px;
 	padding: 60px 100px 100px 60px;
+	display: flex;
 	flex-direction: column;
 	gap: 40px;
+	overflow-x: hidden;
 
 	h3 {
 		color: ${({ theme }) => theme.colors.grayMain};
@@ -217,6 +225,7 @@ const SideMenuWrapper = styled.div`
 	flex-shrink: 0;
 	display: none;
 	background-color: white;
+
 	@media (min-width: 768px) {
 		display: block;
 	}
@@ -337,4 +346,23 @@ const ProdButton = styled.div`
 		font-weight: ${({ theme }) => theme.font.fontWeight.extraBold};
 		color: ${({ theme }) => theme.colors.grayWhite};
 	}
+`;
+const TitleArea = styled.div`
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+`;
+const Button = styled.button`
+	display: flex;
+	align-items: center;
+
+	padding: 5px 12px;
+	border-radius: 3px;
+
+	background: ${({ theme }) => theme.colors.pink500};
+	width: fit-content;
+
+	font-size: ${({ theme }) => theme.font.fontSize.body14};
+	font-weight: ${({ theme }) => theme.font.fontWeight.bold};
+	color: ${({ theme }) => theme.colors.grayWhite};
 `;

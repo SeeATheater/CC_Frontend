@@ -1,15 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import TopBar from '@/components/TopBar';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import Footer from '@/components/Footer';
-import { useEffect } from 'react';
+
 /* 현재 step 번호 계산*/
 
 function SmallTheaterRegister() {
 	const navigate = useNavigate();
-	
 	useEffect(() => {
 		const token = localStorage.getItem('accessToken');
 		const role = sessionStorage.getItem('selectedRole'); // 예: 'USER', 'PRODUCER'
