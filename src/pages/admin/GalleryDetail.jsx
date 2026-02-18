@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import Search from '@/assets/icons/searchBlack.svg?react';
@@ -13,7 +13,7 @@ function GalleryDetail() {
 	const { galleryId } = useParams();
 	const [searchTerm, setSearchTerm] = useState(' ');
 
-	console.log('galleryId:', galleryId);
+	const navigate = useNavigate();
 
 	const {
 		data: AdminPicData,
@@ -23,6 +23,28 @@ function GalleryDetail() {
 	console.log('AdError:', AdError);
 	console.log('AdLoading:', AdLoading);
 	console.log('AdminPicData:', AdminPicData);
+
+	const { fetchData } = useCustomFetch();
+
+	const handleDelete = async () => {
+		try {
+			const response = await fetchData(
+				`/admin/photoAlbum/${galleryId}`,
+				'DELETE',
+			);
+			if (response.data.isSuccess) {
+				alert('삭제 성공');
+				navigate(-1);
+			}
+			if (!response.data.isSuccess) {
+				console.log(response);
+				throw new Error('삭제 실패');
+			}
+		} catch (error) {
+			console.error(error);
+			alert('삭제 중 오류가 발생했습니다.');
+		}
+	};
 
 	if (AdLoading) {
 		return (
@@ -57,7 +79,7 @@ function GalleryDetail() {
 							/>
 							<Search width={15} />
 						</SearchInput>
-						<Button>사진첩 내리기</Button>
+						<Button onClick={() => handleDelete()}>사진첩 내리기</Button>
 					</div>
 
 					<p className="uploader">
