@@ -54,47 +54,48 @@ function Playlist() {
 					<HomeIconMenu isWeb={true} selectedMenu="plays" />
 				</SideMenuWrapper>
 				<WebContent>
-					<SearchPC />
-					<WebHot>
-						<TitleArea>
-							<h3 className="Todays">요즘 🔥HOT한 소극장 연극</h3>
+					<WebInfo>
+						<SearchPC />
+						<WebHot>
+							<TitleArea>
+								<h3 className="Todays">요즘 🔥HOT한 소극장 연극</h3>
 
-							{roleToken === 'PERFORMER' && (
-								<Button onClick={toRegist}>사진 등록</Button>
-							)}
-						</TitleArea>
+								{roleToken === 'PERFORMER' && (
+									<Button onClick={toRegist}>사진 등록</Button>
+								)}
+							</TitleArea>
 
-						<CardWrapper>
-							{rankData?.result.map((data) => (
-								<WebPlayCard
-									key={data.amateurShowId}
-									name={data.name}
-									place={data.place}
-									posterImageUrl={data.posterImageUrl}
-									schedule={data.schedule}
-									amateurShowId={data.amateurShowId}
-								/>
-							))}
-						</CardWrapper>
-					</WebHot>
-					<WebOnGoing>
-						<h3>현재 진행중인 소극장 연극</h3>
-						<BoxWrapper>
-							{ongoingData?.result.content.map((data) => (
-								<WebListCard
-									key={data.amateurShowId}
-									name={data.name}
-									place={data.place}
-									posterImageUrl={data.posterImageUrl}
-									schedule={data.schedule}
-									amateurShowId={data.amateurShowId}
-								/>
-							))}
-						</BoxWrapper>
-					</WebOnGoing>
+							<CardWrapper>
+								{rankData?.result.map((data) => (
+									<WebPlayCard
+										key={data.amateurShowId}
+										name={data.name}
+										place={data.place}
+										posterImageUrl={data.posterImageUrl}
+										schedule={data.schedule}
+										amateurShowId={data.amateurShowId}
+									/>
+								))}
+							</CardWrapper>
+						</WebHot>
+						<WebOnGoing>
+							<h3>현재 진행중인 소극장 연극</h3>
+							<BoxWrapper>
+								{ongoingData?.result.content.map((data) => (
+									<WebListCard
+										key={data.amateurShowId}
+										name={data.name}
+										place={data.place}
+										posterImageUrl={data.posterImageUrl}
+										schedule={data.schedule}
+										amateurShowId={data.amateurShowId}
+									/>
+								))}
+							</BoxWrapper>
+						</WebOnGoing>
+					</WebInfo>
+					<Footer />
 				</WebContent>
-
-				<Footer />
 			</Web>
 
 			<Mobile>
@@ -188,11 +189,6 @@ const MobileContent = styled.div`
 const WebContent = styled.div`
 	flex-grow: 1;
 	margin-left: 100px;
-	padding: 60px 100px 100px 60px;
-	display: flex;
-	flex-direction: column;
-	gap: 40px;
-	overflow-x: hidden;
 
 	h3 {
 		color: ${({ theme }) => theme.colors.grayMain};
@@ -201,6 +197,14 @@ const WebContent = styled.div`
 		margin-bottom: 40px;
 	}
 `;
+const WebInfo = styled.div`
+	padding: 60px 100px 100px 60px;
+	display: flex;
+	flex-direction: column;
+	gap: 40px;
+	overflow-x: hidden;
+`;
+
 const WebHot = styled.div`
 	@media (min-width: 768px) {
 		display: flex;
