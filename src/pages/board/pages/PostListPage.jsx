@@ -29,6 +29,7 @@ const PostListPage = () => {
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [isScrollTop, setIsScrollTop] = useState(true); // 스크롤 여부
   const isPC = useResponsive();
   const contentAreaRef = useRef(null);
   const navigate = useNavigate();
@@ -66,6 +67,25 @@ const PostListPage = () => {
       loadPosts(activeTab, 0, true);
     }
   }, []); // 빈 의존성 배열로 한 번만 실행
+
+  // PC 스크롤 이벤트 리스너
+  useEffect(() => {
+    if (!isPC || !contentAreaRef.current) return;
+
+    const handleScroll = () => {
+      if (contentAreaRef.current) {
+        const scrollTop = contentAreaRef.current.scrollTop;
+        setIsScrollTop(scrollTop === 0);
+      }
+    };
+
+    const contentArea = contentAreaRef.current;
+    contentArea.addEventListener('scroll', handleScroll);
+
+    return () => {
+      contentArea.removeEventListener('scroll', handleScroll);
+    };
+  }, [isPC]);
 
   // 탭 변경 시에만 데이터 로드
   const handleTabChange = (tab) => {
@@ -155,6 +175,7 @@ const PostListPage = () => {
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
           showFloatingButton={showFloatingButton}
+          isScrollTop={isScrollTop} // 스크롤 여부 전달
         />
         
         <SearchBar 
