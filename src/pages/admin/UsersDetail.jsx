@@ -117,7 +117,7 @@ function UsersDetail() {
 			setIsEditing(false);
 		} catch (error) {
 			console.error(error);
-			console.log(editValues);
+			//console.log(editValues);
 			alert('수정 중 오류가 발생했습니다.');
 		}
 	};

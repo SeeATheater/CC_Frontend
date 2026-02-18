@@ -9,13 +9,16 @@ import SearchBg from '@/assets/icons/searchBlackBg.svg?react';
 
 function PlaysDetail() {
 	const { playId } = useParams();
+	const { fetchData } = useCustomFetch();
+
+	const editableKeys = ['hashTag', 'summary', 'account', 'contact'];
 
 	const {
 		data: playDetailData,
 		error: playError,
 		loading: playLoading,
 	} = useCustomFetch(`/admin/amateurShow/${playId}`);
-	console.log(playDetailData);
+	//console.log(playDetailData);
 
 	const safeValue = (val) =>
 		val === null || val === undefined || val === '' ? ' ' : val;
@@ -73,17 +76,6 @@ function PlaysDetail() {
 		},
 	];
 
-	const labelMap = {
-		showName: '소극장 공연 이름',
-		performerName: '등록자명',
-		showId: '아이디',
-		createdAt: '날짜',
-		hashTag: '해시태그',
-		summary: '줄거리',
-		account: '계좌번호',
-		contact: '연락처',
-		showStatus: '상태',
-	};
 	const filterLabelMap = {
 		showName: '공연이름',
 		performerName: '등록자이름',
@@ -120,17 +112,12 @@ function PlaysDetail() {
 
 	const handleSave = async () => {
 		try {
-			const response = await fetch(
-				`https://api.seeatheater.site/admin/amateurShow/${playId}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(editValues),
-				},
+			const response = await fetchData(
+				`/admin/amateurShow/${playId}/revise`,
+				'PATCH',
+				JSON.stringify(editValues),
 			);
-			if (!response.ok) {
+			if (!response?.data.isSuccess) {
 				throw new Error('수정 실패');
 			}
 			setIsEditing(false);
@@ -190,16 +177,16 @@ function PlaysDetail() {
 							<tr key={index}>
 								<th>{row.label}</th>
 								<td>
-									{isEditing ? (
+									{isEditing && editableKeys.includes(row.key) ? (
 										row.key === 'summary' ? (
-											<textarea
+											<TextArea
 												value={editValues[row.key] ?? ''}
 												onChange={(e) =>
 													handleInputChange(row.key, e.target.value)
 												}
 											/>
 										) : (
-											<input
+											<Input
 												type="text"
 												value={editValues[row.key] ?? ''}
 												onChange={(e) =>
