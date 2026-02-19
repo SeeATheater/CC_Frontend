@@ -16,7 +16,7 @@ const useTicketing = (amateurShowId) => {
 
   // useCustomFetch 훅 사용
   const { fetchData } = useCustomFetch();
-  
+
   // fetchData가 매번 새로 생성되는 것을 방지
   const fetchDataRef = useRef(fetchData);
   fetchDataRef.current = fetchData;
@@ -44,28 +44,39 @@ const useTicketing = (amateurShowId) => {
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [reservationData, setReservationData] = useState(null);  // 예매 완료 상태 (카카오페이 결제 후)
 
-  // 결제 완료 후 돌아왔을 때 Step5로 설정
+  // 결제 완료 후 돌아왔을 때 처리
   useEffect(() => {
-    if (location.state?.paymentSuccess && location.state?.step === 5) {
-      setStep(5);
-      // state 정리 (뒤로가기 시 다시 Step5로 가는 것 방지)
-      window.history.replaceState({}, document.title);
+    const paymentStatus = new URLSearchParams(location.search).get('payment');
+
+    if (!paymentStatus) return;
+
+    if (paymentStatus === 'success') {
+      handlePaymentSuccess();
+
+    } else if (paymentStatus === 'fail' || paymentStatus === 'cancel') {
+
+      alert(paymentStatus === 'fail' ? '결제 시간이 초과되었습니다.' : '결제가 취소되었습니다.');
+
+      setStep(1);
     }
-  }, [location.state]);
+
+    // URL 파라미터 정리 
+    window.history.replaceState({}, document.title, location.pathname);
+  }, [location.search, location.pathname]);
 
   // 공연 간략 정보 조회
   const fetchShowInfo = async () => {
     if (!amateurShowId) return;
-    
+
     setLoading(true);
     try {
       const response = await ticketingAPI.getShowSimple(fetchDataRef.current, amateurShowId);
       const apiResponse = response.data || response;
       const showData = apiResponse.result || apiResponse; // axios 응답에서 data.result 추출
-      
+
       setEventInfo({
         title: showData.name || '',
-        venue: showData.detailAddress  || '',
+        venue: showData.detailAddress || '',
         period: '', // 
         posterUrl: showData.posterImageUrl || ''
       });
@@ -86,7 +97,7 @@ const useTicketing = (amateurShowId) => {
       const response = await ticketingAPI.getShowRounds(fetchDataRef.current, amateurShowId);
       const apiResponse = response.data || response;
       const rounds = apiResponse.result || apiResponse; // axios 응답에서 data.result 추출
-      
+
       // 배열인지 확인
       if (!Array.isArray(rounds)) {
         throw new Error('회차 정보가 올바른 형식이 아닙니다.');
@@ -115,12 +126,12 @@ const useTicketing = (amateurShowId) => {
       const response = await ticketingAPI.getTicketTypes(fetchDataRef.current, amateurShowId);
       const apiResponse = response.data || response;
       const tickets = apiResponse.result || apiResponse;  // axios 응답에서 data.result 추출
-      
+
       // 배열인지 확인
       if (!Array.isArray(tickets)) {
         throw new Error('티켓 정보가 올바른 형식이 아닙니다.');
       }
-      
+
       setTicketOptions(tickets);
     } catch (err) {
       setError('티켓 종류를 불러오는데 실패했습니다.');
@@ -140,7 +151,7 @@ const useTicketing = (amateurShowId) => {
     const weekday = weekdays[date.getDay()];
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
+
     return `${year}.${month}.${day} (${weekday}) ${hours}:${minutes}`;
   };
 
@@ -159,7 +170,7 @@ const useTicketing = (amateurShowId) => {
   // 현재 단계의 컨텐츠 타입 반환
   const getCurrentStepContent = () => {
     if (!isPC) {
-      switch(step) {
+      switch (step) {
         case 1: return 'datetime';
         case 2:
         case 3:
@@ -168,7 +179,7 @@ const useTicketing = (amateurShowId) => {
         default: return 'datetime';
       }
     } else {
-      switch(step) {
+      switch (step) {
         case 1: return 'datetime';
         case 2: return 'discount';
         case 3: return 'delivery';
@@ -182,12 +193,12 @@ const useTicketing = (amateurShowId) => {
   // 다음 버튼 활성화 여부 확인
   useEffect(() => {
     const currentContent = getCurrentStepContent();
-    
-    switch(currentContent) {
+
+    switch (currentContent) {
       case 'datetime':
         setNextActive(dateTime && people && selectedRound);
         break;
-        
+
       case 'discount':
         let discountValid = discountType !== null;
         if (discountType === 'standard') {
@@ -195,11 +206,11 @@ const useTicketing = (amateurShowId) => {
         }
         setNextActive(discountValid);
         break;
-        
+
       case 'delivery':
         setNextActive(deliveryType !== null);
         break;
-        
+
       case 'payment':
         let paymentValid = paymentType !== null;
         if (paymentType === 'bank') {
@@ -210,7 +221,7 @@ const useTicketing = (amateurShowId) => {
         }
         setNextActive(paymentValid);
         break;
-        
+
       case 'options':
         let optionsValid = discountType !== null && paymentType !== null && deliveryType !== null;
         if (discountType === 'standard') {
@@ -224,7 +235,7 @@ const useTicketing = (amateurShowId) => {
         }
         setNextActive(optionsValid);
         break;
-        
+
       default:
         setNextActive(false);
     }
@@ -294,12 +305,12 @@ const useTicketing = (amateurShowId) => {
       if (paymentData.next_redirect_pc_url || paymentData.next_redirect_mobile_url) {
         // 결제 완료 후 돌아올 때 사용할 playId를 sessionStorage에 저장
         sessionStorage.setItem('ticketing_playId', amateurShowId);
-        
+
         // PC인지 모바일인지에 따라 적절한 URL 선택
-        const redirectUrl = isPC ? 
-          paymentData.next_redirect_pc_url : 
+        const redirectUrl = isPC ?
+          paymentData.next_redirect_pc_url :
           paymentData.next_redirect_mobile_url;
-        
+
         // 카카오페이 결제 페이지로 이동
         window.location.href = redirectUrl;
       } else {
@@ -346,7 +357,7 @@ const useTicketing = (amateurShowId) => {
     const basePrice = selectedTicket.price;
     const discountAmount = discountType === 'standard' ? 3000 : 0; // 홍대생 할인
     const deliveryFee = 0; // 현장수령은 0원
-    
+
     return {
       basePrice,
       discountAmount,
@@ -385,7 +396,7 @@ const useTicketing = (amateurShowId) => {
     selectedRound,
     selectedTicket,
     reservationData,
-    
+
     // 액션
     setDateTime: handleDateTimeChange,
     setPeople,
@@ -402,7 +413,7 @@ const useTicketing = (amateurShowId) => {
     setSelectedTicket,
     handlePaymentSuccess,
     handlePaymentFailure,
-    
+
     // 유틸리티
     calculatePayment,
     getCurrentStepContent,
