@@ -18,7 +18,8 @@ function PlaysDetail() {
 		error: playError,
 		loading: playLoading,
 	} = useCustomFetch(`/admin/amateurShow/${playId}`);
-	//console.log(playDetailData);
+	console.log(playDetailData);
+	//playDetailData.result.showStatus
 
 	const safeValue = (val) =>
 		val === null || val === undefined || val === '' ? ' ' : val;
@@ -133,7 +134,7 @@ function PlaysDetail() {
 	};
 	const goReview = () => {
 		navigate(`/admin/plays/${playId}/review`, {
-			state: { playId: playId },
+			state: { playId: playId, showStatus: playDetailData?.result?.showStatus },
 		});
 	};
 

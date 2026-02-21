@@ -1,27 +1,30 @@
-import { useState} from 'react';
-import { useNavigate} from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+
+import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 import Search from '@/assets/icons/searchBlack.svg?react';
 import SearchBg from '@/assets/icons/searchBlackBg.svg?react';
 
 function AdminPlayRegister() {
-	const play_data = {
-		title: '실종',
-		uploader: '홍길동',
-		uploaderId: 'HONGID',
-		date: '2025-01-09 / 14:50',
-		tag: '#극중극 #드라마',
-		overview: `1998년 가을, ‘아무 국가기관'의 업무 보조를 하게 된 학생 모두가 동일한 것을 추구하는 사회에서 학생은 적응하지 못한다.
-                    모두가 동일한 것을 추구하는 사회에서 학생은 적응하지 못한다.
-                    모두가 동일한 것을 추구하는 사회에서 학생은 적응하지 못한다.
-                    모두가 동일한 것을 추구하는 사회에서 학생은 적응하지 못한다.
-                    모두가 동일한 것을 추구하는 사회에서 학생은 적응하지 못한다.
-                    모두가 동일한 것을 추구하는 사회에서 학생은 적응하지 못한다.`,
-		account: '토스 0001-0001-0001-0001',
-		contact: '인스타그램 @hongdse_111',
-		situation: '확인 전',
+	const { playId } = useParams();
+	const { fetchData } = useCustomFetch();
+	const [result, setResult] = useState('approved');
+	const [denyReason, setDenyReason] = useState('');
+
+	const navigate = useNavigate();
+	const goBack = () => {
+		navigate(-1);
 	};
+
+	const {
+		data: playDetailData,
+		error: playError,
+		loading: playLoading,
+	} = useCustomFetch(`/admin/amateurShow/${playId}`);
+	console.log(playDetailData);
+
 	const [searchTerm, setSearchTerm] = useState('');
 	const [visibleColumns, setVisibleColumns] = useState([
 		'title',
@@ -40,20 +43,43 @@ function AdminPlayRegister() {
 		uploader: '등록자명',
 	};
 
-	const [result, setResult] = useState('approved');
-	const [denyReason, setDenyReason] = useState('');
-
-	const navigate = useNavigate();
-	const goBack = () => {
-		navigate(-1);
-	};
-
 	const handleColumnToggle = (column) => {
 		setVisibleColumns((prev) =>
 			prev.includes(column)
 				? prev.filter((c) => c !== column)
 				: [...prev, column],
 		);
+	};
+
+	const handleApply = async () => {
+		if (!result) {
+			alert('승인 또는 반려 여부를 선택해주세요.');
+			return;
+		}
+
+		const isApproved = result === 'approved';
+		const url = `/admin/approval/${playId}/${isApproved ? 'approve' : 'reject'}`;
+
+		const options = {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: !isApproved ? JSON.stringify({ rejectReason: denyReason }) : null,
+		};
+
+		try {
+			await fetchData(url, options);
+			alert(
+				isApproved
+					? '승인 처리가 완료되었습니다.'
+					: '반려 처리가 완료되었습니다.',
+			);
+			navigate(`/admin/plays/${playId}`);
+		} catch (error) {
+			console.error('결정 처리 중 에러 발생:', error);
+			alert('처리 중 오류가 발생했습니다.');
+		}
 	};
 
 	return (
@@ -85,16 +111,16 @@ function AdminPlayRegister() {
 			<Content>
 				<Table>
 					<Title onClick={goBack}>
-						{'<'} {play_data.title}
+						{'<'} {playDetailData?.result.showName}
 					</Title>
 					<tbody>
 						<tr>
 							<th>등록자명</th>
-							<td>{play_data.uploader}</td>
+							<td>{playDetailData?.result.performerName}</td>
 						</tr>
 						<tr>
 							<th>아이디</th>
-							<td>{play_data.uploaderId}</td>
+							<td>{playDetailData?.result.performerEmail}</td>
 						</tr>
 						<tr>
 							<th>심사결과</th>
@@ -136,7 +162,7 @@ function AdminPlayRegister() {
 						)}
 					</tbody>
 				</Table>
-				<PButton>적용하기</PButton>
+				<PButton onClick={handleApply}>적용하기</PButton>
 			</Content>
 		</Container>
 	);

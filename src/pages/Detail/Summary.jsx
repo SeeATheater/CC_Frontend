@@ -3,12 +3,12 @@ import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 import ChevronDown from '@/assets/icons/chevronDown.svg?react';
 
 function Summary({ playData }) {
-	const displayGenre = playData?.result.hashtag
+	const displayGenre = (playData?.result.hashtag ?? '')
 		.split('#')
 		.map((tag) => tag.trim())
 		.filter((tag) => tag.length > 0)
 		.map((tag) => ({ label: tag }));
-
+		
 	const posterImg = playData?.result.posterImageUrl;
 
 	return (

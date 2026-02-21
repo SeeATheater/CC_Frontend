@@ -1,35 +1,31 @@
 import styled from 'styled-components';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 import useCustomFetch from '@/utils/hooks/useCustomFetch';
 
 import ChevronLeft from '@/assets/icons/chevronLeft.svg?react';
 import ChevronDown from '@/assets/icons/chevronDown.svg?react';
-
 import Location from '@/assets/icons/location.svg?react';
 import Time from '@/assets/icons/time.svg?react';
 import Price from '@/assets/icons/price.svg?react';
 
 import Summary from '@/pages/Detail/Summary';
 import Gallery from '@/pages/Detail/InfoArea/Gallery';
+import EyeRollingSVG from '@/components/EyeRollingSVG.jsx';
 
 import Staff from '@/components/Detail/Staff';
 import CastCardCheck from '@/components/Admin/CastCardCheck';
 import AddCastCard from '@/components/Admin/AddCastCard';
 
-import sampleImg from '@/assets/mock/images/실종.png';
 import poster from '@/assets/mock/images/실종.png';
-import posterPath from '@/assets/mock/images/실종_정보.png';
-import image1 from '@/assets/mock/images/image1.png';
-import image2 from '@/assets/mock/images/image2.png';
-import image3 from '@/assets/mock/images/image3.png';
-import image4 from '@/assets/mock/images/image4.png';
-import image5 from '@/assets/mock/images/image5.png';
 import profile from '@/assets/mock/images/프로필.png';
-import { useNavigate, useParams } from 'react-router-dom';
 
 function AdminPlayReview() {
+	const location = useLocation();
 	const { playId } = useParams();
-	console.log(playId);
+	const showStatus = location.state?.showStatus;
+	console.log('showStatus', showStatus);
+	console.log('playId', playId);
 
 	const {
 		data: playData,
@@ -56,52 +52,14 @@ function AdminPlayReview() {
 		return `${month}.${day} (${dayOfWeek}) ${hours}:${minutes}`;
 	}
 
-
-	const mockdata = [
-		{
-			path: profile,
-			id: 1,
-			name: '이지후',
-			role: '7급',
-		},
-		{
-			path: profile,
-			id: 2,
-			name: '권혁진',
-			role: '5급',
-		},
-		{
-			path: profile,
-			id: 3,
-			name: '이승재',
-			role: '6급',
-		},
-		{
-			path: profile,
-			id: 4,
-			name: '임유빈',
-			role: '학생1',
-		},
-	];
-	const staffData = [
-		{
-			role: '원작',
-			name: '최문애',
-		},
-		{
-			role: '연출/ 각색',
-			name: '서준서',
-		},
-		{
-			role: '조연출',
-			name: '권혁진, 이보미',
-		},
-	];
-
 	const navigate = useNavigate();
 	const goRegister = () => {
 		navigate(`/admin/plays/${playId}/register`);
 	};
+
+	if (playLoading || !playData?.result) {
+		return <EyeRollingSVG />;
+	}
 
 	return (
 		<Container>
@@ -177,7 +135,7 @@ function AdminPlayReview() {
 								<SubTitle>공연시간 정보</SubTitle>
 								<Text>{playData?.result.notice.timeInfo} </Text>
 								<SubTitle>공지사항</SubTitle>
-								<Text>{playData?.results.notify} </Text>
+								<Text>{playData?.result.notice.content} </Text>
 								<img
 									src={playData?.result.notice.noticeImageUrl}
 									alt="포스터 이미지"
@@ -192,19 +150,23 @@ function AdminPlayReview() {
 								<Title>캐스팅 정보</Title>
 								<SubTitle>출연</SubTitle>
 								<Cast>
-									{mockdata.map((data) => (
+									{playData?.result.casting.map((data) => (
 										<CastCardCheck
-											key={data.id}
-											path={data.path}
-											name={data.name}
-											role={data.role}
+											key={data.castingId}
+											path={data.castingImageUrl}
+											name={data.actorName}
+											role={data.castingName}
 										/>
 									))}
 									<AddCastCard />
 								</Cast>
 								<SubTitle>감독 및 스태프</SubTitle>
-								{staffData.map((data) => (
-									<Staff name={data.name} role={data.role} />
+								{playData?.result.staff.map((data) => (
+									<Staff
+										key={data.staffId}
+										name={data.staffName}
+										role={data.position}
+									/>
 								))}
 							</SubArea>
 
@@ -267,6 +229,7 @@ const Tag = styled.div`
 
 const Info = styled.div`
 	display: flex;
+	flex: 1;
 	flex-direction: column;
 	padding: 40px 100px 0px 160px;
 
