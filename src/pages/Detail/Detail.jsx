@@ -8,6 +8,8 @@ import Footer from '@/components/Footer';
 
 function Detail() {
 	const { playId } = useParams();
+	const roleToken = sessionStorage.getItem('selectedRole');
+	
 
 	const {
 		data: playData,

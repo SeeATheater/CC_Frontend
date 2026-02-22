@@ -10,23 +10,43 @@ import SearchPC from '@/pages/search/SearchPC';
 import FloatingButton from '@/pages/board/components/FloatingButton';
 import useResponsive from '@/pages/board/hooks/useResponsive'
 
-const TabBar = ({ activeTab, onTabChange, showFloatingButton }) => {
+const TabBar = ({ activeTab, onTabChange, showFloatingButton, isScrollTop = true }) => {
   const tabs = [
     { id: 'general', label: '일반' },
     { id: 'hot', label: 'Hot', icon: '🔥' },
     { id: 'promotion', label: '홍보' }
   ];
-  const handleSearch = (searchTerm) => {
-    console.log('검색:', searchTerm);
-    // 검색 기능 구현
-  };
 
   const isPC = useResponsive();
 
   return (
     <>
-      {isPC && ( <div style={{margin: '60px 100px 60px 60px'}}><SearchPC/></div> )}
-      {isPC && ( <div style={{marginLeft: '60px', fontSize: '24px', fontWeight: 'bold', marginBottom: '12px'}}>게시판</div> )}
+      {/* isScrollTop에 따라 margin 변경 */}
+      {isPC && (
+        <div 
+          style={{
+            margin: isScrollTop ? '60px 100px 60px 60px' : '60px 100px 20px 60px',
+            transition: 'margin 0.3s ease-in-out',
+          }}
+        >
+          <SearchPC/>
+        </div>
+      )}
+
+      {/* PC && isScrollTop일 때만 */}
+      <div
+        style={{
+          maxHeight: isPC && isScrollTop ? '50px' : '0px',
+          opacity: isPC && isScrollTop ? 1 : 0,
+          overflow: 'hidden',
+          transition: 'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out',
+        }}
+      >
+        <div style={{marginLeft: '60px', fontSize: '24px', fontWeight: 'bold', marginBottom: '12px'}}>
+          게시판
+        </div>
+      </div>
+      
       <CreateBtnContainer>
         <TabContainer>
           {tabs.map(tab => (

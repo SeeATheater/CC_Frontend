@@ -8,12 +8,14 @@ import SearchBg from '@/assets/icons/searchBlackBg.svg?react';
 
 function UsersDetail() {
 	const { userId } = useParams();
+	const { fetchData } = useCustomFetch();
 
 	const {
 		data: userData,
 		error: userError,
 		loading: userLoading,
 	} = useCustomFetch(`/admin/member/${userId}`);
+	//console.log('userData', userData);
 
 	const safeValue = (val) =>
 		val === null || val === undefined || val === '' ? ' ' : val;
@@ -51,7 +53,11 @@ function UsersDetail() {
 		{ key: 'name', label: '이름', value: safeValue(editValues.name) },
 		{ key: 'phone', label: '번호', value: safeValue(editValues.phone) },
 		{ key: 'email', label: 'E-mail', value: safeValue(editValues.email) },
-		{ key: 'birth_date', label: '생년월일', value: safeValue(editValues.birth_date) },
+		{
+			key: 'birth_date',
+			label: '생년월일',
+			value: safeValue(editValues.birth_date),
+		},
 		{ key: 'gender', label: '성별', value: safeValue(editValues.gender) },
 		{ key: 'address', label: '주소', value: safeValue(editValues.address) },
 	];
@@ -81,7 +87,7 @@ function UsersDetail() {
 		setVisibleColumns((prev) =>
 			prev.includes(column)
 				? prev.filter((c) => c !== column)
-				: [...prev, column]
+				: [...prev, column],
 		);
 	};
 
@@ -89,10 +95,9 @@ function UsersDetail() {
 		return rows.filter(
 			(row) =>
 				visibleColumns.includes(row.key) &&
-				row.value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+				row.value.toString().toLowerCase().includes(searchTerm.toLowerCase()),
 		);
 	}, [searchTerm, visibleColumns, editValues]);
-
 
 	const handleInputChange = (key, value) => {
 		setEditValues((prev) => ({ ...prev, [key]: value }));
@@ -100,22 +105,19 @@ function UsersDetail() {
 
 	const handleSave = async () => {
 		try {
-			const response = await fetch(
-				`https://api.seeatheater.site/admin/member/${userId}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(editValues),
-				}
+			const response = await fetchData(
+				`/admin/member/${userId}`,
+				'PUT',
+				JSON.stringify(editValues),
 			);
-			if (!response.ok) {
+			if (!response.data.isSuccess) {
+				console.log(response);
 				throw new Error('수정 실패');
 			}
 			setIsEditing(false);
 		} catch (error) {
 			console.error(error);
+			//console.log(editValues);
 			alert('수정 중 오류가 발생했습니다.');
 		}
 	};
@@ -182,7 +184,6 @@ function UsersDetail() {
 }
 
 export default UsersDetail;
-
 
 const Container = styled.div`
 	width: 100vw;

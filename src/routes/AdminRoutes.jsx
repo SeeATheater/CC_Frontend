@@ -48,7 +48,6 @@ function AdminRoutes() {
 						path="plays/:playId/register"
 						element={<AdminPlayRegister />}
 					/>
-					<Route path="plays/:playId/review" element={<AdminPlayReview />} />
 
 					<Route path="register-requests" element={<RegisterRequests />} />
 					<Route
@@ -80,6 +79,7 @@ function AdminRoutes() {
 
 					<Route path="mypage" element={<MyPageManagement />} />
 				</Route>
+				<Route path="plays/:playId/review" element={<AdminPlayReview />} />
 			</Route>
 		</Routes>
 	);
