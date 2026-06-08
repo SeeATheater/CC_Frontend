@@ -20,6 +20,7 @@ const useTicketing = (amateurShowId) => {
   // fetchData가 매번 새로 생성되는 것을 방지
   const fetchDataRef = useRef(fetchData);
   fetchDataRef.current = fetchData;
+  const paymentRequestInFlightRef = useRef(false);
 
   // 공연 정보
   const [eventInfo, setEventInfo] = useState({
@@ -261,11 +262,14 @@ const useTicketing = (amateurShowId) => {
 
   // 티켓 예매 실행
   const reserveTicket = async () => {
+    if (paymentRequestInFlightRef.current) return;
+
     if (!selectedRound || !selectedTicket || !people) {
       setError('필수 정보가 누락되었습니다.');
       return;
     }
 
+    paymentRequestInFlightRef.current = true;
     setLoading(true);
     try {
       // 1단계: 먼저 티켓을 예매하여 memberTicketId를 받아옴
@@ -318,6 +322,7 @@ const useTicketing = (amateurShowId) => {
       }
 
     } catch (err) {
+      paymentRequestInFlightRef.current = false;
       setError('예매 처리 중 오류가 발생했습니다.');
       console.error('Error reserving ticket:', err);
       setLoading(false);

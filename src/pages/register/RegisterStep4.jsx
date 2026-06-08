@@ -1,31 +1,16 @@
 import styled from 'styled-components';
 import { RegisterWrapper } from './Register.style.js';
 import { useOutletContext } from 'react-router-dom';
+import useAxios from '@/utils/hooks/useAxios';
 function RegisterStep4() {
 	const { nextStep, formData, _setFormData } = useOutletContext();
-	const accessToken = localStorage.getItem('accessToken');
+	const axiosClient = useAxios();
 	const handleEnroll = async (e) => {
 		e.preventDefault(); // 폼 제출 기본 동작 막기
 		console.log('폼데이터', formData);
 
 		try {
-			const response = await fetch(
-				'https://api.seeatheater.site/amateurs/enroll',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${accessToken}`,
-					},
-					body: JSON.stringify(formData),
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error(`등록 실패: ${response.status}`);
-			}
-
-			const data = await response.json();
+			const { data } = await axiosClient.post('/amateurs/enroll', formData);
 			console.log('등록 성공:', data);
 
 			alert('공연 등록이 완료되었습니다.');

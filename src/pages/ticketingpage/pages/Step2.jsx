@@ -135,6 +135,8 @@ const Step2 = ({
 
 	// 다음 버튼 클릭 핸들러
 	const handleNextStep = async () => {
+		if (loading) return;
+
 		if (currentContent === 'payment' || currentContent === 'options') {
 			try {
 				await reserveTicket();
@@ -333,7 +335,7 @@ const Step2 = ({
 				</SummarySection>
 			</PcLayout>
 			{!isPC && (
-				<ActionButton isActive={nextActive} onClick={handleNextStep}>
+				<ActionButton isActive={nextActive && !loading} onClick={handleNextStep}>
 					{currentContent === 'options' ? '예매하기' : '다음'}
 				</ActionButton>
 			)}
@@ -347,7 +349,7 @@ const Step2 = ({
 						gap: '20px',
 					}}
 				>
-					<ActionButton isActive={nextActive} onClick={handleNextStep}>
+					<ActionButton isActive={nextActive && !loading} onClick={handleNextStep}>
 						{currentContent === 'payment' ? '예매하기' : '다음'}
 					</ActionButton>
 					<BackButton onClick={goToPreviousStep}>이전</BackButton>

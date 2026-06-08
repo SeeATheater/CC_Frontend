@@ -28,6 +28,7 @@ function RegisterRequestDetail() {
 		error,
 		doFetch, // PATCH/POST 등을 위해 추가했다고 가정
 	} = useCustomFetch(`/admin/amateurShow/${registerId}`);
+	const { fetchData } = useCustomFetch();
 
 	const data = fullData?.result || null;
 
@@ -42,24 +43,19 @@ function RegisterRequestDetail() {
 	const handleSave = async () => {
 		if (!registerId) return;
 
-		const accessToken = localStorage.getItem('accessToken');
-
 		const url =
 			selectedStatus === 'YES'
-				? `https://api.seeatheater.site/admin/approval/${registerId}/approve`
-				: `https://api.seeatheater.site/admin/approval/${registerId}/reject`;
+				? `/admin/approval/${registerId}/approve`
+				: `/admin/approval/${registerId}/reject`;
 
 		try {
-			const res = await fetch(url, {
-				method: 'PATCH',
-			});
+			const res = await fetchData(url, 'PATCH');
 
-			if (!res.ok) {
-				throw new Error(`서버 오류: ${res.status}`);
+			if (!res?.data?.isSuccess) {
+				throw new Error(`서버 오류: ${res?.status || 'unknown'}`);
 			}
 
-			const result = await res.json();
-			console.log('저장 성공', result);
+			console.log('저장 성공', res.data);
 
 			alert('저장되었습니다.');
 			setEditMode(false);

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import useAxios from '@/utils/hooks/useAxios';
 
 function TestUploadPic() {
 	const [extension, setExtension] = useState('jpg');
@@ -11,6 +12,7 @@ function TestUploadPic() {
 	const [uploadSuccess, setUploadSuccess] = useState(false);
 	const [showId, setShowId] = useState(1); // 테스트용 amateurShowId
 	const [content, setContent] = useState('테스트 내용');
+	const axiosClient = useAxios();
 
 	const handleRequest = async () => {
 		setLoading(true);
@@ -19,18 +21,12 @@ function TestUploadPic() {
 		setUploadSuccess(false);
 
 		try {
-			const res = await axios.get(
-				'https://api.seeatheater.site/upload/s3/presignedUrl',
-				{
-					params: {
-						imageExtension: extension,
-						filePath: filePath,
-					},
-					headers: {
-						Authorization: `Bearer ${import.meta.env.VITE_REACT_APP_ACCESS_TOKEN}`,
-					},
+			const res = await axiosClient.get('/upload/s3/presignedUrl', {
+				params: {
+					imageExtension: extension,
+					filePath: filePath,
 				},
-			);
+			});
 			setResponseUrl(res.data);
 		} catch (err) {
 			console.error(err);
@@ -90,15 +86,7 @@ function TestUploadPic() {
 		};
 
 		try {
-			await axios.post(
-				'https://api.seeatheater.site/amateurs/images',
-				payload,
-				{
-					headers: {
-						Authorization: `Bearer ${import.meta.env.VITE_REACT_APP_ACCESS_TOKEN}`,
-					},
-				},
-			);
+			await axiosClient.post('/amateurs/images', payload);
 			alert('✅ 이미지 업로드 및 등록 성공');
 		} catch (err) {
 			console.error(err);

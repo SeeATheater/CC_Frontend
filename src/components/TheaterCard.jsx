@@ -3,18 +3,14 @@ import { useState } from 'react';
 import HeartFull from '@/assets/icons/heart-full.svg?react';
 import HeartEmpty from '@/assets/icons/HeartEmpty.svg?react';
 
-import axios from 'axios';
+import useAxios from '@/utils/hooks/useAxios';
 function TheaterCard({ data }) {
 	const [liked, setLiked] = useState(true);
+	const axiosClient = useAxios();
 	const handleClick = async (performerId) => {
 		try {
-			const response = await axios.delete(
-				`https://api.seeatheater.site/member-like/like/${performerId}`,
-				{
-					headers: {
-						Authorization: `Bearer ${import.meta.env.VITE_REACT_APP_ACCESS_TOKEN}`,
-					},
-				},
+			const response = await axiosClient.delete(
+				`/member-like/like/${performerId}`,
 			);
 
 			if (response.data.isSuccess) {
