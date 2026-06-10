@@ -31,6 +31,7 @@ const { data, loading, error } = useCustomFetch(
 // 3️⃣ API 결과 구조분해
 const {
   detailAddress,
+  roadAddress,
   posterImageUrl,
   reservations,
   roundSummaries,
@@ -105,7 +106,7 @@ const selectedOption = roundOptions.find(
 							
 						</div>
 						<p style={{ marginBottom: '10px' }}>
-							{detailAddress ?? 'null'}
+							{[roadAddress, detailAddress].filter(Boolean).join(' ') || '주소 정보 없음'}
 						</p>
 						<p className="color-gray400" style={{ marginBottom: '16px' }}>
 							{schedule ?? 'null'}
