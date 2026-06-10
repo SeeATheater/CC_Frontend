@@ -85,7 +85,8 @@ function Info({ playData }) {
 							<Location height={24} />
 						</IconWrapper>
 						<p className="blackTxt">
-							{playData?.result.hallName} {playData?.result.detailAddress}
+							{playData?.result.hallName} {playData?.result.roadAddress}{' '}
+							{playData?.result.detailAddress}
 						</p>
 					</InfoBlock>
 					<InfoBlock>
@@ -176,7 +177,8 @@ function Info({ playData }) {
 									</IconWrapper>
 
 									<p className="blackTxt">
-										{playData?.result.hallName} {playData?.result.detailAddress}
+										{playData?.result.hallName} {playData?.result.roadAddress}{' '}
+										{playData?.result.detailAddress}
 									</p>
 								</InfoBlock>
 								<InfoBlock>

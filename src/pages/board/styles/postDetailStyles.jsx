@@ -132,6 +132,11 @@ export const PaginationDot = styled.button.withConfig({
 // 게시글 좋아요
 export const PostActions = styled.div`
   margin-bottom: 20px;
+
+  ${media.pc} {
+    display: flex;
+    justify-content: flex-end;
+  }
 `;
 
 export const LikeButton = styled.button.withConfig({
@@ -149,6 +154,12 @@ export const LikeButton = styled.button.withConfig({
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+
+  ${media.pc} {
+    padding: 8px 20px;
+    border-radius: 18px;
+    font-size: 14px;
+  }
   
   &:hover {
     background: #fff5f5;

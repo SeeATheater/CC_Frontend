@@ -509,14 +509,12 @@ const PostDetailPage = () => {
           )}
 
           {/* 게시글 좋아요 */}
-          {!isPC && (
           <PostActions>
             <LikeButton liked={post.isLiked} onClick={handlePostLike}>
               <LikeIcon src={LikePink} alt="좋아요" />
               좋아요
             </LikeButton>
           </PostActions>
-          )}
 
           <Divider />
 
