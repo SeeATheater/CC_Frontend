@@ -22,29 +22,17 @@ function Playlist() {
 
 	const roleToken = sessionStorage.getItem('selectedRole');
 
-	const {
-		data: todayData,
-		error: todayError,
-		loading: todayLoading,
-	} = useCustomFetch(`/amateurs/today`);
+	const { data: todayData } = useCustomFetch(`/amateurs/today`);
 	console.log('todayData:', todayData);
 
-	const {
-		data: rankData,
-		error: rankError,
-		loading: rankLoading,
-	} = useCustomFetch(`/amateurs/ranking`);
+	const { data: rankData } = useCustomFetch(`/amateurs/ranking`);
 	console.log('rankData:', rankData);
 
-	const {
-		data: ongoingData,
-		error: ongoingError,
-		loading: ongoingLoading,
-	} = useCustomFetch(`/amateurs/ongoing`);
+	const { data: ongoingData } = useCustomFetch(`/amateurs/ongoing`);
 	console.log('ongoing:', ongoingData);
 
 	const toRegist = () => {
-		navigate(`/small-theater/register`);
+		navigate(`/small-theater/register/step1`);
 	};
 
 	return (
@@ -61,7 +49,7 @@ function Playlist() {
 								<h3 className="Todays">요즘 🔥HOT한 소극장 연극</h3>
 
 								{roleToken === 'PERFORMER' && (
-									<Button onClick={toRegist}>사진 등록</Button>
+									<Button onClick={toRegist}>공연 등록</Button>
 								)}
 							</TitleArea>
 
@@ -110,7 +98,7 @@ function Playlist() {
 							<CarouselWrapper>
 								<CarouselTrack $current={current}>
 									{todayData &&
-										todayData?.result.content.map((data, idx) => (
+										todayData?.result.content.map((data) => (
 											<Slide key={data.amateurShowId}>
 												<PlayCard
 													key={data.amateurShowId}

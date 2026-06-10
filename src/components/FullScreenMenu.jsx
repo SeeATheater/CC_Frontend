@@ -16,7 +16,10 @@ function FullScreenMenu({ onClose }) {
 			label: '소극장 공연',
 			subItems: [
 				{ label: '현재 진행중인 소극장 공연', path: '/small-theater/current' },
-				{ label: '소극장 공연 등록하기', path: '/small-theater/register' },
+				{
+					label: '소극장 공연 등록하기',
+					path: '/small-theater/register/step1',
+				},
 			],
 		},
 		{
