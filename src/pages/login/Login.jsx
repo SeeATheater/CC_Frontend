@@ -6,18 +6,25 @@ import chevron from '@/assets/icons/chevronLeft.svg?react';
 import { useIsMobile } from '@/utils/hooks/useIsMobile';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 function Login() {
 	const isMobile = useIsMobile();
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
+	const { isLoggedIn } = useAuth();
 
 	useEffect(() => {
+		if (isLoggedIn) {
+			navigate('/', { replace: true });
+			return;
+		}
+
 		const role = searchParams.get('role');
 		if (role) {
 			sessionStorage.setItem('selectedRole', role);
 		}
-	}, [searchParams]);
+	}, [isLoggedIn, navigate, searchParams]);
 
 	return (
 		<Container>
