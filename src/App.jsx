@@ -9,6 +9,7 @@ import Logout from './pages/logout/Logout';
 import Withdrawal from './pages/withdrawal/Withdrawal';
 
 import SmallTheaterRoutes from './routes/SmallTheaterRoutes.jsx';
+import ProtectedRoute from './routes/ProtectedRoute.jsx';
 
 import Home from './pages/home/Home';
 import TicketingPage from './pages/ticketingpage/TicketingPage.jsx';
@@ -35,41 +36,42 @@ function App() {
 			<Route path="/login" element={<Onboarding />} />
 			<Route path="/login/auth" element={<Login />} />
 			<Route path="/auth/kakao/callback" element={<KakaoCallback />} />
-			<Route path="/logout" element={<Logout />} />
-			<Route path="/withdrawal" element={<Withdrawal />} />
-
-			<Route path="/" element={<Home />} />
-			<Route path="/menu" element={<FullScreenMenu />} />
-
-			<Route path="/small-theater/*" element={<SmallTheaterRoutes />} />
-
-			<Route path="/search" element={<SearchMobile />} />
-			<Route path="/ticketing/:playId" element={<TicketingPage />} />
 			{/*<Route path="/kakaoPay/approve" element={<KakaoPayApprove />} />*/}
-			<Route path="/board/*" element={<Board />} />
-			<Route path="/gallery" element={<Gallery />} />
-			<Route path="/info" element={<Info />} />
-
-			<Route path="/plays" element={<Playlist />} />
-			<Route path="/plays/detail/:playId" element={<Detail />} />
-
-			<Route path="/notification" element={<Notification />} />
-			<Route path="/production/:prodId" element={<Production />} />
-			<Route
-				path="/production/album/:prodId/:AlbumId"
-				element={<ProdDetail />}
-			/>
-			<Route path="/production/upload_photo" element={<UploadPic />} />
-			<Route path="/production/uploadDone" element={<UploadDone />} />
-
-			<Route path="/mypage/*" element={<MyPageRoutes />} />
-
 			<Route path="/admin/*" element={<AdminRoutes />} />
+			<Route path="/service" element={<ServiceTerms />} />
+
+			<Route element={<ProtectedRoute />}>
+				<Route path="/logout" element={<Logout />} />
+				<Route path="/withdrawal" element={<Withdrawal />} />
+
+				<Route path="/" element={<Home />} />
+				<Route path="/menu" element={<FullScreenMenu />} />
+
+				<Route path="/small-theater/*" element={<SmallTheaterRoutes />} />
+
+				<Route path="/search" element={<SearchMobile />} />
+				<Route path="/ticketing/:playId" element={<TicketingPage />} />
+				<Route path="/board/*" element={<Board />} />
+				<Route path="/gallery" element={<Gallery />} />
+				<Route path="/info" element={<Info />} />
+
+				<Route path="/plays" element={<Playlist />} />
+				<Route path="/plays/detail/:playId" element={<Detail />} />
+
+				<Route path="/notification" element={<Notification />} />
+				<Route path="/production/:prodId" element={<Production />} />
+				<Route
+					path="/production/album/:prodId/:AlbumId"
+					element={<ProdDetail />}
+				/>
+				<Route path="/production/upload_photo" element={<UploadPic />} />
+				<Route path="/production/uploadDone" element={<UploadDone />} />
+
+				<Route path="/mypage/*" element={<MyPageRoutes />} />
+				<Route path="test/upload-pic" element={<TestUploadPic />} />
+			</Route>
 
 			<Route path="*" element={<NotFoundPage />} />
-
-			<Route path="test/upload-pic" element={<TestUploadPic />} />
-			<Route path="/service" element={<ServiceTerms />} />
 		</Routes>
 	);
 }

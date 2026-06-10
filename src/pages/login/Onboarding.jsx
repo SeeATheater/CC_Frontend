@@ -3,10 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import LogoWeb from '@/assets/icons/login/LogoWeb.svg?react';
 import LogoMobile from '@/assets/icons/login/LogoMobile.svg?react';
 import { useIsMobile } from '@/utils/hooks/useIsMobile';
+import { useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 function Onboarding() {
 	const isMobile = useIsMobile();
 	const navigate = useNavigate();
+	const { isLoggedIn } = useAuth();
+
+	useEffect(() => {
+		if (isLoggedIn) {
+			navigate('/', { replace: true });
+		}
+	}, [isLoggedIn, navigate]);
 
 	const handleLoginClick = (roleType) => {
 		navigate(`/login/auth?role=${roleType}`);
