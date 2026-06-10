@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import SmallTheaterCurrent from '@/pages/theater/SmallTheaterCurrent';
 import SmallTheaterRegister from '@/pages/register/SmallTheaterRegister';
 import RegisterStep1 from '@/pages/register/RegisterStep1';
@@ -12,6 +12,7 @@ function SmallTheaterRoutes() {
 		<Routes>
 			<Route path="current" element={<SmallTheaterCurrent />} />
 			<Route path="register" element={<SmallTheaterRegister />}>
+				<Route index element={<Navigate to="step1" replace />} />
 				<Route path="step1" element={<RegisterStep1 />} />
 				<Route path="step2" element={<RegisterStep2 />} />
 				<Route path="step3" element={<RegisterStep3 />} />
