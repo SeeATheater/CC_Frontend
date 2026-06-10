@@ -74,6 +74,7 @@ function RegisterStep1() {
 		const updatedRounds = [...formData.rounds];
 		updatedRounds[index] = {
 			...updatedRounds[index],
+			roundNumber: index + 1,
 			[field]: value,
 		};
 
