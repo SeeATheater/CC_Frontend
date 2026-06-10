@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 function RegisterStep5() {
 	const navigate = useNavigate();
-	const showId = localStorage.getItem('등록한 공연 id');
 	return (
 		<div style={{ height: '100%' }}>
 			<div className="only-mobile" style={{ height: '100%' }}>
@@ -16,15 +15,18 @@ function RegisterStep5() {
 							flex: '1',
 						}}
 					>
-						<h1>등록 완료!</h1>
+						<div style={{ textAlign: 'center' }}>
+							<h1>등록 완료!</h1>
+							<p>관리자 승인 후 공연 목록에 공개됩니다.</p>
+						</div>
 					</div>
 
 					<button
 						type="submit"
 						className="btn-primary"
-						onClick={() => navigate(`/plays/detail/${showId}`)}
+						onClick={() => navigate('/plays')}
 					>
-						내가 작성한 공연 보러가기
+						공연 목록으로 돌아가기
 					</button>
 				</RegisterWrapper>
 			</div>
@@ -38,14 +40,17 @@ function RegisterStep5() {
 							alignItems: 'center',
 						}}
 					>
-						<h1 style={{ marginBottom: '60px' }}>공연이 등록되었습니다</h1>
+						<h1 style={{ marginBottom: '16px' }}>공연이 등록되었습니다</h1>
+						<p style={{ marginBottom: '60px' }}>
+							관리자 승인 후 공연 목록에 공개됩니다.
+						</p>
 
 						<ButtonWrapper>
 							<button
 								className="btn-square"
-								onClick={() => navigate(`/plays/detail/${showId}`)}
+								onClick={() => navigate('/plays')}
 							>
-								내가 작성한 공연 보러가기
+								공연 목록으로 돌아가기
 							</button>
 						</ButtonWrapper>
 					</div>
