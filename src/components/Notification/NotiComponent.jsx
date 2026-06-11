@@ -17,10 +17,13 @@ function NotiComponent() {
 
 	const isRequesting = useRef(false);
 	const observerRef = useRef(null);
+	const observerInstanceRef = useRef(null);
+	const authenticationFailed = useRef(false);
+	const initialFetchStarted = useRef(false);
 	const { fetchData } = useCustomFetch();
 
 	const fetchNoti = useCallback(async () => {
-		if (isRequesting.current || !hasNext) return;
+		if (isRequesting.current || authenticationFailed.current || !hasNext) return;
 
 		isRequesting.current = true;
 		setIsFetching(true);
@@ -32,6 +35,15 @@ function NotiComponent() {
 
 		try {
 			const res = await fetchData(url, 'GET');
+			const status = res?.error?.response?.status;
+
+			if (status === 401 || status === 403) {
+				authenticationFailed.current = true;
+				setHasNext(false);
+				observerInstanceRef.current?.disconnect();
+				return;
+			}
+
 			const result = res?.data?.result;
 
 			if (result) {
@@ -46,11 +58,13 @@ function NotiComponent() {
 			isRequesting.current = false;
 			setIsFetching(false);
 		}
-	}, [cursorId, hasNext, isFetching, fetchData]);
+	}, [cursorCreated, cursorId, fetchData, hasNext]);
 
 	useEffect(() => {
+		if (initialFetchStarted.current) return;
+		initialFetchStarted.current = true;
 		fetchNoti();
-	}, []);
+	}, [fetchNoti]);
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(
@@ -61,12 +75,18 @@ function NotiComponent() {
 			},
 			{ rootMargin: '100px', threshold: 0 },
 		);
+		observerInstanceRef.current = observer;
 
 		if (observerRef.current) {
 			observer.observe(observerRef.current);
 		}
 
-		return () => observer.disconnect();
+		return () => {
+			observer.disconnect();
+			if (observerInstanceRef.current === observer) {
+				observerInstanceRef.current = null;
+			}
+		};
 	}, [fetchNoti, hasNext, isFetching]);
 
 	const filteredNotices = notices.filter((noti) => {
@@ -75,8 +95,6 @@ function NotiComponent() {
 		if (selectedOption === '소극장 공연') return noti.noticeType !== 'AD';
 		return true;
 	});
-
-	console.log(notices);
 
 	return (
 		<Box>

@@ -1,6 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { axiosInstance } from '@/utils/apis/axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import {
+	AUTH_LOGOUT_EVENT,
+	clearStoredAuth,
+	isAccessTokenValid,
+} from '@/utils/apis/axiosInstance';
 
 const AuthContext = createContext();
 
@@ -15,18 +20,33 @@ export const AuthProvider = ({ children }) => {
 		const accessToken = localStorage.getItem('accessToken');
 		const refreshToken = localStorage.getItem('refreshToken');
 
-		if (accessToken && refreshToken) {
+		if (isAccessTokenValid(accessToken) && refreshToken) {
 			setAccessToken(accessToken);
 			setRefreshToken(refreshToken);
 			setIsLoggedIn(true);
 			axiosInstance.defaults.headers.common['Authorization'] =
 				`Bearer ${accessToken}`;
 		} else {
+			localStorage.removeItem('accessToken');
+			localStorage.removeItem('refreshToken');
+			sessionStorage.removeItem('selectedRole');
 			setIsLoggedIn(false);
 			setAccessToken(null);
 			setRefreshToken(null);
 			delete axiosInstance.defaults.headers.common['Authorization'];
 		}
+	}, []);
+
+	useEffect(() => {
+		const resetAuthState = () => {
+			setAccessToken(null);
+			setRefreshToken(null);
+			setIsLoggedIn(false);
+			delete axiosInstance.defaults.headers.common.Authorization;
+		};
+
+		window.addEventListener(AUTH_LOGOUT_EVENT, resetAuthState);
+		return () => window.removeEventListener(AUTH_LOGOUT_EVENT, resetAuthState);
 	}, []);
 
 	const setAuthInfo = (accessToken, refreshToken, path) => {
@@ -42,9 +62,7 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	const logout = (path) => {
-		localStorage.removeItem('accessToken');
-		localStorage.removeItem('refreshToken');
-		sessionStorage.removeItem('selectedRole');
+		clearStoredAuth();
 		setAccessToken(null);
 		setRefreshToken(null);
 		setIsLoggedIn(false);

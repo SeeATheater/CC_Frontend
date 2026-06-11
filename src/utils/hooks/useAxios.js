@@ -1,6 +1,47 @@
 import { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { axiosInstance } from '@/utils/apis/axiosInstance';
+import axios from 'axios';
+import {
+	axiosInstance,
+	clearStoredAuth,
+} from '@/utils/apis/axiosInstance';
+
+let refreshPromise = null;
+
+const refreshAccessToken = () => {
+	if (!refreshPromise) {
+		const refreshToken = localStorage.getItem('refreshToken');
+
+		if (!refreshToken) {
+			return Promise.reject(new Error('Refresh token is missing.'));
+		}
+
+		refreshPromise = axios
+			.post(
+				`${import.meta.env.VITE_APP_API_URL}/auth/refresh`,
+				{ refreshToken },
+				{ withCredentials: true },
+			)
+			.then((response) => {
+				const newAccessToken =
+					response.data?.accessToken ?? response.data?.result?.accessToken;
+
+				if (!newAccessToken) {
+					throw new Error('Refresh response did not include an access token.');
+				}
+
+				localStorage.setItem('accessToken', newAccessToken);
+				axiosInstance.defaults.headers.common.Authorization =
+					`Bearer ${newAccessToken}`;
+				return newAccessToken;
+			})
+			.finally(() => {
+				refreshPromise = null;
+			});
+	}
+
+	return refreshPromise;
+};
 
 const useAxios = () => {
 	const navigate = useNavigate();
@@ -17,22 +58,20 @@ const useAxios = () => {
 		async (error) => {
 			const originalRequest = error.config;
 
-			// accessToken 만료 시
-			if (error.response?.status === 401 && !originalRequest._retry) {
+			if (
+				error.response?.status === 401 &&
+				originalRequest &&
+				!originalRequest._retry
+			) {
 				originalRequest._retry = true;
-				const refreshToken = localStorage.getItem('refreshToken');
-
-				if (!refreshToken) {
-					console.error('refreshToken 없음 → 로그인 페이지로 이동');
-					navigate('/login', { replace: true });
-					return Promise.reject(error);
-				}
 
 				try {
-					originalRequest.headers.Authorization = `Bearer ${refreshToken}`;
+					const newAccessToken = await refreshAccessToken();
+					originalRequest.headers = originalRequest.headers ?? {};
+					originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 					return axiosInstance(originalRequest);
 				} catch (refreshError) {
-					console.error('refreshToken도 만료 → 로그인 페이지로 이동');
+					clearStoredAuth();
 					navigate('/login', { replace: true });
 					return Promise.reject(refreshError);
 				}
