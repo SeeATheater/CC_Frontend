@@ -25,11 +25,11 @@ function MyPageMenu() {
 	const handleLogout = async () => {
 		const res = await fetchData('/auth/logout', 'POST', {});
 
-		if (res?.status === 200) {
-			logout('/');
-		} else {
+		if (res?.status !== 200) {
 			console.error('로그아웃 실패:', res);
 		}
+
+		logout('/login');
 	};
 	const handleDeactivate = async () => {
 		const res = await fetchData('/member/myPage/deActive', 'PATCH', {});

@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { isAccessTokenValid } from '@/utils/apis/axiosInstance';
 
 const PAYMENT_RESULT_STATUSES = ['success', 'fail', 'cancel'];
 
@@ -8,6 +9,7 @@ const ProtectedRoute = () => {
 	const location = useLocation();
 	const accessToken = localStorage.getItem('accessToken');
 	const refreshToken = localStorage.getItem('refreshToken');
+	const hasValidAccessToken = isAccessTokenValid(accessToken);
 	const paymentStatus = new URLSearchParams(location.search).get('payment');
 	const isPaymentResultRoute =
 		location.pathname.startsWith('/ticketing/') &&
@@ -17,7 +19,7 @@ const ProtectedRoute = () => {
 		return <Outlet />;
 	}
 
-	if (!isLoggedIn && (!accessToken || !refreshToken)) {
+	if (!hasValidAccessToken || (!isLoggedIn && !refreshToken)) {
 		return <Navigate to="/login" replace state={{ from: location }} />;
 	}
 
