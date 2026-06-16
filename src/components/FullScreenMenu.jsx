@@ -32,7 +32,7 @@ function FullScreenMenu({ onClose }) {
 		},
 		{
 			label: '정보',
-			path: '/info',
+			path: '/mypage/about-cc',
 		},
 		{
 			label: '마이페이지',
