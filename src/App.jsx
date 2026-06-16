@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import FullScreenMenu from './components/FullScreenMenu';
 
 // 아래는 각 페이지를 담당할 컴포넌트들
@@ -53,7 +53,7 @@ function App() {
 				<Route path="/ticketing/:playId" element={<TicketingPage />} />
 				<Route path="/board/*" element={<Board />} />
 				<Route path="/gallery" element={<Gallery />} />
-				<Route path="/info" element={<Info />} />
+				<Route path="/info" element={<Navigate to="/mypage/about-cc" replace />} />
 
 				<Route path="/plays" element={<Playlist />} />
 				<Route path="/plays/detail/:playId" element={<Detail />} />

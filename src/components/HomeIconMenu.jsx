@@ -96,7 +96,7 @@ function HomeIconMenu({ isWeb, selectedMenu }) {
 						<span>프로필</span>
 					</div>
 					{!isWeb && (
-						<div>
+						<div onClick={() => navigate('/mypage/about-cc')}>
 							<Information />
 							<span>cc</span>
 						</div>
