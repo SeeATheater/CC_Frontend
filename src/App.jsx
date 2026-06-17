@@ -4,6 +4,7 @@ import FullScreenMenu from './components/FullScreenMenu';
 // 아래는 각 페이지를 담당할 컴포넌트들
 import Onboarding from './pages/login/Onboarding.jsx';
 import Login from './pages/login/Login.jsx';
+import GeneralLogin from './pages/login/GeneralLogin.jsx';
 import KakaoCallback from './pages/login/KakaoCallback.jsx';
 import Logout from './pages/logout/Logout';
 import Withdrawal from './pages/withdrawal/Withdrawal';
@@ -35,6 +36,7 @@ function App() {
 		<Routes>
 			<Route path="/login" element={<Onboarding />} />
 			<Route path="/login/auth" element={<Login />} />
+			<Route path="/login/general" element={<GeneralLogin />} />
 			<Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 			{/*<Route path="/kakaoPay/approve" element={<KakaoPayApprove />} />*/}
 			<Route path="/admin/*" element={<AdminRoutes />} />

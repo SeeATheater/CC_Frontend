@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import KakaoLoginButton from '@/components/Login/KakaoLoginButton';
+import GeneralLoginButton from '@/components/Login/GeneralLoginButton';
 import LogoWeb from '@/assets/icons/login/LogoWeb.svg?react';
 import LogoMobile from '@/assets/icons/login/LogoMobile.svg?react';
 import chevron from '@/assets/icons/chevronLeft.svg?react';
@@ -30,7 +31,10 @@ function Login() {
 		<Container>
 			<Chevron onClick={() => navigate(-1)} />
 			{isMobile ? <LogoMobile /> : <LogoWeb />}
-			<KakaoLoginButton />
+			<ButtonGroup>
+				<KakaoLoginButton />
+				<GeneralLoginButton />
+			</ButtonGroup>
 		</Container>
 	);
 }
@@ -56,4 +60,11 @@ const Chevron = styled(chevron)`
 	position: absolute;
 	top: 20px;
 	left: 28px;
+`;
+
+const ButtonGroup = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	align-items: center;
 `;
